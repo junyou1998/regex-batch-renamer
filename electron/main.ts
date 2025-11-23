@@ -48,20 +48,13 @@ function createWindow() {
     win?.webContents.send('main-process-message', (new Date).toLocaleString())
   })
 
-  // Open DevTools to see errors
-  win.webContents.openDevTools()
-
+  // Open DevTools only in development
   if (VITE_DEV_SERVER_URL) {
-    console.log('Loading DEV URL:', VITE_DEV_SERVER_URL)
+    win.webContents.openDevTools()
     win.loadURL(VITE_DEV_SERVER_URL)
   } else {
     // In production, load from dist folder
     const indexPath = path.join(process.env.DIST || '', 'index.html')
-    console.log('Loading production file:', indexPath)
-    console.log('File exists:', require('fs').existsSync(indexPath))
-    console.log('DIST path:', process.env.DIST)
-    console.log('__dirname:', __dirname)
-    console.log('app.isPackaged:', app.isPackaged)
     win.loadFile(indexPath)
   }
 }
