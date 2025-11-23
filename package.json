@@ -1,0 +1,51 @@
+{
+    "name": "file-renamer",
+    "productName": "Mac Batch Renamer",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vue-tsc && vite build && electron-builder",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "pinia": "^3.0.4",
+        "uuid": "^13.0.0",
+        "vue": "^3.4.21"
+    },
+    "devDependencies": {
+        "@types/uuid": "^10.0.0",
+        "@vitejs/plugin-vue": "^5.0.4",
+        "autoprefixer": "^10.4.19",
+        "electron": "^28.3.3",
+        "electron-builder": "^24.13.3",
+        "postcss": "^8.4.38",
+        "tailwindcss": "^3.4.3",
+        "typescript": "^5.2.2",
+        "vite": "^5.1.6",
+        "vite-plugin-electron": "^0.28.4",
+        "vite-plugin-electron-renderer": "^0.14.5",
+        "vue-tsc": "^2.0.6"
+    },
+    "main": "dist-electron/main.cjs",
+    "build": {
+        "appId": "com.macbatchrenamer.app",
+        "productName": "Mac Batch Renamer",
+        "files": [
+            "dist/**/*",
+            "dist-electron/**/*"
+        ],
+        "directories": {
+            "output": "dist",
+            "buildResources": "public"
+        },
+        "mac": {
+            "target": [
+                "dmg",
+                "zip"
+            ],
+            "category": "public.app-category.utilities"
+        }
+    }
+}

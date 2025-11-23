@@ -1,0 +1,38 @@
+export function generateDiffHtml(original: string, modified: string): string {
+  if (!original || !modified) return modified || original || '';
+  
+  // Simple diff logic: 
+  // If strings are identical, return as is.
+  if (original === modified) return original;
+
+  // Find common prefix
+  let start = 0;
+  while (start < original.length && start < modified.length && original[start] === modified[start]) {
+    start++;
+  }
+
+  // Find common suffix
+  let endOriginal = original.length - 1;
+  let endModified = modified.length - 1;
+  while (endOriginal >= start && endModified >= start && original[endOriginal] === modified[endModified]) {
+    endOriginal--;
+    endModified--;
+  }
+
+  const prefix = original.substring(0, start);
+  const suffix = original.substring(endOriginal + 1);
+
+  const removed = original.substring(start, endOriginal + 1);
+  const added = modified.substring(start, endModified + 1);
+
+  let html = prefix;
+  if (removed) {
+    html += `<span class="bg-red-100 dark:bg-red-500/30 text-red-700 dark:text-red-200 line-through decoration-red-500 dark:decoration-red-400/50 px-0.5 rounded-sm mx-0.5">${removed}</span>`;
+  }
+  if (added) {
+    html += `<span class="bg-green-100 dark:bg-green-500/30 text-green-700 dark:text-green-200 px-0.5 rounded-sm">${added}</span>`;
+  }
+  html += suffix;
+
+  return html;
+}
