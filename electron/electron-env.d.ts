@@ -28,5 +28,6 @@ interface Window {
     renameFiles: (files: { oldPath: string, newPath: string }[]) => Promise<{ path: string, success: boolean, error?: string }[]>
     copyRenameFiles: (files: { oldPath: string, newPath: string }[]) => Promise<{ path: string, success: boolean, error?: string }[]>
     selectDirectory: () => Promise<string | undefined>
+    platform: string
   }
 }

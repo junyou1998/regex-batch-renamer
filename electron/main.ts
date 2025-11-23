@@ -31,9 +31,16 @@ function createWindow() {
     },
     width: 1200,
     height: 800,
-    titleBarStyle: 'hiddenInset', // Premium look for macOS
-    vibrancy: 'under-window', // Glass effect
-    visualEffectState: 'active',
+    // macOS specific settings
+    ...(process.platform === 'darwin' ? {
+      titleBarStyle: 'hiddenInset',
+      vibrancy: 'under-window',
+      visualEffectState: 'active',
+    } : {
+      // Windows/Linux settings
+      titleBarStyle: 'default',
+      autoHideMenuBar: true,
+    }),
   })
 
   // Test active push message to Renderer-process.

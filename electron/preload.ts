@@ -23,4 +23,5 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
   renameFiles: (files: { oldPath: string, newPath: string }[]) => ipcRenderer.invoke('rename-files', files),
   copyRenameFiles: (files: { oldPath: string, newPath: string }[]) => ipcRenderer.invoke('copy-rename-files', files),
   selectDirectory: () => ipcRenderer.invoke('select-directory'),
+  platform: process.platform,
 })
