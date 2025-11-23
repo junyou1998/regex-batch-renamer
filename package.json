@@ -52,7 +52,9 @@
                 "nsis",
                 "portable"
             ],
-            "icon": "public/electron-vite.svg"
+            "icon": "public/electron-vite.svg",
+            "verifyUpdateCodeSignature": false,
+            "sign": null
         },
         "nsis": {
             "oneClick": false,
