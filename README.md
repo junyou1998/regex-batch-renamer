@@ -1,5 +1,7 @@
 # Regex Batch Renamer
 
+**繁體中文** | [简体中文](README.zh-CN.md) | [English](README.en.md)
+
 一個強大且直觀的跨平台批次更名工具 (支援 Windows / macOS / Linux)。支援正規表達式 (Regex)、純文字取代以及流水號功能，讓繁瑣的檔案更名工作變得輕鬆簡單。
 
 <img src="public/icon.png" width="128" alt="App Icon" />

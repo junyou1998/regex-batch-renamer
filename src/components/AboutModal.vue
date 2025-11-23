@@ -24,7 +24,7 @@ defineEmits<{
                         class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
                         <h3 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
                             <!-- <span class="text-2xl">ℹ️</span> -->
-                            關於本專案
+                            {{ $t('about.title') }}
                         </h3>
                         <button @click="$emit('update:modelValue', false)"
                             class="p-2 rounded-lg text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
@@ -45,7 +45,7 @@ defineEmits<{
                             <img src="/icon.png" alt="App Icon" class="w-24 h-24 mx-auto mb-4" />
                             <h4 class="text-xl font-bold text-slate-800 dark:text-white">Regex Batch Renamer</h4>
                             <p class="text-sm text-slate-500 dark:text-slate-400">
-                                一個簡單、強大且開源的跨平台批次更名工具，支援 Windows、macOS 與 Linux。
+                                {{ $t('about.description') }}
                             </p>
                         </div>
 
@@ -54,10 +54,10 @@ defineEmits<{
                         <!-- Developer Info -->
                         <div class="space-y-3">
                             <h5 class="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                                <span class="text-lg">👨‍💻</span> 開發者資訊
+                                <span class="text-lg">👨‍💻</span> {{ $t('about.developer') }}
                             </h5>
                             <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                                嗨！我是 Junyou。這個專案是為了讓繁瑣的檔案更名工作變得更簡單。如果您覺得這個工具對您有幫助，歡迎贊助我一杯咖啡，這將成為我持續開發與維護的動力！
+                                {{ $t('about.bio') }}
                             </p>
                         </div>
 
@@ -69,7 +69,7 @@ defineEmits<{
                                     alt="Buy Me A Coffee" style="height: 60px !important; width: 217px !important;">
                             </a>
                             <p class="text-xs text-center text-slate-400 dark:text-slate-500 mt-3">
-                                感謝您的支持與鼓勵 ❤️
+                                {{ $t('about.thanks') }}
                             </p>
                         </div>
 

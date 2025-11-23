@@ -1,0 +1,123 @@
+{
+    "app": {
+        "title": "Regex Batch Renamer",
+        "subtitle": "批次更名工具",
+        "showSidebar": "顯示左側面板",
+        "hideSidebar": "隱藏左側面板",
+        "about": "關於本專案",
+        "rename": "執行重命名",
+        "copyTo": "複製到...",
+        "processing": "處理中..."
+    },
+    "dropZone": {
+        "text": "拖放檔案至此 或",
+        "action": "點擊選擇",
+        "supports": "支援多選與資料夾"
+    },
+    "operations": {
+        "title": "操作流程",
+        "add": "新增規則",
+        "clear": "清空",
+        "regex": "搜尋與取代",
+        "other": "其他操作",
+        "moveUp": "上移",
+        "moveDown": "下移",
+        "remove": "移除",
+        "patternLabel": "尋找目標",
+        "useRegex": "使用正規表達式 (Regex)",
+        "placeholderPatternRegex": "輸入 Regex 樣式...",
+        "placeholderPatternText": "輸入要尋找的文字...",
+        "replacementLabel": "取代為",
+        "supportSequence": "支援 ${n} 序號",
+        "placeholderReplacement": "輸入取代後的文字...",
+        "empty": "尚未新增任何規則"
+    },
+    "preview": {
+        "title": "預覽變更 ({n} 檔案)",
+        "clear": "清空列表",
+        "original": "原始檔名",
+        "new": "新檔名 (預覽)",
+        "status": "狀態",
+        "remove": "移除此檔案",
+        "clickToCopy": "點擊複製: {text}",
+        "empty": "尚未加入任何檔案",
+        "copied": "已複製: {text}",
+        "copyFailed": "複製失敗"
+    },
+    "theme": {
+        "light": "亮色模式",
+        "dark": "暗色模式",
+        "system": "跟隨系統",
+        "auto": "跟隨系統"
+    },
+    "about": {
+        "title": "關於本專案",
+        "description": "一個簡單、強大且開源的跨平台批次更名工具，支援 Windows、macOS 與 Linux。",
+        "developer": "開發者資訊",
+        "bio": "嗨！我是 Junyou。這個專案是為了讓繁瑣的檔案更名工作變得更簡單。如果您覺得這個工具對您有幫助，歡迎贊助我一杯咖啡，這將成為我持續開發與維護的動力！",
+        "thanks": "感謝您的支持與鼓勵 ❤️",
+        "close": "關閉"
+    },
+    "help": {
+        "title": "使用說明與 Regex 教學",
+        "basic": {
+            "title": "基本操作流程",
+            "step1": "將檔案拖曳至左上角區塊，或點擊選擇檔案。",
+            "step2": "在「操作流程」中新增規則。",
+            "step3": "設定「尋找目標」與「取代為」的內容。",
+            "step4": "右側列表會即時預覽更名結果。",
+            "step5": "確認無誤後，點擊「執行重命名」或「複製到...」。"
+        },
+        "regex": {
+            "title": "正規表達式 (Regex) 速查",
+            "advanced": "進階技巧",
+            "description": "正規表達式是一種強大的文字比對工具，可以幫助您精確地選取想要修改的文字部分。",
+            "table": {
+                "symbol": "符號",
+                "desc": "說明",
+                "dot": "匹配任意單一字元",
+                "digit": "匹配數字 (0-9)",
+                "word": "匹配字母、數字或底線",
+                "space": "匹配空白字元 (空白鍵、Tab)",
+                "star": "前面的字元出現 0 次或多次",
+                "plus": "前面的字元出現 1 次或多次",
+                "caret": "匹配字串開頭",
+                "dollar": "匹配字串結尾"
+            },
+            "examples": {
+                "title": "實用範例",
+                "ex1": {
+                    "title": "刪除所有空白",
+                    "desc": "(留空)"
+                },
+                "ex2": {
+                    "title": "統一日期格式 (20231125 → 2023-11-25)",
+                    "find": "尋找:",
+                    "replace": "取代:"
+                },
+                "ex3": {
+                    "title": "刪除括號及內容 (例如 \"File (copy).txt\" → \"File.txt\")",
+                    "desc": "(留空)"
+                }
+            }
+        },
+        "numbering": {
+            "title": "流水號功能 (${n})",
+            "description": "您可以在「取代為」欄位中使用 {code} 來插入遞增的數字。",
+            "table": {
+                "syntax": "語法",
+                "desc": "說明",
+                "example": "範例 (第 5 個檔案)",
+                "n": "插入序號 (從 1 開始)",
+                "nPad": "補零至指定位數 (例如 3 位)"
+            },
+            "example": {
+                "title": "範例：重新命名為 Image_001, Image_002...",
+                "find": "尋找:",
+                "selectAll": "(選取全部檔名)",
+                "replace": "取代:"
+            }
+        },
+        "close": "關閉"
+    }
+}
