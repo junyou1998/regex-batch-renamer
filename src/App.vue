@@ -11,6 +11,7 @@ const fileStore = useFileStore()
 const operationStore = useOperationStore()
 const isProcessing = ref(false)
 const isSidebarCollapsed = ref(false)
+const isMac = window.ipcRenderer?.platform === 'darwin'
 
 // Debounce helper
 function debounce<T extends (...args: any[]) => any>(fn: T, delay: number) {
@@ -163,8 +164,8 @@ async function handleCopyTo() {
 <template>
   <div
     class="flex h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 font-sans selection:bg-blue-200 dark:selection:bg-blue-500/30 selection:text-blue-900 dark:selection:text-blue-200 transition-colors">
-    <!-- Draggable Title Bar -->
-    <div class="drag-region fixed top-0 left-0 right-0 h-12 z-50"></div>
+    <!-- Draggable Title Bar (macOS only) -->
+    <div v-if="isMac" class="drag-region fixed top-0 left-0 right-0 h-12 z-50"></div>
 
     <!-- Sidebar -->
     <aside :class="[
@@ -183,8 +184,8 @@ async function handleCopyTo() {
       </div>
 
       <!-- Expanded state: show full content -->
-      <div v-else class="flex flex-col flex-1 min-w-80">
-        <div class="p-6 pt-14 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+      <div v-else class="flex flex-col flex-1 min-w-80 h-full">
+        <div class="p-6 pt-14 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
           <div class="flex-1">
             <h1
               class="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 dark:from-blue-400 dark:to-cyan-300 bg-clip-text text-transparent">
@@ -204,7 +205,7 @@ async function handleCopyTo() {
           </div>
         </div>
 
-        <div class="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar">
+        <div class="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar min-h-0">
           <FileDropZone />
           <OperationPipeline />
         </div>

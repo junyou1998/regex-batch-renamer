@@ -1,1 +1,26 @@
-"use strict";const n=require("electron");n.contextBridge.exposeInMainWorld("ipcRenderer",{on(...e){const[r,i]=e;return n.ipcRenderer.on(r,(c,...o)=>i(c,...o))},off(...e){const[r,...i]=e;return n.ipcRenderer.off(r,...i)},send(...e){const[r,...i]=e;return n.ipcRenderer.send(r,...i)},invoke(...e){const[r,...i]=e;return n.ipcRenderer.invoke(r,...i)},selectFiles:()=>n.ipcRenderer.invoke("select-files"),renameFiles:e=>n.ipcRenderer.invoke("rename-files",e),copyRenameFiles:e=>n.ipcRenderer.invoke("copy-rename-files",e),selectDirectory:()=>n.ipcRenderer.invoke("select-directory")});
+"use strict";
+const electron = require("electron");
+electron.contextBridge.exposeInMainWorld("ipcRenderer", {
+  on(...args) {
+    const [channel, listener] = args;
+    return electron.ipcRenderer.on(channel, (event, ...args2) => listener(event, ...args2));
+  },
+  off(...args) {
+    const [channel, ...omit] = args;
+    return electron.ipcRenderer.off(channel, ...omit);
+  },
+  send(...args) {
+    const [channel, ...omit] = args;
+    return electron.ipcRenderer.send(channel, ...omit);
+  },
+  invoke(...args) {
+    const [channel, ...omit] = args;
+    return electron.ipcRenderer.invoke(channel, ...omit);
+  },
+  // Custom APIs
+  selectFiles: () => electron.ipcRenderer.invoke("select-files"),
+  renameFiles: (files) => electron.ipcRenderer.invoke("rename-files", files),
+  copyRenameFiles: (files) => electron.ipcRenderer.invoke("copy-rename-files", files),
+  selectDirectory: () => electron.ipcRenderer.invoke("select-directory"),
+  platform: process.platform
+});

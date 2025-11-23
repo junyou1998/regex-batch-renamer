@@ -1,1 +1,101 @@
-"use strict";const h=require("electron"),t=require("node:path"),d=require("node:fs/promises");console.log("ELECTRON REQUIRE:",h);const{app:r,BrowserWindow:u,ipcMain:i,dialog:p}=h;r.isPackaged?process.env.DIST=t.join(t.dirname(__dirname),"dist"):process.env.DIST=t.join(__dirname,"../dist");process.env.VITE_PUBLIC=r.isPackaged?process.env.DIST:t.join(process.env.DIST,"../public");let e;const l=process.env.VITE_DEV_SERVER_URL;function f(){if(e=new u({icon:t.join(process.env.VITE_PUBLIC||"","electron-vite.svg"),webPreferences:{preload:t.join(__dirname,"preload.cjs")},width:1200,height:800,titleBarStyle:"hiddenInset",vibrancy:"under-window",visualEffectState:"active"}),e.webContents.on("did-finish-load",()=>{e==null||e.webContents.send("main-process-message",new Date().toLocaleString())}),e.webContents.openDevTools(),l)console.log("Loading DEV URL:",l),e.loadURL(l);else{const o=t.join(process.env.DIST||"","index.html");console.log("Loading production file:",o),console.log("File exists:",require("fs").existsSync(o)),console.log("DIST path:",process.env.DIST),console.log("__dirname:",__dirname),console.log("app.isPackaged:",r.isPackaged),e.loadFile(o)}}r.on("window-all-closed",()=>{process.platform!=="darwin"&&r.quit()});r.on("activate",()=>{u.getAllWindows().length===0&&f()});r.whenReady().then(()=>{f(),i.handle("select-files",async()=>e?(await p.showOpenDialog(e,{properties:["openFile","multiSelections"]})).filePaths:[]),i.handle("rename-files",async(o,a)=>{const n=[];for(const s of a)try{await d.rename(s.oldPath,s.newPath),n.push({path:s.oldPath,success:!0})}catch(c){n.push({path:s.oldPath,success:!1,error:c.message})}return n}),i.handle("copy-rename-files",async(o,a)=>{const n=[];for(const s of a)try{await d.copyFile(s.oldPath,s.newPath),n.push({path:s.oldPath,success:!0})}catch(c){n.push({path:s.oldPath,success:!1,error:c.message})}return n}),i.handle("select-directory",async()=>e?(await p.showOpenDialog(e,{properties:["openDirectory"]})).filePaths[0]:void 0)});
+"use strict";
+const electron = require("electron");
+const path = require("node:path");
+const fs = require("node:fs/promises");
+console.log("ELECTRON REQUIRE:", electron);
+const { app, BrowserWindow, ipcMain, dialog } = electron;
+if (app.isPackaged) {
+  process.env.DIST = path.join(path.dirname(__dirname), "dist");
+} else {
+  process.env.DIST = path.join(__dirname, "../dist");
+}
+process.env.VITE_PUBLIC = app.isPackaged ? process.env.DIST : path.join(process.env.DIST, "../public");
+let win;
+const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
+function createWindow() {
+  win = new BrowserWindow({
+    icon: path.join(process.env.VITE_PUBLIC || "", "electron-vite.svg"),
+    webPreferences: {
+      preload: path.join(__dirname, "preload.cjs")
+    },
+    width: 1200,
+    height: 800,
+    // macOS specific settings
+    ...process.platform === "darwin" ? {
+      titleBarStyle: "hiddenInset",
+      vibrancy: "under-window",
+      visualEffectState: "active"
+    } : {
+      // Windows/Linux settings
+      titleBarStyle: "default",
+      autoHideMenuBar: true
+    }
+  });
+  win.webContents.on("did-finish-load", () => {
+    win == null ? void 0 : win.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
+  });
+  win.webContents.openDevTools();
+  if (VITE_DEV_SERVER_URL) {
+    console.log("Loading DEV URL:", VITE_DEV_SERVER_URL);
+    win.loadURL(VITE_DEV_SERVER_URL);
+  } else {
+    const indexPath = path.join(process.env.DIST || "", "index.html");
+    console.log("Loading production file:", indexPath);
+    console.log("File exists:", require("fs").existsSync(indexPath));
+    console.log("DIST path:", process.env.DIST);
+    console.log("__dirname:", __dirname);
+    console.log("app.isPackaged:", app.isPackaged);
+    win.loadFile(indexPath);
+  }
+}
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
+    app.quit();
+  }
+});
+app.on("activate", () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
+  }
+});
+app.whenReady().then(() => {
+  createWindow();
+  ipcMain.handle("select-files", async () => {
+    if (!win) return [];
+    const result = await dialog.showOpenDialog(win, {
+      properties: ["openFile", "multiSelections"]
+    });
+    return result.filePaths;
+  });
+  ipcMain.handle("rename-files", async (_event, files) => {
+    const results = [];
+    for (const file of files) {
+      try {
+        await fs.rename(file.oldPath, file.newPath);
+        results.push({ path: file.oldPath, success: true });
+      } catch (error) {
+        results.push({ path: file.oldPath, success: false, error: error.message });
+      }
+    }
+    return results;
+  });
+  ipcMain.handle("copy-rename-files", async (_event, files) => {
+    const results = [];
+    for (const file of files) {
+      try {
+        await fs.copyFile(file.oldPath, file.newPath);
+        results.push({ path: file.oldPath, success: true });
+      } catch (error) {
+        results.push({ path: file.oldPath, success: false, error: error.message });
+      }
+    }
+    return results;
+  });
+  ipcMain.handle("select-directory", async () => {
+    if (!win) return void 0;
+    const result = await dialog.showOpenDialog(win, {
+      properties: ["openDirectory"]
+    });
+    return result.filePaths[0];
+  });
+});
