@@ -41,6 +41,7 @@
             "buildResources": "public"
         },
         "mac": {
+            "identity": null,
             "target": [
                 "dmg",
                 "zip"
