@@ -185,11 +185,12 @@ async function handleCopyTo() {
 
       <!-- Expanded state: show full content -->
       <div v-else class="flex flex-col flex-1 min-w-80 h-full">
-        <div class="p-6 pt-14 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+        <div
+          class="p-6 pt-14 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
           <div class="flex-1">
             <h1
               class="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 dark:from-blue-400 dark:to-cyan-300 bg-clip-text text-transparent">
-              Mac Batch Renamer
+              Regex Batch Renamer
             </h1>
             <p class="text-xs text-slate-500 dark:text-slate-500 mt-1">批次更名工具</p>
           </div>
