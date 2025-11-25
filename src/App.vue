@@ -4,6 +4,7 @@ import FileDropZone from './components/FileDropZone.vue'
 import OperationPipeline from './components/OperationPipeline.vue'
 import FilePreviewList from './components/FilePreviewList.vue'
 import ThemeSwitcher from './components/ThemeSwitcher.vue'
+import ToastNotification from './components/ToastNotification.vue'
 import { useFileStore } from './stores/fileStore'
 import { useOperationStore } from './stores/operationStore'
 
@@ -43,7 +44,14 @@ const updatePreviews = debounce(() => {
         const { pattern, replacement } = op.params
         if (pattern) {
           try {
-            const regex = new RegExp(pattern, 'g') // Global replace by default
+            let regex: RegExp
+            if (op.params.useRegex === false) {
+              // Escape special regex characters for plain text matching
+              const escapedPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+              regex = new RegExp(escapedPattern, 'g')
+            } else {
+              regex = new RegExp(pattern, 'g') // Global replace by default
+            }
 
             // Handle ${n} syntax
             // We need to replace ${n} or ${n:03} with the actual number
@@ -232,6 +240,7 @@ async function handleCopyTo() {
         <FilePreviewList />
       </div>
     </main>
+    <ToastNotification />
   </div>
 </template>
 
