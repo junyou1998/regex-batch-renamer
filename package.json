@@ -47,14 +47,15 @@
                 "dmg",
                 "zip"
             ],
-            "category": "public.app-category.utilities"
+            "category": "public.app-category.utilities",
+            "icon": "public/icon.png"
         },
         "win": {
             "target": [
                 "nsis",
                 "portable"
             ],
-            "icon": "public/electron-vite.svg",
+            "icon": "public/icon.png",
             "verifyUpdateCodeSignature": false,
             "sign": null
         },
