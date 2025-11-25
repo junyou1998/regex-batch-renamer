@@ -4,6 +4,7 @@ import FileDropZone from './components/FileDropZone.vue'
 import OperationPipeline from './components/OperationPipeline.vue'
 import FilePreviewList from './components/FilePreviewList.vue'
 import ThemeSwitcher from './components/ThemeSwitcher.vue'
+import LanguageSwitcher from './components/LanguageSwitcher.vue'
 import ToastNotification from './components/ToastNotification.vue'
 import AboutModal from './components/AboutModal.vue'
 import { useFileStore } from './stores/fileStore'
@@ -184,7 +185,7 @@ async function handleCopyTo() {
     ]">
       <!-- Collapsed state: only show toggle button -->
       <div v-if="isSidebarCollapsed" class="flex-1 flex items-center justify-center pt-14">
-        <button @click="isSidebarCollapsed = false" title="顯示左側面板"
+        <button @click="isSidebarCollapsed = false" :title="$t('app.showSidebar')"
           class="p-1.5 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
             stroke-width="2">
@@ -196,16 +197,16 @@ async function handleCopyTo() {
       <!-- Expanded state: show full content -->
       <div v-else class="flex flex-col flex-1 min-w-80 h-full">
         <div
-          class="p-6 pt-14 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0">
+          class="p-6 pt-14 border-b border-slate-200 dark:border-slate-800 flex items-start justify-between shrink-0">
           <div class="flex-1">
             <h1
               class="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 dark:from-blue-400 dark:to-cyan-300 bg-clip-text text-transparent">
-              Regex Batch Renamer
+              {{ $t('app.title') }}
             </h1>
-            <p class="text-xs text-slate-500 dark:text-slate-500 mt-1">批次更名工具</p>
+            <p class="text-xs text-slate-500 dark:text-slate-500 mt-1">{{ $t('app.subtitle') }}</p>
           </div>
           <div class="flex items-center gap-1">
-            <button @click="showAbout = true" title="關於本專案"
+            <button @click="showAbout = true" :title="$t('app.about')"
               class="p-1.5 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor" stroke-width="2">
@@ -213,8 +214,9 @@ async function handleCopyTo() {
                   d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </button>
+            <LanguageSwitcher />
             <ThemeSwitcher />
-            <button @click="isSidebarCollapsed = true" title="隱藏左側面板"
+            <button @click="isSidebarCollapsed = true" :title="$t('app.hideSidebar')"
               class="p-1.5 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor" stroke-width="2">
@@ -233,11 +235,11 @@ async function handleCopyTo() {
           <div class="grid grid-cols-2 gap-3">
             <button @click="handleRename" :disabled="isProcessing || fileStore.files.length === 0"
               class="px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-500 dark:to-blue-600 dark:hover:from-blue-600 dark:hover:to-blue-700 text-white rounded-lg font-medium transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
-              {{ isProcessing ? '處理中...' : '執行重命名' }}
+              {{ isProcessing ? $t('app.processing') : $t('app.rename') }}
             </button>
             <button @click="handleCopyTo" :disabled="isProcessing || fileStore.files.length === 0"
               class="px-4 py-2.5 bg-slate-300 hover:bg-slate-400 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 rounded-lg font-medium transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
-              {{ isProcessing ? '處理中...' : '複製到...' }}
+              {{ isProcessing ? $t('app.processing') : $t('app.copyTo') }}
             </button>
           </div>
         </div>

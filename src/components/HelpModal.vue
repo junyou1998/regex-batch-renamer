@@ -23,7 +23,7 @@ defineEmits<{
                     <div
                         class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
                         <h3 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
-                            <span class="text-2xl">📖</span> 使用說明與 Regex 教學
+                            <span class="text-2xl">📖</span> {{ $t('help.title') }}
                         </h3>
                         <button @click="$emit('update:modelValue', false)"
                             class="p-2 rounded-lg text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
@@ -43,15 +43,15 @@ defineEmits<{
                         <section class="space-y-3">
                             <h4 class="text-base font-bold text-blue-600 dark:text-blue-400 flex items-center gap-2">
                                 <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                                基本操作流程
+                                {{ $t('help.basic.title') }}
                             </h4>
                             <ol
                                 class="list-decimal list-inside space-y-2 text-sm text-slate-600 dark:text-slate-300 ml-2">
-                                <li>將檔案拖曳至左上角區塊，或點擊選擇檔案。</li>
-                                <li>在「操作流程」中新增規則。</li>
-                                <li>設定「尋找目標」與「取代為」的內容。</li>
-                                <li>右側列表會即時預覽更名結果。</li>
-                                <li>確認無誤後，點擊「執行重命名」或「複製到...」。</li>
+                                <li>{{ $t('help.basic.step1') }}</li>
+                                <li>{{ $t('help.basic.step2') }}</li>
+                                <li>{{ $t('help.basic.step3') }}</li>
+                                <li>{{ $t('help.basic.step4') }}</li>
+                                <li>{{ $t('help.basic.step5') }}</li>
                             </ol>
                         </section>
 
@@ -63,14 +63,15 @@ defineEmits<{
                                 <h4
                                     class="text-base font-bold text-purple-600 dark:text-purple-400 flex items-center gap-2">
                                     <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
-                                    正規表達式 (Regex) 速查
+                                    {{ $t('help.regex.title') }}
                                 </h4>
                                 <span
-                                    class="text-xs px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded">進階技巧</span>
+                                    class="text-xs px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded">{{
+                                    $t('help.regex.advanced') }}</span>
                             </div>
 
                             <p class="text-sm text-slate-500 dark:text-slate-400">
-                                正規表達式是一種強大的文字比對工具，可以幫助您精確地選取想要修改的文字部分。
+                                {{ $t('help.regex.description') }}
                             </p>
 
                             <!-- Common Symbols Table -->
@@ -81,8 +82,9 @@ defineEmits<{
                                         <tr>
                                             <th
                                                 class="px-4 py-2 border-b border-r border-slate-200 dark:border-slate-700 w-24">
-                                                符號</th>
-                                            <th class="px-4 py-2 border-b border-slate-200 dark:border-slate-700">說明
+                                                {{ $t('help.regex.table.symbol') }}</th>
+                                            <th class="px-4 py-2 border-b border-slate-200 dark:border-slate-700">{{
+                                                $t('help.regex.table.desc') }}
                                             </th>
                                         </tr>
                                     </thead>
@@ -92,50 +94,58 @@ defineEmits<{
                                             <td
                                                 class="px-4 py-2 font-mono text-pink-600 dark:text-pink-400 border-r border-slate-200 dark:border-slate-700">
                                                 .</td>
-                                            <td class="px-4 py-2 text-slate-600 dark:text-slate-400">匹配任意單一字元</td>
+                                            <td class="px-4 py-2 text-slate-600 dark:text-slate-400">{{
+                                                $t('help.regex.table.dot') }}</td>
                                         </tr>
                                         <tr>
                                             <td
                                                 class="px-4 py-2 font-mono text-pink-600 dark:text-pink-400 border-r border-slate-200 dark:border-slate-700">
                                                 \d</td>
-                                            <td class="px-4 py-2 text-slate-600 dark:text-slate-400">匹配數字 (0-9)</td>
+                                            <td class="px-4 py-2 text-slate-600 dark:text-slate-400">{{
+                                                $t('help.regex.table.digit') }}</td>
                                         </tr>
                                         <tr>
                                             <td
                                                 class="px-4 py-2 font-mono text-pink-600 dark:text-pink-400 border-r border-slate-200 dark:border-slate-700">
                                                 \w</td>
-                                            <td class="px-4 py-2 text-slate-600 dark:text-slate-400">匹配字母、數字或底線</td>
+                                            <td class="px-4 py-2 text-slate-600 dark:text-slate-400">{{
+                                                $t('help.regex.table.word') }}</td>
                                         </tr>
                                         <tr>
                                             <td
                                                 class="px-4 py-2 font-mono text-pink-600 dark:text-pink-400 border-r border-slate-200 dark:border-slate-700">
                                                 \s</td>
-                                            <td class="px-4 py-2 text-slate-600 dark:text-slate-400">匹配空白字元 (空白鍵、Tab)
+                                            <td class="px-4 py-2 text-slate-600 dark:text-slate-400">{{
+                                                $t('help.regex.table.space') }}
                                             </td>
                                         </tr>
                                         <tr>
                                             <td
                                                 class="px-4 py-2 font-mono text-pink-600 dark:text-pink-400 border-r border-slate-200 dark:border-slate-700">
                                                 *</td>
-                                            <td class="px-4 py-2 text-slate-600 dark:text-slate-400">前面的字元出現 0 次或多次</td>
+                                            <td class="px-4 py-2 text-slate-600 dark:text-slate-400">{{
+                                                $t('help.regex.table.star') }}</td>
                                         </tr>
                                         <tr>
                                             <td
                                                 class="px-4 py-2 font-mono text-pink-600 dark:text-pink-400 border-r border-slate-200 dark:border-slate-700">
                                                 +</td>
-                                            <td class="px-4 py-2 text-slate-600 dark:text-slate-400">前面的字元出現 1 次或多次</td>
+                                            <td class="px-4 py-2 text-slate-600 dark:text-slate-400">{{
+                                                $t('help.regex.table.plus') }}</td>
                                         </tr>
                                         <tr>
                                             <td
                                                 class="px-4 py-2 font-mono text-pink-600 dark:text-pink-400 border-r border-slate-200 dark:border-slate-700">
                                                 ^</td>
-                                            <td class="px-4 py-2 text-slate-600 dark:text-slate-400">匹配字串開頭</td>
+                                            <td class="px-4 py-2 text-slate-600 dark:text-slate-400">{{
+                                                $t('help.regex.table.caret') }}</td>
                                         </tr>
                                         <tr>
                                             <td
                                                 class="px-4 py-2 font-mono text-pink-600 dark:text-pink-400 border-r border-slate-200 dark:border-slate-700">
                                                 $</td>
-                                            <td class="px-4 py-2 text-slate-600 dark:text-slate-400">匹配字串結尾</td>
+                                            <td class="px-4 py-2 text-slate-600 dark:text-slate-400">{{
+                                                $t('help.regex.table.dollar') }}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -143,34 +153,39 @@ defineEmits<{
 
                             <!-- Examples -->
                             <div class="space-y-3">
-                                <h5 class="text-sm font-bold text-slate-700 dark:text-slate-300">實用範例</h5>
+                                <h5 class="text-sm font-bold text-slate-700 dark:text-slate-300">{{
+                                    $t('help.regex.examples.title') }}</h5>
 
                                 <div class="grid gap-3">
                                     <!-- Example 1 -->
                                     <div
                                         class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
-                                        <div class="text-xs font-semibold text-slate-500 mb-1">刪除所有空白</div>
+                                        <div class="text-xs font-semibold text-slate-500 mb-1">{{
+                                            $t('help.regex.examples.ex1.title') }}</div>
                                         <div class="flex items-center gap-2 text-sm font-mono">
                                             <span
                                                 class="bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-300 dark:border-slate-600 text-pink-600 dark:text-pink-400">\s+</span>
                                             <span class="text-slate-400">→</span>
-                                            <span class="text-slate-400 italic">(留空)</span>
+                                            <span class="text-slate-400 italic">{{ $t('help.regex.examples.ex1.desc')
+                                                }}</span>
                                         </div>
                                     </div>
 
                                     <!-- Example 2 -->
                                     <div
                                         class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
-                                        <div class="text-xs font-semibold text-slate-500 mb-1">統一日期格式 (20231125 →
-                                            2023-11-25)</div>
+                                        <div class="text-xs font-semibold text-slate-500 mb-1">{{
+                                            $t('help.regex.examples.ex2.title') }}</div>
                                         <div class="flex flex-col gap-1">
                                             <div class="flex items-center gap-2 text-sm font-mono">
-                                                <span class="text-slate-500 w-12">尋找:</span>
+                                                <span class="text-slate-500 w-12">{{ $t('help.regex.examples.ex2.find')
+                                                    }}</span>
                                                 <span
                                                     class="bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-300 dark:border-slate-600 text-pink-600 dark:text-pink-400">(\d{4})(\d{2})(\d{2})</span>
                                             </div>
                                             <div class="flex items-center gap-2 text-sm font-mono">
-                                                <span class="text-slate-500 w-12">取代:</span>
+                                                <span class="text-slate-500 w-12">{{
+                                                    $t('help.regex.examples.ex2.replace') }}</span>
                                                 <span
                                                     class="bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-300 dark:border-slate-600 text-green-600 dark:text-green-400">$1-$2-$3</span>
                                             </div>
@@ -180,13 +195,14 @@ defineEmits<{
                                     <!-- Example 3 -->
                                     <div
                                         class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
-                                        <div class="text-xs font-semibold text-slate-500 mb-1">刪除括號及內容 (例如 "File
-                                            (copy).txt" → "File.txt")</div>
+                                        <div class="text-xs font-semibold text-slate-500 mb-1">{{
+                                            $t('help.regex.examples.ex3.title') }}</div>
                                         <div class="flex items-center gap-2 text-sm font-mono">
                                             <span
                                                 class="bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-300 dark:border-slate-600 text-pink-600 dark:text-pink-400">\s*\([^)]*\)</span>
                                             <span class="text-slate-400">→</span>
-                                            <span class="text-slate-400 italic">(留空)</span>
+                                            <span class="text-slate-400 italic">{{ $t('help.regex.examples.ex3.desc')
+                                                }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -199,12 +215,15 @@ defineEmits<{
                                 <h4
                                     class="text-base font-bold text-green-600 dark:text-green-400 flex items-center gap-2">
                                     <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                                    流水號功能 (${n})
+                                    {{ $t('help.numbering.title') }}
                                 </h4>
                                 <p class="text-sm text-slate-500 dark:text-slate-400">
-                                    您可以在「取代為」欄位中使用 <code
-                                        class="bg-slate-100 dark:bg-slate-800 px-1 rounded font-mono text-slate-700 dark:text-slate-300">${n}</code>
-                                    來插入遞增的數字。
+                                    <i18n-t keypath="help.numbering.description" tag="span">
+                                        <template #code>
+                                            <code
+                                                class="bg-slate-100 dark:bg-slate-800 px-1 rounded font-mono text-slate-700 dark:text-slate-300">${n}</code>
+                                        </template>
+                                    </i18n-t>
                                 </p>
 
                                 <div class="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
@@ -214,11 +233,13 @@ defineEmits<{
                                             <tr>
                                                 <th
                                                     class="px-4 py-2 border-b border-r border-slate-200 dark:border-slate-700 w-32">
-                                                    語法</th>
-                                                <th class="px-4 py-2 border-b border-slate-200 dark:border-slate-700">說明
+                                                    {{ $t('help.numbering.table.syntax') }}</th>
+                                                <th class="px-4 py-2 border-b border-slate-200 dark:border-slate-700">{{
+                                                    $t('help.numbering.table.desc')
+                                                    }}
                                                 </th>
-                                                <th class="px-4 py-2 border-b border-slate-200 dark:border-slate-700">範例
-                                                    (第 5 個檔案)</th>
+                                                <th class="px-4 py-2 border-b border-slate-200 dark:border-slate-700">{{
+                                                    $t('help.numbering.table.example') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody
@@ -227,7 +248,8 @@ defineEmits<{
                                                 <td
                                                     class="px-4 py-2 font-mono text-green-600 dark:text-green-400 border-r border-slate-200 dark:border-slate-700">
                                                     ${n}</td>
-                                                <td class="px-4 py-2 text-slate-600 dark:text-slate-400">插入序號 (從 1 開始)
+                                                <td class="px-4 py-2 text-slate-600 dark:text-slate-400">{{
+                                                    $t('help.numbering.table.n') }}
                                                 </td>
                                                 <td class="px-4 py-2 font-mono text-slate-600 dark:text-slate-400">5
                                                 </td>
@@ -236,8 +258,8 @@ defineEmits<{
                                                 <td
                                                     class="px-4 py-2 font-mono text-green-600 dark:text-green-400 border-r border-slate-200 dark:border-slate-700">
                                                     ${n:03}</td>
-                                                <td class="px-4 py-2 text-slate-600 dark:text-slate-400">補零至指定位數 (例如 3
-                                                    位)</td>
+                                                <td class="px-4 py-2 text-slate-600 dark:text-slate-400">{{
+                                                    $t('help.numbering.table.nPad') }}</td>
                                                 <td class="px-4 py-2 font-mono text-slate-600 dark:text-slate-400">005
                                                 </td>
                                             </tr>
@@ -247,17 +269,20 @@ defineEmits<{
 
                                 <div
                                     class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
-                                    <div class="text-xs font-semibold text-slate-500 mb-1">範例：重新命名為 Image_001,
-                                        Image_002...</div>
+                                    <div class="text-xs font-semibold text-slate-500 mb-1">{{
+                                        $t('help.numbering.example.title') }}</div>
                                     <div class="flex flex-col gap-1">
                                         <div class="flex items-center gap-2 text-sm font-mono">
-                                            <span class="text-slate-500 w-12">尋找:</span>
+                                            <span class="text-slate-500 w-12">{{ $t('help.numbering.example.find')
+                                                }}</span>
                                             <span
                                                 class="bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-300 dark:border-slate-600 text-pink-600 dark:text-pink-400">.*</span>
-                                            <span class="text-xs text-slate-400">(選取全部檔名)</span>
+                                            <span class="text-xs text-slate-400">{{
+                                                $t('help.numbering.example.selectAll') }}</span>
                                         </div>
                                         <div class="flex items-center gap-2 text-sm font-mono">
-                                            <span class="text-slate-500 w-12">取代:</span>
+                                            <span class="text-slate-500 w-12">{{ $t('help.numbering.example.replace')
+                                                }}</span>
                                             <span
                                                 class="bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-300 dark:border-slate-600 text-green-600 dark:text-green-400">Image_${n:03}</span>
                                         </div>
@@ -272,7 +297,7 @@ defineEmits<{
                         class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex justify-end">
                         <button @click="$emit('update:modelValue', false)"
                             class="px-4 py-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium transition-colors">
-                            關閉
+                            {{ $t('help.close') }}
                         </button>
                     </div>
                 </div>
