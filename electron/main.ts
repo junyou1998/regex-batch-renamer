@@ -3,7 +3,7 @@ const path = require('node:path')
 const fs = require('node:fs/promises')
 
 console.log('ELECTRON REQUIRE:', electron)
-const { app, BrowserWindow, ipcMain, dialog } = electron
+const { app, BrowserWindow, ipcMain, dialog, nativeImage } = electron
 
 // The built directory structure
 // In packaged app: app.asar contains both dist and dist-electron
@@ -72,6 +72,10 @@ app.on('activate', () => {
 })
 
 app.whenReady().then(() => {
+  if (process.platform === 'darwin') {
+    const iconPath = path.join(process.env.VITE_PUBLIC || '', 'icon.png')
+    app.dock.setIcon(nativeImage.createFromPath(iconPath))
+  }
   createWindow()
 
   // IPC Handlers
