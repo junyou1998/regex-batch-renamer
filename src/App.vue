@@ -5,6 +5,7 @@ import OperationPipeline from './components/OperationPipeline.vue'
 import FilePreviewList from './components/FilePreviewList.vue'
 import ThemeSwitcher from './components/ThemeSwitcher.vue'
 import ToastNotification from './components/ToastNotification.vue'
+import AboutModal from './components/AboutModal.vue'
 import { useFileStore } from './stores/fileStore'
 import { useOperationStore } from './stores/operationStore'
 
@@ -13,6 +14,7 @@ const operationStore = useOperationStore()
 const isProcessing = ref(false)
 const isSidebarCollapsed = ref(false)
 const isMac = window.ipcRenderer?.platform === 'darwin'
+const showAbout = ref(false)
 
 // Debounce helper
 function debounce<T extends (...args: any[]) => any>(fn: T, delay: number) {
@@ -203,6 +205,14 @@ async function handleCopyTo() {
             <p class="text-xs text-slate-500 dark:text-slate-500 mt-1">批次更名工具</p>
           </div>
           <div class="flex items-center gap-1">
+            <button @click="showAbout = true" title="關於本專案"
+              class="p-1.5 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
             <ThemeSwitcher />
             <button @click="isSidebarCollapsed = true" title="隱藏左側面板"
               class="p-1.5 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
@@ -241,6 +251,7 @@ async function handleCopyTo() {
       </div>
     </main>
     <ToastNotification />
+    <AboutModal v-model="showAbout" />
   </div>
 </template>
 
