@@ -1,0 +1,123 @@
+{
+    "app": {
+        "title": "Regex Batch Renamer",
+        "subtitle": "Batch Renaming Tool",
+        "showSidebar": "Show Sidebar",
+        "hideSidebar": "Hide Sidebar",
+        "about": "About",
+        "rename": "Rename Files",
+        "copyTo": "Copy To...",
+        "processing": "Processing..."
+    },
+    "dropZone": {
+        "text": "Drag & Drop Files Here or",
+        "action": "Click to Select",
+        "supports": "Supports multiple files and folders"
+    },
+    "operations": {
+        "title": "Operations",
+        "add": "Add Rule",
+        "clear": "Clear",
+        "regex": "Search & Replace",
+        "other": "Other Operation",
+        "moveUp": "Move Up",
+        "moveDown": "Move Down",
+        "remove": "Remove",
+        "patternLabel": "Find",
+        "useRegex": "Use Regex",
+        "placeholderPatternRegex": "Enter Regex pattern...",
+        "placeholderPatternText": "Enter text to find...",
+        "replacementLabel": "Replace with",
+        "supportSequence": "Supports ${n} sequence",
+        "placeholderReplacement": "Enter replacement text...",
+        "empty": "No rules added yet"
+    },
+    "preview": {
+        "title": "Preview Changes ({n} files)",
+        "clear": "Clear List",
+        "original": "Original Name",
+        "new": "New Name (Preview)",
+        "status": "Status",
+        "remove": "Remove File",
+        "clickToCopy": "Click to copy: {text}",
+        "empty": "No files added yet",
+        "copied": "Copied: {text}",
+        "copyFailed": "Copy failed"
+    },
+    "theme": {
+        "light": "Light Mode",
+        "dark": "Dark Mode",
+        "system": "System Default",
+        "auto": "System Default"
+    },
+    "about": {
+        "title": "About Project",
+        "description": "A simple, powerful, and open-source cross-platform batch file renaming tool for Windows, macOS, and Linux.",
+        "developer": "Developer Info",
+        "bio": "Hi! I'm Junyou. This project aims to make tedious file renaming tasks easier. If you find this tool helpful, consider buying me a coffee to support continued development!",
+        "thanks": "Thanks for your support ❤️",
+        "close": "Close"
+    },
+    "help": {
+        "title": "Help & Regex Tutorial",
+        "basic": {
+            "title": "Basic Workflow",
+            "step1": "Drag & drop files to the top-left area, or click to select files.",
+            "step2": "Add a rule in the \"Operations\" section.",
+            "step3": "Set the \"Find\" and \"Replace with\" content.",
+            "step4": "The list on the right will preview the renaming results in real-time.",
+            "step5": "Once confirmed, click \"Rename Files\" or \"Copy To...\"."
+        },
+        "regex": {
+            "title": "Regex Cheat Sheet",
+            "advanced": "Advanced",
+            "description": "Regular Expressions (Regex) are powerful text matching tools that help you precisely select the parts of text you want to modify.",
+            "table": {
+                "symbol": "Symbol",
+                "desc": "Description",
+                "dot": "Matches any single character",
+                "digit": "Matches any digit (0-9)",
+                "word": "Matches any letter, digit, or underscore",
+                "space": "Matches any whitespace (space, tab)",
+                "star": "Matches 0 or more of the preceding character",
+                "plus": "Matches 1 or more of the preceding character",
+                "caret": "Matches the start of the string",
+                "dollar": "Matches the end of the string"
+            },
+            "examples": {
+                "title": "Examples",
+                "ex1": {
+                    "title": "Remove all whitespace",
+                    "desc": "(Empty)"
+                },
+                "ex2": {
+                    "title": "Standardize date format (20231125 → 2023-11-25)",
+                    "find": "Find:",
+                    "replace": "Replace:"
+                },
+                "ex3": {
+                    "title": "Remove parentheses and content (e.g. \"File (copy).txt\" → \"File.txt\")",
+                    "desc": "(Empty)"
+                }
+            }
+        },
+        "numbering": {
+            "title": "Sequential Numbering (${n})",
+            "description": "You can use {code} in the \"Replace with\" field to insert incrementing numbers.",
+            "table": {
+                "syntax": "Syntax",
+                "desc": "Description",
+                "example": "Example (5th file)",
+                "n": "Insert sequence number (starts from 1)",
+                "nPad": "Zero-pad to specific digits (e.g. 3 digits)"
+            },
+            "example": {
+                "title": "Example: Rename to Image_001, Image_002...",
+                "find": "Find:",
+                "selectAll": "(Select all filenames)",
+                "replace": "Replace:"
+            }
+        },
+        "close": "Close"
+    }
+}

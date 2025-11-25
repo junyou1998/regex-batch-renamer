@@ -65,9 +65,10 @@ async function openFileDialog() {
     </div>
     <p
       class="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
-      拖放檔案至此 或 <span
-        class="text-blue-600 dark:text-blue-400 underline decoration-blue-400/30 group-hover:decoration-blue-500 dark:group-hover:decoration-blue-400">點擊選擇</span>
+      {{ $t('dropZone.text') }} <span
+        class="text-blue-600 dark:text-blue-400 underline decoration-blue-400/30 group-hover:decoration-blue-500 dark:group-hover:decoration-blue-400">{{
+          $t('dropZone.action') }}</span>
     </p>
-    <p class="text-xs text-slate-500 dark:text-slate-500 mt-1">支援多選與資料夾</p>
+    <p class="text-xs text-slate-500 dark:text-slate-500 mt-1">{{ $t('dropZone.supports') }}</p>
   </div>
 </template>

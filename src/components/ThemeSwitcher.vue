@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useThemeStore, type ThemeMode } from '../stores/themeStore'
+import { useI18n } from 'vue-i18n'
 
 const themeStore = useThemeStore()
+const { t } = useI18n()
 
 // Cycle through themes: auto -> light -> dark -> auto
 function cycleTheme() {
@@ -15,9 +17,9 @@ function cycleTheme() {
 // Get tooltip based on current theme mode
 const themeTooltip = computed(() => {
     switch (themeStore.themeMode) {
-        case 'auto': return '跟隨系統'
-        case 'light': return '亮色模式'
-        case 'dark': return '暗色模式'
+        case 'auto': return t('theme.auto')
+        case 'light': return t('theme.light')
+        case 'dark': return t('theme.dark')
     }
 })
 </script>
