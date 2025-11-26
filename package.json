@@ -1,9 +1,10 @@
 {
     "name": "regex-batch-renamer",
     "productName": "Regex Batch Renamer",
+    "description": "A powerful tool for batch renaming files using regular expressions.",
     "author": "junyou",
     "private": true,
-    "version": "0.0.0",
+    "version": "0.1.0",
     "type": "module",
     "scripts": {
         "dev": "vite",
@@ -59,6 +60,14 @@
             "icon": "public/icon.png",
             "verifyUpdateCodeSignature": false,
             "sign": null
+        },
+        "linux": {
+            "target": [
+                "AppImage",
+                "deb"
+            ],
+            "icon": "public/icon.png",
+            "category": "Utility"
         },
         "nsis": {
             "oneClick": false,
