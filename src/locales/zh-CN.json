@@ -7,7 +7,9 @@
         "about": "关于本项目",
         "rename": "执行重命名",
         "copyTo": "复制到...",
-        "processing": "处理中..."
+        "processing": "处理中...",
+        "updateAvailable": "发现新版本",
+        "download": "下载"
     },
     "dropZone": {
         "text": "拖放文件至此 或",

@@ -120,4 +120,8 @@ app.whenReady().then(() => {
     })
     return result.filePaths[0]
   })
+
+  ipcMain.handle('open-external', async (_event: any, url: string) => {
+    await electron.shell.openExternal(url)
+  })
 })

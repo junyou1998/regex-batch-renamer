@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import FileDropZone from './components/FileDropZone.vue'
 import OperationPipeline from './components/OperationPipeline.vue'
 import FilePreviewList from './components/FilePreviewList.vue'
@@ -10,12 +10,61 @@ import AboutModal from './components/AboutModal.vue'
 import { useFileStore } from './stores/fileStore'
 import { useOperationStore } from './stores/operationStore'
 
+// @ts-ignore
+import { version as currentVersion } from '../package.json'
+
 const fileStore = useFileStore()
 const operationStore = useOperationStore()
 const isProcessing = ref(false)
 const isSidebarCollapsed = ref(false)
 const isMac = window.ipcRenderer?.platform === 'darwin'
 const showAbout = ref(false)
+
+// Update Check
+const updateAvailable = ref(false)
+const latestVersion = ref('')
+const releaseUrl = ref('')
+
+function isNewerVersion(oldVer: string, newVer: string) {
+  const oldParts = oldVer.split('.').map(Number)
+  const newParts = newVer.split('.').map(Number)
+  for (let i = 0; i < 3; i++) {
+    const a = oldParts[i] || 0
+    const b = newParts[i] || 0
+    if (a < b) return true
+    if (a > b) return false
+  }
+  return false
+}
+
+async function checkForUpdates() {
+  try {
+    const res = await fetch('https://api.github.com/repos/junyou1998/regex-batch-renamer/releases/latest')
+    if (res.ok) {
+      const data = await res.json()
+      const tagName = data.tag_name
+      const remoteVersion = tagName.startsWith('v') ? tagName.slice(1) : tagName
+
+      if (isNewerVersion(currentVersion, remoteVersion)) {
+        updateAvailable.value = true
+        latestVersion.value = tagName
+        releaseUrl.value = data.html_url
+      }
+    }
+  } catch (e) {
+    console.error('Update check failed:', e)
+  }
+}
+
+function openReleasePage() {
+  if (releaseUrl.value) {
+    window.ipcRenderer.invoke('open-external', releaseUrl.value)
+  }
+}
+
+onMounted(() => {
+  checkForUpdates()
+})
 
 // Debounce helper
 function debounce<T extends (...args: any[]) => any>(fn: T, delay: number) {
@@ -248,6 +297,32 @@ async function handleCopyTo() {
 
     <!-- Main Content -->
     <main class="flex-1 flex flex-col bg-white dark:bg-slate-950">
+      <!-- Update Banner -->
+      <div v-if="updateAvailable"
+        :class="['bg-blue-600 text-white px-4 py-3 flex items-center justify-between text-sm shadow-md z-40 shrink-0', isMac ? 'mt-12' : '']">
+        <div class="flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+              clip-rule="evenodd" />
+          </svg>
+          <span class="font-medium">{{ $t('app.updateAvailable') }} ({{ latestVersion }})</span>
+        </div>
+        <div class="flex items-center gap-4">
+          <button @click="openReleasePage"
+            class="bg-white text-blue-600 px-3 py-1 rounded font-bold hover:bg-blue-50 transition-colors">
+            {{ $t('app.download') }}
+          </button>
+          <button @click="updateAvailable = false" class="opacity-80 hover:opacity-100">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd"
+                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                clip-rule="evenodd" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
       <div class="flex-1 p-6 overflow-hidden">
         <FilePreviewList />
       </div>

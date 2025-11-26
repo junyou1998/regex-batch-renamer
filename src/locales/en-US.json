@@ -7,7 +7,9 @@
         "about": "About",
         "rename": "Rename Files",
         "copyTo": "Copy To...",
-        "processing": "Processing..."
+        "processing": "Processing...",
+        "updateAvailable": "New Version Available",
+        "download": "Download"
     },
     "dropZone": {
         "text": "Drag & Drop Files Here or",
