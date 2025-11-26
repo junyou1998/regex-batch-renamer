@@ -16,6 +16,22 @@ A powerful and intuitive cross-platform batch file renaming tool (Windows / macO
 - **Modern Interface**: Designed with a premium look and feel, fully supporting macOS Light/Dark modes (follows system settings).
 - **Safe & Reliable**: Full preview before execution, and supports "Copy To..." to preserve original files.
 
+## 📥 Installation
+
+### macOS Users Note
+Since this app is not signed with an Apple Developer Certificate (as I am an independent developer), you might encounter an **"App is damaged and can't be opened"** error when launching it for the first time on macOS. This is due to macOS security features, not because the app is actually damaged.
+
+To resolve this, please open the Terminal and run the following command:
+
+```bash
+sudo xattr -r -d com.apple.quarantine /Applications/Regex\ Batch\ Renamer.app
+```
+
+Enter your password when prompted, and you should be able to open the app normally.
+
+### Windows / Linux
+Simply download and run the installer for your platform.
+
 ## 🚀 Quick Start
 
 1. **Add Files**: Drag files to the top-left area or click the button to select files.
