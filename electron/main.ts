@@ -73,7 +73,7 @@ app.on('activate', () => {
 
 app.whenReady().then(() => {
   if (process.platform === 'darwin') {
-    const iconPath = path.join(process.env.VITE_PUBLIC || '', 'icon.png')
+    const iconPath = path.join(process.env.VITE_PUBLIC || '', 'icon-mac.png')
     app.dock.setIcon(nativeImage.createFromPath(iconPath))
   }
   createWindow()
