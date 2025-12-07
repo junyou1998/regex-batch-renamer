@@ -2,12 +2,73 @@
 import { useFileStore } from '../stores/fileStore'
 import { useToastStore } from '../stores/toastStore'
 import { generateDiffHtml } from '../utils/diff'
-
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const fileStore = useFileStore()
 const toastStore = useToastStore()
 const { t } = useI18n()
+
+// Tooltip State
+const tooltip = ref({
+  visible: false,
+  x: 0,
+  y: 0,
+  content: '',
+  isHtml: false
+})
+const tooltipRef = ref<HTMLElement | null>(null)
+
+import { nextTick } from 'vue'
+
+async function showTooltip(event: MouseEvent, content: string, isHtml = false) {
+  const target = event.currentTarget as HTMLElement
+  const rect = target.getBoundingClientRect()
+
+  // Initial position
+  let x = rect.left
+  let y = rect.bottom + 5
+
+  tooltip.value = {
+    visible: true,
+    x,
+    y,
+    content,
+    isHtml
+  }
+
+  // Adjust position after render to prevent overflow
+  await nextTick()
+
+  if (tooltipRef.value) {
+    const tooltipRect = tooltipRef.value.getBoundingClientRect()
+    const viewportWidth = window.innerWidth
+    const viewportHeight = window.innerHeight
+
+    // Check right edge
+    if (x + tooltipRect.width > viewportWidth - 20) {
+      x = viewportWidth - tooltipRect.width - 20 // 20px padding from right
+    }
+
+    // Check bottom edge
+    if (y + tooltipRect.height > viewportHeight - 20) {
+      y = rect.top - tooltipRect.height - 5 // Flip to top
+    }
+
+    // Ensure left edge doesn't go off screen
+    if (x < 20) {
+      x = 20
+    }
+
+    // Update position
+    tooltip.value.x = x
+    tooltip.value.y = y
+  }
+}
+
+function hideTooltip() {
+  tooltip.value.visible = false
+}
 
 function removeFile(id: string) {
   fileStore.removeFile(id)
@@ -31,7 +92,8 @@ async function copyToClipboard(text: string) {
       class="bg-slate-200/50 dark:bg-slate-900/50 px-4 py-3 border-b border-slate-300 dark:border-slate-700 flex justify-between items-center backdrop-blur-sm">
       <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ $t('preview.title', {
         n:
-          fileStore.files.length }) }}</h3>
+          fileStore.files.length
+      }) }}</h3>
       <button v-if="fileStore.files.length > 0" @click="fileStore.clearFiles"
         class="text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 px-2 py-1 rounded hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors">
         {{ $t('preview.clear') }}
@@ -46,8 +108,10 @@ async function copyToClipboard(text: string) {
             <th class="px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-500">{{ $t('preview.original') }}
             </th>
             <th class="px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-500">{{ $t('preview.new') }}</th>
-            <th class="px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-500 w-16 text-center">{{
-              $t('preview.status') }}</th>
+            <th
+              class="px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-500 whitespace-nowrap w-16 text-center">
+              {{
+                $t('preview.status') }}</th>
             <th class="px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-500 w-10"></th>
           </tr>
         </thead>
@@ -60,25 +124,18 @@ async function copyToClipboard(text: string) {
           ]">
             <td class="px-4 py-2 text-xs text-slate-500 dark:text-slate-500 text-center font-mono">{{ index + 1 }}</td>
             <td
-              class="px-4 py-2 text-sm text-slate-600 dark:text-slate-400 group relative max-w-0 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
-              @click="copyToClipboard(file.originalName)">
+              class="px-4 py-2 text-sm text-slate-600 dark:text-slate-400 relative max-w-0 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
+              @click="copyToClipboard(file.originalName)"
+              @mouseenter="(e) => showTooltip(e, $t('preview.clickToCopy', { text: file.originalName }))"
+              @mouseleave="hideTooltip">
               <div class="truncate" :title="file.originalName">
                 {{ file.originalName }}
               </div>
-              <!-- Tooltip on hover -->
-              <div
-                class="absolute left-0 top-full mt-1 bg-slate-800 dark:bg-slate-900 text-slate-200 dark:text-slate-200 px-3 py-2 rounded-lg shadow-xl z-20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap text-xs border border-slate-600 dark:border-slate-700">
-                {{ $t('preview.clickToCopy', { text: file.originalName }) }}
-              </div>
             </td>
-            <td class="px-4 py-2 text-sm text-slate-800 dark:text-slate-200 group relative max-w-0">
+            <td class="px-4 py-2 text-sm text-slate-800 dark:text-slate-200 relative max-w-0"
+              @mouseenter="(e) => showTooltip(e, file.newName)" @mouseleave="hideTooltip">
               <!-- Diff View -->
               <div class="truncate" v-html="generateDiffHtml(file.originalName, file.newName)"></div>
-              <!-- Tooltip on hover -->
-              <div
-                class="absolute left-0 top-full mt-1 bg-slate-800 dark:bg-slate-900 text-slate-200 dark:text-slate-200 px-3 py-2 rounded-lg shadow-xl z-20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap text-xs border border-slate-600 dark:border-slate-700">
-                {{ file.newName }}
-              </div>
             </td>
             <td class="px-4 py-2 text-center">
               <!-- Only show status if there's a pending change or error -->
@@ -103,6 +160,16 @@ async function copyToClipboard(text: string) {
         </tbody>
       </table>
     </div>
+
+    <!-- Teleported Tooltip -->
+    <Teleport to="body">
+      <div v-show="tooltip.visible" ref="tooltipRef"
+        class="fixed z-[9999] bg-slate-800 dark:bg-slate-900 text-slate-200 dark:text-slate-200 px-3 py-2 rounded-lg shadow-xl text-xs border border-slate-600 dark:border-slate-700 pointer-events-none whitespace-nowrap"
+        :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }">
+        <span v-if="!tooltip.isHtml">{{ tooltip.content }}</span>
+        <span v-else v-html="tooltip.content"></span>
+      </div>
+    </Teleport>
   </div>
 </template>
 

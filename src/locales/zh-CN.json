@@ -30,7 +30,7 @@
         "placeholderPatternRegex": "输入 Regex 模式...",
         "placeholderPatternText": "输入要查找的文本...",
         "replacementLabel": "替换为",
-        "supportSequence": "支持 ${n} 序号",
+        "supportSequence": "支持 ${n} 序号与起始值",
         "placeholderReplacement": "输入替换后的文本...",
         "empty": "尚未新增任何规则"
     },
@@ -53,11 +53,17 @@
         "auto": "跟随系统"
     },
     "about": {
-        "title": "关于本项目",
-        "description": "一个简单、强大且开源的跨平台批量文件重命名工具，支持 Windows、macOS 与 Linux。",
-        "developer": "开发者信息",
-        "bio": "嗨！我是 Junyou。这个项目是为了让繁琐的文件重命名工作变得更简单。如果您觉得这个工具对您有帮助，欢迎赞助我一杯咖啡，这将成为我持续开发与维护的动力！",
+        "title": "关于本专案",
+        "description": "一个简单、强大且开源的跨平台批量重命名工具，支持 Windows、macOS 与 Linux。",
+        "developer": "开发者资讯",
+        "bio": "嗨！我是 Junyou。这个专案是为了让繁琐的档案重命名工作变得更简单。如果您觉得这个工具对您有帮助，欢迎赞助我一杯咖啡，这将成为我持续开发与维护的动力！",
         "thanks": "感谢您的支持与鼓励 ❤️",
+        "version": "版本",
+        "changelog": "更新日志",
+        "changelogLoading": "正在加载更新日志...",
+        "changelogError": "无法加载更新日志",
+        "viewOnGithub": "在 GitHub 上查看",
+        "newVersionAvailable": "有新版本可用",
         "close": "关闭"
     },
     "help": {
@@ -111,7 +117,8 @@
                 "desc": "说明",
                 "example": "范例 (第 5 个文件)",
                 "n": "插入序号 (从 1 开始)",
-                "nPad": "补零至指定位数 (例如 3 位)"
+                "nPad": "补零至指定位数 (例如 3 位)",
+                "nStart": "自定义起始值 (例如从 0 开始)"
             },
             "example": {
                 "title": "范例：重新命名为 Image_001, Image_002...",
