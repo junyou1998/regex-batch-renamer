@@ -30,7 +30,7 @@
         "placeholderPatternRegex": "Enter Regex pattern...",
         "placeholderPatternText": "Enter text to find...",
         "replacementLabel": "Replace with",
-        "supportSequence": "Supports ${n} sequence",
+        "supportSequence": "Supports ${n} sequence with start",
         "placeholderReplacement": "Enter replacement text...",
         "empty": "No rules added yet"
     },
@@ -54,10 +54,16 @@
     },
     "about": {
         "title": "About Project",
-        "description": "A simple, powerful, and open-source cross-platform batch file renaming tool for Windows, macOS, and Linux.",
+        "description": "A simple, powerful, and open-source cross-platform batch renaming tool that supports Windows, macOS, and Linux.",
         "developer": "Developer Info",
-        "bio": "Hi! I'm Junyou. This project aims to make tedious file renaming tasks easier. If you find this tool helpful, consider buying me a coffee to support continued development!",
-        "thanks": "Thanks for your support ❤️",
+        "bio": "Hi! I'm Junyou. This project was created to make tedious file renaming tasks easier. If you find this tool helpful, consider buying me a coffee to support continued development and maintenance!",
+        "thanks": "Thank you for your support and encouragement ❤️",
+        "version": "Version",
+        "changelog": "Changelog",
+        "changelogLoading": "Loading changelog...",
+        "changelogError": "Failed to load changelog",
+        "viewOnGithub": "View on GitHub",
+        "newVersionAvailable": "New version available",
         "close": "Close"
     },
     "help": {
@@ -111,7 +117,8 @@
                 "desc": "Description",
                 "example": "Example (5th file)",
                 "n": "Insert sequence number (starts from 1)",
-                "nPad": "Zero-pad to specific digits (e.g. 3 digits)"
+                "nPad": "Zero-pad to specific digits (e.g. 3 digits)",
+                "nStart": "Custom start number (e.g. starts from 0)"
             },
             "example": {
                 "title": "Example: Rename to Image_001, Image_002...",
