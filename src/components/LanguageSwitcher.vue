@@ -6,7 +6,8 @@ const { locale } = useI18n()
 const availableLocales = [
     { code: 'zh-TW', name: '繁體中文' },
     { code: 'zh-CN', name: '简体中文' },
-    { code: 'en-US', name: 'English' }
+    { code: 'en-US', name: 'English' },
+    { code: 'ja-JP', name: '日本語' }
 ]
 
 function switchLanguage(code: string) {

@@ -30,7 +30,7 @@ function addRegexOperation() {
 
 <template>
   <div class="space-y-4">
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between flex-wrap gap-2">
       <h2 class="text-lg font-semibold text-slate-800 dark:text-white flex items-center gap-2">
         <span class="w-1 h-5 bg-blue-500 rounded-full"></span>
         {{ $t('operations.title') }}

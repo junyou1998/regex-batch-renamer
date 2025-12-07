@@ -1,0 +1,132 @@
+{
+    "app": {
+        "title": "Regex Batch Renamer",
+        "subtitle": "一括リネームツール",
+        "showSidebar": "サイドバーを表示",
+        "hideSidebar": "サイドバーを隠す",
+        "about": "このプロジェクトについて",
+        "rename": "リネーム実行",
+        "copyTo": "コピー...",
+        "processing": "処理中...",
+        "updateAvailable": "新しいバージョンがあります",
+        "download": "ダウンロード"
+    },
+    "dropZone": {
+        "text": "ファイルをドラッグ",
+        "action": "または選択",
+        "supports": "複数選択・フォルダ対応"
+    },
+    "operations": {
+        "title": "操作一覧",
+        "add": "追加",
+        "clear": "クリア",
+        "regex": "置換",
+        "other": "その他",
+        "moveUp": "上へ移動",
+        "moveDown": "下へ移動",
+        "remove": "削除",
+        "patternLabel": "検索",
+        "useRegex": "正規表現を使用 (Regex)",
+        "placeholderPatternRegex": "Regexパターンを入力...",
+        "placeholderPatternText": "検索するテキストを入力...",
+        "replacementLabel": "置換",
+        "supportSequence": "${n} 連番・開始番号対応",
+        "placeholderReplacement": "置換後のテキストを入力...",
+        "empty": "ルールが追加されていません"
+    },
+    "preview": {
+        "title": "プレビュー ({n} ファイル)",
+        "clear": "リストをクリア",
+        "original": "元のファイル名",
+        "new": "新しいファイル名 (プレビュー)",
+        "status": "ステータス",
+        "remove": "このファイルを削除",
+        "clickToCopy": "クリックしてコピー: {text}",
+        "empty": "ファイルが追加されていません",
+        "copied": "コピーしました: {text}",
+        "copyFailed": "コピーに失敗しました"
+    },
+    "theme": {
+        "light": "ライトモード",
+        "dark": "ダークモード",
+        "system": "システム設定と同じ",
+        "auto": "システム設定と同じ"
+    },
+    "about": {
+        "title": "このプロジェクトについて",
+        "description": "Windows、macOS、Linuxに対応した、シンプルで強力なオープンソースの一括リネームツールです。",
+        "developer": "開発者情報",
+        "bio": "こんにちは！Junyouです。このプロジェクトは、面倒なファイルリネーム作業を簡単にするために作られました。もしこのツールが役立ったら、コーヒーを一杯奢っていただけると、開発とメンテナンスの励みになります！",
+        "thanks": "ご支援と励ましに感謝します ❤️",
+        "version": "バージョン",
+        "changelog": "更新履歴",
+        "changelogLoading": "更新履歴を読み込み中...",
+        "changelogError": "更新履歴の読み込みに失敗しました",
+        "viewOnGithub": "GitHubで見る",
+        "newVersionAvailable": "新しいバージョンが利用可能です",
+        "close": "閉じる"
+    },
+    "help": {
+        "title": "使い方とRegexチュートリアル",
+        "basic": {
+            "title": "基本操作フロー",
+            "step1": "左上のエリアにファイルをドラッグ＆ドロップするか、クリックして選択します。",
+            "step2": "「操作パイプライン」にルールを追加します。",
+            "step3": "「検索パターン」と「置換後の文字列」を設定します。",
+            "step4": "右側のリストでリネーム結果をリアルタイムでプレビューできます。",
+            "step5": "問題なければ、「リネーム実行」または「コピー...」をクリックします。"
+        },
+        "regex": {
+            "title": "正規表現 (Regex) クイックリファレンス",
+            "advanced": "高度なテクニック",
+            "description": "正規表現は、変更したいテキスト部分を正確に選択するのに役立つ強力なテキスト照合ツールです。",
+            "table": {
+                "symbol": "記号",
+                "desc": "説明",
+                "dot": "任意の1文字にマッチ",
+                "digit": "数字 (0-9) にマッチ",
+                "word": "文字、数字、アンダースコアにマッチ",
+                "space": "空白文字 (スペース、タブ) にマッチ",
+                "star": "直前の文字が0回以上出現",
+                "plus": "直前の文字が1回以上出現",
+                "caret": "行頭にマッチ",
+                "dollar": "行末にマッチ"
+            },
+            "examples": {
+                "title": "実用例",
+                "ex1": {
+                    "title": "すべての空白を削除",
+                    "desc": "(空欄)"
+                },
+                "ex2": {
+                    "title": "日付形式の統一 (20231125 → 2023-11-25)",
+                    "find": "検索:",
+                    "replace": "置換:"
+                },
+                "ex3": {
+                    "title": "括弧と内容を削除 (例 \"File (copy).txt\" → \"File.txt\")",
+                    "desc": "(空欄)"
+                }
+            }
+        },
+        "numbering": {
+            "title": "連番機能 (${n})",
+            "description": "「置換後の文字列」フィールドで {code} を使用して、増加する数値を挿入できます。",
+            "table": {
+                "syntax": "構文",
+                "desc": "説明",
+                "example": "例 (5番目のファイル)",
+                "n": "連番を挿入 (1から開始)",
+                "nPad": "指定桁数でゼロ埋め (例: 3桁)",
+                "nStart": "開始番号を指定 (例: 0から開始)"
+            },
+            "example": {
+                "title": "例：Image_001, Image_002... のようにリネーム",
+                "find": "検索:",
+                "selectAll": "(すべてのファイル名を選択)",
+                "replace": "置換:"
+            }
+        },
+        "close": "閉じる"
+    }
+}

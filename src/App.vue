@@ -110,15 +110,19 @@ const updatePreviews = debounce(() => {
             // This needs to happen FOR EACH match if we want sequential numbering per match?
             // Or usually it's per file?
             // The user requirement: "流水號我原本是希望用在替換時 用類似＄等文字作為遞增數字的語法"
-            // Usually in batch renamers, ${n} refers to the file's index in the list.
+            // usually in batch renamers, ${n} refers to the file's index in the list.
 
-            const fileIndex = index + 1
 
             // Function to replace the numbering syntax in the replacement string
             const processReplacementString = (repStr: string) => {
-              return repStr.replace(/\$\{n(?::(\d+))?\}/g, (_match, width) => {
+              // Supports ${n}, ${n:width}, or ${n:width:start}
+              // width: padding length (default 0, meaning no padding)
+              // start: starting number (default 1)
+              return repStr.replace(/\$\{n(?::(\d+)(?::(\d+))?)?\}/g, (_match, width, start) => {
                 const padding = width ? parseInt(width, 10) : 0
-                return fileIndex.toString().padStart(padding, '0')
+                const startNum = start !== undefined ? parseInt(start, 10) : 1
+                const currentNum = index + startNum
+                return currentNum.toString().padStart(padding, '0')
               })
             }
 

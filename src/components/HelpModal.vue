@@ -167,7 +167,7 @@ defineEmits<{
                                                 class="bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-300 dark:border-slate-600 text-pink-600 dark:text-pink-400">\s+</span>
                                             <span class="text-slate-400">→</span>
                                             <span class="text-slate-400 italic">{{ $t('help.regex.examples.ex1.desc')
-                                            }}</span>
+                                                }}</span>
                                         </div>
                                     </div>
 
@@ -179,7 +179,7 @@ defineEmits<{
                                         <div class="flex flex-col gap-1">
                                             <div class="flex items-center gap-2 text-sm font-mono">
                                                 <span class="text-slate-500 w-12">{{ $t('help.regex.examples.ex2.find')
-                                                }}</span>
+                                                    }}</span>
                                                 <span
                                                     class="bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-300 dark:border-slate-600 text-pink-600 dark:text-pink-400">(\d{4})(\d{2})(\d{2})</span>
                                             </div>
@@ -202,7 +202,7 @@ defineEmits<{
                                                 class="bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-300 dark:border-slate-600 text-pink-600 dark:text-pink-400">\s*\([^)]*\)</span>
                                             <span class="text-slate-400">→</span>
                                             <span class="text-slate-400 italic">{{ $t('help.regex.examples.ex3.desc')
-                                            }}</span>
+                                                }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -236,7 +236,7 @@ defineEmits<{
                                                     {{ $t('help.numbering.table.syntax') }}</th>
                                                 <th class="px-4 py-2 border-b border-slate-200 dark:border-slate-700">{{
                                                     $t('help.numbering.table.desc')
-                                                }}
+                                                    }}
                                                 </th>
                                                 <th class="px-4 py-2 border-b border-slate-200 dark:border-slate-700">{{
                                                     $t('help.numbering.table.example') }}</th>
@@ -263,6 +263,15 @@ defineEmits<{
                                                 <td class="px-4 py-2 font-mono text-slate-600 dark:text-slate-400">005
                                                 </td>
                                             </tr>
+                                            <tr>
+                                                <td
+                                                    class="px-4 py-2 font-mono text-green-600 dark:text-green-400 border-r border-slate-200 dark:border-slate-700">
+                                                    ${n:3:0}</td>
+                                                <td class="px-4 py-2 text-slate-600 dark:text-slate-400">{{
+                                                    $t('help.numbering.table.nStart') }}</td>
+                                                <td class="px-4 py-2 font-mono text-slate-600 dark:text-slate-400">004
+                                                </td>
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
@@ -274,7 +283,7 @@ defineEmits<{
                                     <div class="flex flex-col gap-1">
                                         <div class="flex items-center gap-2 text-sm font-mono">
                                             <span class="text-slate-500 w-12">{{ $t('help.numbering.example.find')
-                                            }}</span>
+                                                }}</span>
                                             <span
                                                 class="bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-300 dark:border-slate-600 text-pink-600 dark:text-pink-400">^.*</span>
                                             <span class="text-xs text-slate-400">{{
@@ -282,7 +291,7 @@ defineEmits<{
                                         </div>
                                         <div class="flex items-center gap-2 text-sm font-mono">
                                             <span class="text-slate-500 w-12">{{ $t('help.numbering.example.replace')
-                                            }}</span>
+                                                }}</span>
                                             <span
                                                 class="bg-white dark:bg-slate-900 px-2 py-0.5 rounded border border-slate-300 dark:border-slate-600 text-green-600 dark:text-green-400">Image_${n:03}</span>
                                         </div>

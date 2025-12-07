@@ -30,7 +30,7 @@
         "placeholderPatternRegex": "輸入 Regex 樣式...",
         "placeholderPatternText": "輸入要尋找的文字...",
         "replacementLabel": "取代為",
-        "supportSequence": "支援 ${n} 序號",
+        "supportSequence": "支援 ${n} 序號與起始值",
         "placeholderReplacement": "輸入取代後的文字...",
         "empty": "尚未新增任何規則"
     },
@@ -58,6 +58,12 @@
         "developer": "開發者資訊",
         "bio": "嗨！我是 Junyou。這個專案是為了讓繁瑣的檔案更名工作變得更簡單。如果您覺得這個工具對您有幫助，歡迎贊助我一杯咖啡，這將成為我持續開發與維護的動力！",
         "thanks": "感謝您的支持與鼓勵 ❤️",
+        "version": "版本",
+        "changelog": "更新日誌",
+        "changelogLoading": "正在載入更新日誌...",
+        "changelogError": "無法載入更新日誌",
+        "viewOnGithub": "在 GitHub 上查看",
+        "newVersionAvailable": "有新版本可用",
         "close": "關閉"
     },
     "help": {
@@ -111,7 +117,8 @@
                 "desc": "說明",
                 "example": "範例 (第 5 個檔案)",
                 "n": "插入序號 (從 1 開始)",
-                "nPad": "補零至指定位數 (例如 3 位)"
+                "nPad": "補零至指定位數 (例如 3 位)",
+                "nStart": "自訂起始值 (例如從 0 開始)"
             },
             "example": {
                 "title": "範例：重新命名為 Image_001, Image_002...",
