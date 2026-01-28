@@ -78,14 +78,14 @@ function toggleChangelog() {
             enter-to-class="opacity-100" leave-active-class="transition duration-150 ease-in"
             leave-from-class="opacity-100" leave-to-class="opacity-0">
             <div v-if="modelValue"
-                class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+                class="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
                 @click.self="$emit('update:modelValue', false)">
 
                 <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden border border-slate-200 dark:border-slate-700 transform transition-all max-h-[85vh]"
                     role="dialog" aria-modal="true">
                     <!-- Header -->
                     <div
-                        class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50 flex-shrink-0">
+                        class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50 shrink-0">
                         <div class="flex items-center gap-3">
                             <button v-if="showChangelog" @click="showChangelog = false"
                                 class="text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
@@ -138,7 +138,7 @@ function toggleChangelog() {
                                 - prose-a:text-blue-500: improved link visibility
                                 - prose-img:rounded-lg: better image styling
                              -->
-                            <div v-else class="prose prose-slate dark:prose-invert max-w-none break-words 
+                            <div v-else class="prose prose-slate dark:prose-invert max-w-none wrap-break-word 
                                 prose-headings:font-bold prose-headings:text-slate-900 dark:prose-headings:text-slate-100
                                 prose-h1:text-2xl prose-h2:text-xl
                                 prose-pre:whitespace-pre-wrap prose-pre:bg-slate-100 dark:prose-pre:bg-slate-800/50 

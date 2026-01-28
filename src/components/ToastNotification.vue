@@ -11,7 +11,7 @@ const toastStore = useToastStore()
             leave-active-class="transition duration-200 ease-in" leave-from-class="transform translate-y-0 opacity-100"
             leave-to-class="transform translate-y-2 opacity-0">
             <div v-for="toast in toastStore.toasts" :key="toast.id"
-                class="pointer-events-auto px-4 py-3 rounded-lg shadow-lg border flex items-center gap-2 min-w-[200px]"
+                class="pointer-events-auto px-4 py-3 rounded-lg shadow-lg border flex items-center gap-2 min-w-50"
                 :class="{
                     'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200': toast.type === 'info',
                     'bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200': toast.type === 'success',

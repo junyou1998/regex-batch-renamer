@@ -1,4 +1,19 @@
 {
+    "common": {
+        "cancel": "キャンセル",
+        "done": "完了"
+    },
+    "settings": {
+        "title": "設定",
+        "defaults": "デフォルト",
+        "defaultUseRegex": "デフォルトで正規表現を使用",
+        "defaultUseRegexDesc": "新しいルール追加時に Regex モードを有効にする",
+        "processFilenameOnly": "ファイル名のみ処理",
+        "processFilenameOnlyDesc": "拡張子を無視し、ファイル名のみにルールを適用",
+        "appearance": "外観",
+        "language": "言語",
+        "theme": "テーマ"
+    },
     "app": {
         "title": "Regex Batch Renamer",
         "subtitle": "一括リネームツール",
@@ -9,7 +24,9 @@
         "copyTo": "コピー...",
         "processing": "処理中...",
         "updateAvailable": "新しいバージョンがあります",
-        "download": "ダウンロード"
+        "download": "ダウンロード",
+        "processFilenameOnly": "ファイル名のみ処理（拡張子を保持）",
+        "conflictDetected": "⚠️ ファイル名の競合が検出されました"
     },
     "dropZone": {
         "text": "ファイルをドラッグ",
@@ -32,7 +49,11 @@
         "replacementLabel": "置換",
         "supportSequence": "${n} 連番・開始番号対応",
         "placeholderReplacement": "置換後のテキストを入力...",
-        "empty": "ルールが追加されていません"
+        "empty": "ルールが追加されていません",
+        "variableHelper": "連番を挿入",
+        "variableWidth": "桁数 (0 はゼロ埋めなし)",
+        "variableStart": "開始番号",
+        "insert": "挿入"
     },
     "preview": {
         "title": "プレビュー ({n} ファイル)",

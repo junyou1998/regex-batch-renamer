@@ -1,4 +1,19 @@
 {
+    "common": {
+        "cancel": "取消",
+        "done": "完成"
+    },
+    "settings": {
+        "title": "设置",
+        "defaults": "默认值",
+        "defaultUseRegex": "默认使用正则表达式",
+        "defaultUseRegexDesc": "新增规则时默认启用 Regex 模式",
+        "processFilenameOnly": "仅处理文件名",
+        "processFilenameOnlyDesc": "忽略扩展名，只对文件名应用规则",
+        "appearance": "外观",
+        "language": "界面语言",
+        "theme": "主题"
+    },
     "app": {
         "title": "Regex Batch Renamer",
         "subtitle": "批量重命名工具",
@@ -9,7 +24,9 @@
         "copyTo": "复制到...",
         "processing": "处理中...",
         "updateAvailable": "发现新版本",
-        "download": "下载"
+        "download": "下载",
+        "processFilenameOnly": "仅处理文件名（保留扩展名）",
+        "conflictDetected": "⚠️ 存在文件名冲突"
     },
     "dropZone": {
         "text": "拖放文件至此 或",
@@ -32,7 +49,11 @@
         "replacementLabel": "替换为",
         "supportSequence": "支持 ${n} 序号与起始值",
         "placeholderReplacement": "输入替换后的文本...",
-        "empty": "尚未新增任何规则"
+        "empty": "尚未新增任何规则",
+        "variableHelper": "插入序号",
+        "variableWidth": "位数 (0 为不补零)",
+        "variableStart": "起始值",
+        "insert": "插入"
     },
     "preview": {
         "title": "预览变更 ({n} 文件)",
