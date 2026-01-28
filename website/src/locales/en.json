@@ -1,0 +1,43 @@
+{
+    "app": {
+        "title": "Regex Batch Renamer",
+        "subtitle": "Powerful Batch File Renaming Tool",
+        "description": "A modern and intuitive batch file renaming tool with regex support and real-time preview."
+    },
+    "hero": {
+        "headline": "Rename Files Faster Than Ever",
+        "subheadline": "Powerful regex-based batch renaming with real-time preview",
+        "cta": "Download Free",
+        "learnMore": "Learn More"
+    },
+    "features": {
+        "title": "Why Regex Batch Renamer?",
+        "subtitle": "Stop wasting time on manual file organization",
+        "batch": {
+            "title": "Tame the Chaos",
+            "description": "Turn hours of manual renaming into seconds. Use standard Regex or simple wildcards to organize thousands of files instantly."
+        },
+        "preview": {
+            "title": "Confidence in Every Click",
+            "description": "Live diff preview shows exactly what will change. Catch mistakes before they happen with our real-time comparison engine."
+        },
+        "opensource": {
+            "title": "Open Source & Privacy First",
+            "description": "100% Free, MIT Licensed, and Offline-capable. Your files never leave your device. No tracking, no paywalls."
+        }
+    },
+    "download": {
+        "title": "Download",
+        "description": "Available for macOS, Windows, and Linux",
+        "macos": "macOS (Apple Silicon)",
+        "macosIntel": "macOS (Intel)",
+        "windows": "Windows",
+        "linux": "Linux",
+        "viewAll": "View all releases on GitHub"
+    },
+    "footer": {
+        "copyright": "© 2024 Regex Batch Renamer. MIT License.",
+        "github": "GitHub",
+        "releases": "Releases"
+    }
+}
