@@ -48,6 +48,43 @@ function createWindow() {
     win?.webContents.send('main-process-message', (new Date).toLocaleString())
   })
 
+  // Window close protection
+  let isClosing = false
+  win.on('close', (e: any) => {
+    if (isClosing) return // Already handling close
+
+    e.preventDefault()
+    isClosing = true
+
+    // Async check for pending changes
+    win.webContents.executeJavaScript(
+      `window.__hasPendingChanges ? window.__hasPendingChanges() : false`
+    ).then((hasPendingChanges: boolean) => {
+      if (hasPendingChanges) {
+        dialog.showMessageBox(win, {
+          type: 'warning',
+          buttons: ['取消', '確定關閉'],
+          defaultId: 0,
+          cancelId: 0,
+          title: '確認關閉',
+          message: '您有尚未執行的更名變更',
+          detail: '關閉視窗將會遺失這些變更，確定要關閉嗎？'
+        }).then(({ response }: { response: number }) => {
+          if (response === 1) {
+            win.destroy()
+          } else {
+            isClosing = false
+          }
+        })
+      } else {
+        win.destroy()
+      }
+    }).catch(() => {
+      // On error, allow close
+      win.destroy()
+    })
+  })
+
   // Open DevTools only in development
   if (VITE_DEV_SERVER_URL) {
     win.webContents.openDevTools()

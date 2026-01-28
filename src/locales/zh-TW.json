@@ -1,4 +1,19 @@
 {
+    "common": {
+        "cancel": "取消",
+        "done": "完成"
+    },
+    "settings": {
+        "title": "設定",
+        "defaults": "預設值",
+        "defaultUseRegex": "預設使用正規表達式",
+        "defaultUseRegexDesc": "新增規則時預設啟用 Regex 模式",
+        "processFilenameOnly": "僅處理主檔名",
+        "processFilenameOnlyDesc": "忽略副檔名，只對主檔名套用規則",
+        "appearance": "外觀",
+        "language": "介面語言",
+        "theme": "主題"
+    },
     "app": {
         "title": "Regex Batch Renamer",
         "subtitle": "批次更名工具",
@@ -9,7 +24,9 @@
         "copyTo": "複製到...",
         "processing": "處理中...",
         "updateAvailable": "發現新版本",
-        "download": "下載"
+        "download": "下載",
+        "processFilenameOnly": "僅處理主檔名 (忽略副檔名)",
+        "conflictDetected": "偵測到檔名衝突，請檢查規則"
     },
     "dropZone": {
         "text": "拖放檔案至此 或",
@@ -31,6 +48,10 @@
         "placeholderPatternText": "輸入要尋找的文字...",
         "replacementLabel": "取代為",
         "supportSequence": "支援 ${n} 序號與起始值",
+        "variableHelper": "插入序號",
+        "variableWidth": "位數 (0 為不補零)",
+        "variableStart": "起始值",
+        "insert": "插入",
         "placeholderReplacement": "輸入取代後的文字...",
         "empty": "尚未新增任何規則"
     },

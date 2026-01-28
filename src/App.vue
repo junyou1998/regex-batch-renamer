@@ -1,24 +1,30 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
 import FileDropZone from './components/FileDropZone.vue'
 import OperationPipeline from './components/OperationPipeline.vue'
 import FilePreviewList from './components/FilePreviewList.vue'
-import ThemeSwitcher from './components/ThemeSwitcher.vue'
-import LanguageSwitcher from './components/LanguageSwitcher.vue'
 import ToastNotification from './components/ToastNotification.vue'
 import AboutModal from './components/AboutModal.vue'
+import SettingsModal from './components/SettingsModal.vue'
 import { useFileStore } from './stores/fileStore'
 import { useOperationStore } from './stores/operationStore'
+import { useSettingsStore } from './stores/settingsStore'
 
 // @ts-ignore
 import { version as currentVersion } from '../package.json'
 
 const fileStore = useFileStore()
 const operationStore = useOperationStore()
+const settingsStore = useSettingsStore()
 const isProcessing = ref(false)
 const isSidebarCollapsed = ref(false)
 const isMac = window.ipcRenderer?.platform === 'darwin'
 const showAbout = ref(false)
+const showSettings = ref(false)
+
+// v0.2.0 Features - now from settings store
+const processFilenameOnly = computed(() => settingsStore.processFilenameOnly)
+const hasConflicts = ref(false)
 
 // Update Check
 const updateAvailable = ref(false)
@@ -62,8 +68,18 @@ function openReleasePage() {
   }
 }
 
+
 onMounted(() => {
   checkForUpdates()
+
+    // Expose function for Electron main process to check pending changes
+    ; (window as any).__hasPendingChanges = () => {
+      return fileStore.files.some(f => f.originalName !== f.newName)
+    }
+})
+
+onUnmounted(() => {
+  delete (window as any).__hasPendingChanges
 })
 
 // Debounce helper
@@ -83,6 +99,9 @@ const updatePreviews = debounce(() => {
   // Create a snapshot of operations to avoid reactivity issues during loop
   const ops = operationStore.operations.filter(op => op.enabled)
 
+  const generatedNames = new Set<string>()
+  let conflictFound = false
+
   // Process each file
   // We can optimize this by only processing visible files if the list is huge, 
   // but for now let's process all since we need the full list for numbering potentially.
@@ -90,6 +109,16 @@ const updatePreviews = debounce(() => {
 
   fileStore.files.forEach((file, index) => {
     let currentName = file.originalName
+    let extension = ''
+
+    // v0.2.0 Extension Handling
+    if (processFilenameOnly.value) {
+      const lastDotIndex = currentName.lastIndexOf('.')
+      if (lastDotIndex > 0) { // Ensure it's not a dotfile or empty name
+        extension = currentName.substring(lastDotIndex)
+        currentName = currentName.substring(0, lastDotIndex)
+      }
+    }
 
     ops.forEach(op => {
       if (op.type === 'regex') {
@@ -136,16 +165,38 @@ const updatePreviews = debounce(() => {
       }
     })
 
+    // Reattach extension if needed
+    if (processFilenameOnly.value && extension) {
+      currentName += extension
+    }
+
+    // v0.2.0 Conflict Detection
+    // Simple check: duplicate names in the output list.
+    // Does NOT check against existing files on disk (yet), but prevents internal collisions.
+    if (generatedNames.has(currentName)) {
+      conflictFound = true
+      // We could mark specific file as conflicting here if store supports it
+      fileStore.updateFileStatus(file.id, 'error', 'Filename conflict detected')
+    } else {
+      generatedNames.add(currentName)
+      // Clear previous error if it was a conflict error (optional refinement)
+      if (file.status === 'error' && file.errorMessage === 'Filename conflict detected') {
+        fileStore.updateFileStatus(file.id, 'idle')
+      }
+    }
+
     // Only update if changed to avoid unnecessary reactivity triggers
     if (file.newName !== currentName) {
       fileStore.updateNewName(file.id, currentName)
     }
   })
+
+  hasConflicts.value = conflictFound
 }, 300) // 300ms debounce
 
 // Watch for changes in files and operations
 watch(
-  [() => fileStore.files, () => operationStore.operations],
+  [() => fileStore.files, () => operationStore.operations, processFilenameOnly],
   () => {
     console.log('Triggering updatePreviews due to change')
     updatePreviews()
@@ -253,7 +304,7 @@ async function handleCopyTo() {
           class="p-6 pt-14 border-b border-slate-200 dark:border-slate-800 flex items-start justify-between shrink-0">
           <div class="flex-1">
             <h1
-              class="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-500 dark:from-blue-400 dark:to-cyan-300 bg-clip-text text-transparent">
+              class="text-xl font-bold bg-linear-to-r from-blue-600 to-cyan-500 dark:from-blue-400 dark:to-cyan-300 bg-clip-text text-transparent">
               {{ $t('app.title') }}
             </h1>
             <p class="text-xs text-slate-500 dark:text-slate-500 mt-1">{{ $t('app.subtitle') }}</p>
@@ -267,8 +318,14 @@ async function handleCopyTo() {
                   d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </button>
-            <LanguageSwitcher />
-            <ThemeSwitcher />
+            <button @click="showSettings = true" :title="$t('settings.title')"
+              class="p-1.5 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                  d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
+                  clip-rule="evenodd" />
+              </svg>
+            </button>
             <button @click="isSidebarCollapsed = true" :title="$t('app.hideSidebar')"
               class="p-1.5 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
@@ -284,13 +341,23 @@ async function handleCopyTo() {
           <OperationPipeline />
         </div>
 
-        <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-100/80 dark:bg-slate-900/80">
+        <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-100/80 dark:bg-slate-900/80 space-y-3">
+          <!-- Conflict Warning -->
+          <div v-if="hasConflicts"
+            class="text-xs text-red-600 dark:text-red-400 font-medium flex items-center gap-1 animate-pulse">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                clip-rule="evenodd" />
+            </svg>
+            {{ $t('app.conflictDetected') }}
+          </div>
           <div class="grid grid-cols-2 gap-3">
-            <button @click="handleRename" :disabled="isProcessing || fileStore.files.length === 0"
-              class="px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-500 dark:to-blue-600 dark:hover:from-blue-600 dark:hover:to-blue-700 text-white rounded-lg font-medium transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
+            <button @click="handleRename" :disabled="isProcessing || fileStore.files.length === 0 || hasConflicts"
+              class="px-4 py-2.5 bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-500 dark:to-blue-600 dark:hover:from-blue-600 dark:hover:to-blue-700 text-white rounded-lg font-medium transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
               {{ isProcessing ? $t('app.processing') : $t('app.rename') }}
             </button>
-            <button @click="handleCopyTo" :disabled="isProcessing || fileStore.files.length === 0"
+            <button @click="handleCopyTo" :disabled="isProcessing || fileStore.files.length === 0 || hasConflicts"
               class="px-4 py-2.5 bg-slate-300 hover:bg-slate-400 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 rounded-lg font-medium transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
               {{ isProcessing ? $t('app.processing') : $t('app.copyTo') }}
             </button>
@@ -333,6 +400,7 @@ async function handleCopyTo() {
     </main>
     <ToastNotification />
     <AboutModal v-model="showAbout" />
+    <SettingsModal v-model="showSettings" />
   </div>
 </template>
 
