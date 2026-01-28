@@ -2,19 +2,21 @@
 
 **繁體中文** | [简体中文](README.zh-CN.md) | [English](README.en.md)
 
+🌐 **官方網站**: https://renamer.junyou.tw/
+
 一個強大且直觀的跨平台批次更名工具 (支援 Windows / macOS / Linux)。支援正規表達式 (Regex)、純文字取代以及流水號功能，讓繁瑣的檔案更名工作變得輕鬆簡單。
 
 <img src="public/icon.png" width="128" alt="App Icon" />
 
 ## ✨ 主要功能
 
--   **直觀操作**：支援拖曳檔案 (Drag & Drop) 與即時預覽更名結果。
--   **雙重模式**：
-    -   **Regex 模式**：支援完整的正規表達式語法，適合進階使用者。
-    -   **純文字模式**：自動處理跳脫字元，直觀取代 `[]`、`()` 等特殊符號。
--   **流水號功能**：使用 `${n}` 語法輕鬆插入遞增數字，並支援補零 (如 `${n:03}`)。
--   **現代化介面**：採用質感設計，並完整支援 macOS 淺色/深色模式 (可跟隨系統)。
--   **安全可靠**：執行前可完整預覽，並支援「複製到...」功能以保留原始檔案。
+- **直觀操作**：支援拖曳檔案 (Drag & Drop) 與即時預覽更名結果。
+- **雙重模式**：
+    - **Regex 模式**：支援完整的正規表達式語法，適合進階使用者。
+    - **純文字模式**：自動處理跳脫字元，直觀取代 `[]`、`()` 等特殊符號。
+- **流水號功能**：使用 `${n}` 語法輕鬆插入遞增數字，並支援補零 (如 `${n:03}`)。
+- **現代化介面**：採用質感設計，並完整支援 macOS 淺色/深色模式 (可跟隨系統)。
+- **安全可靠**：執行前可完整預覽，並支援「複製到...」功能以保留原始檔案。
 
 ## 📥 安裝說明
 
@@ -50,13 +52,13 @@ sudo xattr -r -d com.apple.quarantine /Applications/Regex\ Batch\ Renamer.app
 
 在「取代為」欄位中使用 `${n}` 來插入序號：
 
--   `${n}`：1, 2, 3...
--   `${n:03}`：001, 002, 003...
+- `${n}`：1, 2, 3...
+- `${n:03}`：001, 002, 003...
 
 ### 常用 Regex 範例
 
--   **刪除空白**：尋找 `\s+`，取代為 `(留空)`
--   **統一日期**：尋找 `(\d{4})(\d{2})(\d{2})`，取代為 `$1-$2-$3` (將 20231125 轉為 2023-11-25)
+- **刪除空白**：尋找 `\s+`，取代為 `(留空)`
+- **統一日期**：尋找 `(\d{4})(\d{2})(\d{2})`，取代為 `$1-$2-$3` (將 20231125 轉為 2023-11-25)
 
 _更多教學請點擊軟體介面中的「？」按鈕查看。_
 
@@ -64,12 +66,12 @@ _更多教學請點擊軟體介面中的「？」按鈕查看。_
 
 本專案使用以下現代化網頁技術構建：
 
--   **核心框架**：[Electron](https://www.electronjs.org/)
--   **前端框架**：[Vue 3](https://vuejs.org/) (Composition API)
--   **語言**：[TypeScript](https://www.typescriptlang.org/)
--   **樣式**：[Tailwind CSS](https://tailwindcss.com/)
--   **建置工具**：[Vite](https://vitejs.dev/)
--   **狀態管理**：[Pinia](https://pinia.vuejs.org/)
+- **核心框架**：[Electron](https://www.electronjs.org/)
+- **前端框架**：[Vue 3](https://vuejs.org/) (Composition API)
+- **語言**：[TypeScript](https://www.typescriptlang.org/)
+- **樣式**：[Tailwind CSS](https://tailwindcss.com/)
+- **建置工具**：[Vite](https://vitejs.dev/)
+- **狀態管理**：[Pinia](https://pinia.vuejs.org/)
 
 ## ☕ 贊助開發
 
