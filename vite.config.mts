@@ -2,10 +2,12 @@ import { defineConfig } from 'vite';
 import path from 'node:path';
 import electron from 'vite-plugin-electron/simple';
 import vue from '@vitejs/plugin-vue';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   plugins: [
     vue(),
+    tailwindcss(),
     electron({
       main: {
         // Use rollupOptions to output pure CJS
@@ -25,6 +27,7 @@ export default defineConfig({
         },
       },
       preload: {
+        input: path.join(__dirname, 'electron/preload.ts'),
         // Use rollupOptions to output pure CJS for preload
         vite: {
           build: {
