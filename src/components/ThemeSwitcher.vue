@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, nextTick } from 'vue'
 import { useThemeStore, type ThemeMode } from '../stores/themeStore'
 import { useI18n } from 'vue-i18n'
 
@@ -7,11 +7,97 @@ const themeStore = useThemeStore()
 const { t } = useI18n()
 
 // Cycle through themes: auto -> light -> dark -> auto
-function cycleTheme() {
+async function cycleTheme(event: MouseEvent) {
     const modes: ThemeMode[] = ['auto', 'light', 'dark']
     const currentIndex = modes.indexOf(themeStore.themeMode)
     const nextIndex = (currentIndex + 1) % modes.length
-    themeStore.setTheme(modes[nextIndex])
+    const nextTheme = modes[nextIndex]
+
+    const isAppearanceTransition = 'startViewTransition' in document
+        && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    if (!isAppearanceTransition) {
+        themeStore.setTheme(nextTheme)
+        return
+    }
+
+    const x = event.clientX
+    const y = event.clientY
+    const endRadius = Math.hypot(
+        Math.max(x, window.innerWidth - x),
+        Math.max(y, window.innerHeight - y)
+    )
+
+    const html = document.documentElement
+    const isDark = html.classList.contains('dark')
+    // Set data attribute for CSS to handle z-index if needed
+    html.setAttribute('data-vt-from', isDark ? 'dark' : 'light')
+
+    const transition = document.startViewTransition(async () => {
+        themeStore.setTheme(nextTheme)
+        await nextTick()
+    })
+
+    await transition.ready
+
+    // Generate a wavy polygon (flower/star shape)
+    // We use a polygon with many points to simulate a curve with waves
+    const createWavyPolygon = (radius: number, waveCount: number = 8, waveAmp: number = 0.08) => {
+        const points = []
+        const steps = 100 // Resolution of the shape
+        for (let i = 0; i < steps; i++) {
+            const angle = (i / steps) * 2 * Math.PI
+            // Radius changes based on sine wave to create "petals" or "waves"
+            // r = radius * (1 + amplitude * sin(angle * frequency))
+            const r = radius * (1 + waveAmp * Math.sin(angle * waveCount))
+            const px = x + r * Math.cos(angle)
+            const py = y + r * Math.sin(angle)
+            points.push(`${px.toFixed(1)}px ${py.toFixed(1)}px`)
+        }
+        return `polygon(${points.join(', ')})`
+    }
+
+    // Start with radius 0
+    const clipPathStart = createWavyPolygon(0)
+    // End with radius covering screen (plus buffer for the wave amplitude)
+    const clipPathEnd = createWavyPolygon(endRadius * 1.5)
+
+    // We can also rotate the waves by adding phase if we used path(), but for polygon we just expand.
+    // To make it look like "fabric" stretching, maybe we increase amplitude?
+
+    // We will animate from 0 to Full.
+    // NOTE: CSS clip-path polygon interpolation requires same number of points.
+
+    const expand = [clipPathStart, clipPathEnd]
+    // For collapse, we reverse
+    const collapse = [clipPathEnd, clipPathStart]
+
+    if (isDark) {
+        // Dark -> Light. Old (Dark) collapses.
+        document.documentElement.animate(
+            { clipPath: collapse },
+            {
+                duration: 600,
+                easing: 'ease-in-out',
+                pseudoElement: '::view-transition-old(root)'
+            }
+        )
+    } else {
+        // Light -> Dark. New (Dark) expands.
+        document.documentElement.animate(
+            { clipPath: expand },
+            {
+                duration: 600,
+                easing: 'ease-in-out',
+                pseudoElement: '::view-transition-new(root)'
+            }
+        )
+    }
+
+    // Cleanup
+    transition.finished.finally(() => {
+        html.removeAttribute('data-vt-from')
+    })
 }
 
 // Get tooltip based on current theme mode
