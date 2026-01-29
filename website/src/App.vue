@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t, locale } = useI18n()
@@ -12,6 +12,13 @@ const languages = [
 
 const currentLang = ref(locale.value)
 const showLangMenu = ref(false)
+const langMenuContainer = ref<HTMLElement | null>(null)
+
+function handleClickOutside(event: MouseEvent) {
+  if (showLangMenu.value && langMenuContainer.value && !langMenuContainer.value.contains(event.target as Node)) {
+    showLangMenu.value = false
+  }
+}
 
 function setLanguage(code: string) {
   locale.value = code
@@ -22,6 +29,7 @@ function setLanguage(code: string) {
 
 // Auto-detect language with persistence
 onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
   const savedLocale = localStorage.getItem('user-locale')
   if (savedLocale && languages.some(l => l.code === savedLocale)) {
     setLanguage(savedLocale)
@@ -36,6 +44,10 @@ onMounted(() => {
       setLanguage('en')
     }
   }
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
 })
 
 const currentLangInfo = computed(() => {
@@ -111,7 +123,7 @@ onMounted(async () => {
         </div>
 
         <!-- Language Switcher -->
-        <div class="relative">
+        <div class="relative" ref="langMenuContainer">
           <button @click="showLangMenu = !showLangMenu"
             class="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors text-sm font-medium text-slate-700 cursor-pointer">
             <span>{{ currentLangInfo.name }}</span>
@@ -172,7 +184,7 @@ onMounted(async () => {
               class="absolute -inset-4 bg-linear-to-r from-blue-500/20 to-cyan-500/20 rounded-3xl blur-3xl transform lg:scale-110">
             </div>
             <div
-              class="relative rounded-2xl shadow-2xl ring-1 ring-slate-900/5 lg:w-[140%] lg:max-w-none hover:scale-[1.02] transition-transform duration-500 overflow-hidden bg-slate-50">
+              class="relative rounded-sm md:rounded-lg lg:rounded-2xl shadow-2xl ring-1 ring-slate-900/5 lg:w-[140%] lg:max-w-none hover:scale-[1.02] transition-transform duration-500 overflow-hidden bg-slate-50">
               <img src="/screenshot.png" alt="Regex Batch Renamer Screenshot" class="w-full scale-[1.01]">
             </div>
           </div>
@@ -241,10 +253,10 @@ onMounted(async () => {
         <h2 class="text-3xl lg:text-4xl font-bold mb-4">{{ t('download.title') }}</h2>
         <p class="text-slate-400 mb-12 text-lg max-w-2xl mx-auto">{{ t('download.description') }}</p>
 
-        <div class="flex flex-wrap justify-center gap-4 max-w-5xl mx-auto">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-7xl mx-auto">
           <!-- macOS Universal -->
           <a v-if="downloadLinks.macUniversal" :href="downloadLinks.macUniversal"
-            class="group flex flex-col items-center gap-3 p-6 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 transition-all hover:-translate-y-1 hover:shadow-2xl cursor-pointer w-full sm:w-64">
+            class="group flex flex-col items-center gap-3 p-6 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 transition-all hover:-translate-y-1 hover:shadow-2xl cursor-pointer">
             <svg class="w-12 h-12 text-white group-hover:text-blue-400 transition-colors" viewBox="0 0 24 24"
               fill="currentColor">
               <path
@@ -259,7 +271,7 @@ onMounted(async () => {
 
           <!-- macOS Arm64 (Only show if no universal) -->
           <a v-if="!downloadLinks.macUniversal && downloadLinks.macArm" :href="downloadLinks.macArm"
-            class="group flex flex-col items-center gap-3 p-6 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 transition-all hover:-translate-y-1 hover:shadow-2xl cursor-pointer w-full sm:w-64">
+            class="group flex flex-col items-center gap-3 p-6 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 transition-all hover:-translate-y-1 hover:shadow-2xl cursor-pointer">
             <svg class="w-12 h-12 text-white group-hover:text-blue-400 transition-colors" viewBox="0 0 24 24"
               fill="currentColor">
               <path
@@ -274,7 +286,7 @@ onMounted(async () => {
 
           <!-- macOS Intel (Only show if no universal) -->
           <a v-if="!downloadLinks.macUniversal && downloadLinks.macIntel" :href="downloadLinks.macIntel"
-            class="group flex flex-col items-center gap-3 p-6 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 transition-all hover:-translate-y-1 hover:shadow-2xl cursor-pointer w-full sm:w-64">
+            class="group flex flex-col items-center gap-3 p-6 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 transition-all hover:-translate-y-1 hover:shadow-2xl cursor-pointer">
             <svg class="w-12 h-12 text-white group-hover:text-blue-400 transition-colors" viewBox="0 0 24 24"
               fill="currentColor">
               <path
@@ -289,7 +301,7 @@ onMounted(async () => {
 
           <!-- Windows -->
           <a v-if="downloadLinks.windows" :href="downloadLinks.windows"
-            class="group flex flex-col items-center gap-3 p-6 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 transition-all hover:-translate-y-1 hover:shadow-2xl cursor-pointer w-full sm:w-64">
+            class="group flex flex-col items-center gap-3 p-6 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 transition-all hover:-translate-y-1 hover:shadow-2xl cursor-pointer">
             <svg class="w-12 h-12 text-white group-hover:text-cyan-400 transition-colors" viewBox="0 0 24 24"
               fill="currentColor">
               <path d="M0,0H11.377V11.372H0ZM12.623,0H24V11.372H12.623ZM0,12.623H11.377V24H0Zm12.623,0H24V24H12.623" />
@@ -305,7 +317,7 @@ onMounted(async () => {
 
           <!-- Linux -->
           <a v-if="downloadLinks.linux" :href="downloadLinks.linux"
-            class="group flex flex-col items-center gap-3 p-6 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 transition-all hover:-translate-y-1 hover:shadow-2xl cursor-pointer w-full sm:w-64">
+            class="group flex flex-col items-center gap-3 p-6 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 transition-all hover:-translate-y-1 hover:shadow-2xl cursor-pointer">
             <svg class="w-12 h-12 text-white group-hover:text-yellow-400 transition-colors" viewBox="0 0 24 24"
               fill="currentColor">
               <path
@@ -359,7 +371,8 @@ onMounted(async () => {
             </svg>
             Buy me a coffee
           </a>
-          <span class="text-slate-600">Created by <span class="text-slate-400">JunYou</span></span>
+          <span class="text-slate-600">Created by <a href="https://github.com/junyou1998" target="_blank"
+              class="text-slate-400 hover:text-blue-400 transition-colors">JunYou</a></span>
         </div>
       </div>
     </footer>

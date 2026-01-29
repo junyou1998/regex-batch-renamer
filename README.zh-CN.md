@@ -1,6 +1,6 @@
 # Regex Batch Renamer
 
-[繁體中文](README.md) | **简体中文** | [English](README.en.md)
+[繁體中文](README.zh-TW.md) | **简体中文** | [English](README.md)
 
 🌐 **官方网站**: https://renamer.junyou.tw/
 
