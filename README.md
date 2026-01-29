@@ -4,9 +4,13 @@
 
 🌐 **Official Website**: https://renamer.junyou.tw/
 
+<img src="public/icon.png" align="left" width="128" style="margin-right: 24px; margin-bottom: 12px;" alt="App Icon" />
+
 A powerful and intuitive cross-platform batch file renaming tool (Windows / macOS / Linux). Supports Regular Expressions (Regex), plain text replacement, and sequential numbering, making tedious file renaming tasks easy and simple.
 
-<img src="public/icon.png" width="128" alt="App Icon" />
+<br clear="left"/>
+
+<img src="public/screenshot.png" alt="App Screenshot" width="800" />
 
 ## ✨ Key Features
 
