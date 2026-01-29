@@ -83,6 +83,37 @@ async function copyToClipboard(text: string) {
     toastStore.addToast(t('preview.copyFailed'), 'error')
   }
 }
+
+// Drag and Drop Reordering
+const draggedIndex = ref<number | null>(null)
+const dragOverIndex = ref<number | null>(null)
+
+function onDragStart(event: DragEvent, index: number) {
+  draggedIndex.value = index
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = 'move'
+    event.dataTransfer.dropEffect = 'move'
+    // Optional: Set a custom drag image or data if needed
+  }
+}
+
+function onDragEnter(event: DragEvent, index: number) {
+  if (draggedIndex.value !== null && draggedIndex.value !== index) {
+    dragOverIndex.value = index
+  }
+}
+
+function onDragEnd() {
+  draggedIndex.value = null
+  dragOverIndex.value = null
+}
+
+function onDrop(event: DragEvent, index: number) {
+  if (draggedIndex.value !== null && draggedIndex.value !== index) {
+    fileStore.reorderFiles(draggedIndex.value, index)
+  }
+  onDragEnd()
+}
 </script>
 
 <template>
@@ -116,13 +147,31 @@ async function copyToClipboard(text: string) {
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-200 dark:divide-slate-700/50">
-          <tr v-for="(file, index) in fileStore.files" :key="file.id" :class="[
-            'transition-colors group',
+          <tr v-for="(file, index) in fileStore.files" :key="file.id" 
+            draggable="true"
+            @dragstart="onDragStart($event, index)"
+            @dragenter="onDragEnter($event, index)"
+            @dragover.prevent
+            @drop="onDrop($event, index)"
+            @dragend="onDragEnd"
+            :class="[
+            'transition-colors group cursor-grab active:cursor-grabbing',
+            dragOverIndex === index ? 'border-t-2 border-blue-500' : '',
             index % 2 === 0
               ? 'bg-white dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-800/50'
-              : 'bg-slate-50 dark:bg-slate-800/30 hover:bg-slate-100 dark:hover:bg-slate-800/50'
+              : 'bg-slate-50 dark:bg-slate-800/30 hover:bg-slate-100 dark:hover:bg-slate-800/50',
+            draggedIndex === index ? 'opacity-50 bg-slate-200 dark:bg-slate-700' : ''
           ]">
-            <td class="px-4 py-2 text-xs text-slate-500 dark:text-slate-500 text-center font-mono">{{ index + 1 }}</td>
+            <td class="px-4 py-2 text-xs text-slate-500 dark:text-slate-500 text-center font-mono relative">
+              <div class="flex items-center justify-center">
+                <span class="group-hover:hidden">{{ index + 1 }}</span>
+                <span class="hidden group-hover:block text-slate-400 cursor-grab">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M7 2a2 2 0 10.001 4.001A2 2 0 007 2zm0 6a2 2 0 10.001 4.001A2 2 0 007 8zm0 6a2 2 0 10.001 4.001A2 2 0 007 14zm6-8a2 2 0 10-.001-4.001A2 2 0 0013 6zm0 2a2 2 0 10.001 4.001A2 2 0 0013 8zm0 6a2 2 0 10.001 4.001A2 2 0 0013 14z" />
+                  </svg>
+                </span>
+              </div>
+            </td>
             <td
               class="px-4 py-2 text-sm text-slate-600 dark:text-slate-400 relative max-w-0 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
               @click="copyToClipboard(file.originalName)"
