@@ -4,9 +4,13 @@
 
 🌐 **官方网站**: https://renamer.junyou.tw/
 
+<img src="public/icon.png" align="left" width="128" style="margin-right: 24px; margin-bottom: 12px;" alt="App Icon" />
+
 一个强大且直观的跨平台批量重命名工具 (支持 Windows / macOS / Linux)。支持正则表达式 (Regex)、纯文本替换以及流水号功能，让繁琐的文件重命名工作变得轻松简单。
 
-<img src="public/icon.png" width="128" alt="App Icon" />
+<br clear="left"/>
+
+<img src="public/screenshot.png" alt="App Screenshot" width="800" />
 
 ## ✨ 主要功能
 
