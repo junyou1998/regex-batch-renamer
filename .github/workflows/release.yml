@@ -6,7 +6,19 @@ on:
             - "v*"
 
 jobs:
+    cleanup:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+        steps:
+            - name: Cleanup existing release
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  gh release delete ${{ github.ref_name }} -y --cleanup-tag || true
+
     release:
+        needs: cleanup
         runs-on: ${{ matrix.os }}
 
         permissions:

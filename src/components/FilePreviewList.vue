@@ -97,7 +97,7 @@ function onDragStart(event: DragEvent, index: number) {
   }
 }
 
-function onDragEnter(event: DragEvent, index: number) {
+function onDragEnter(index: number) {
   if (draggedIndex.value !== null && draggedIndex.value !== index) {
     dragOverIndex.value = index
   }
@@ -108,7 +108,7 @@ function onDragEnd() {
   dragOverIndex.value = null
 }
 
-function onDrop(event: DragEvent, index: number) {
+function onDrop(index: number) {
   if (draggedIndex.value !== null && draggedIndex.value !== index) {
     fileStore.reorderFiles(draggedIndex.value, index)
   }
@@ -148,8 +148,8 @@ function onDrop(event: DragEvent, index: number) {
         </thead>
         <tbody class="divide-y divide-slate-200 dark:divide-slate-700/50">
           <tr v-for="(file, index) in fileStore.files" :key="file.id" draggable="true"
-            @dragstart="onDragStart($event, index)" @dragenter="onDragEnter($event, index)" @dragover.prevent
-            @drop="onDrop($event, index)" @dragend="onDragEnd" :class="[
+            @dragstart="onDragStart($event, index)" @dragenter="onDragEnter(index)" @dragover.prevent
+            @drop="onDrop(index)" @dragend="onDragEnd" :class="[
               'transition-colors group cursor-grab active:cursor-grabbing',
               dragOverIndex === index ? 'border-t-2 border-blue-500' : '',
               index % 2 === 0
