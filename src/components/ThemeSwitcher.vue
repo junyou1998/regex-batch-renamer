@@ -6,7 +6,7 @@ import { useI18n } from 'vue-i18n'
 const themeStore = useThemeStore()
 const { t } = useI18n()
 
-// Cycle through themes: auto -> light -> dark -> auto
+
 async function cycleTheme(event: MouseEvent) {
     const modes: ThemeMode[] = ['auto', 'light', 'dark']
     const currentIndex = modes.indexOf(themeStore.themeMode)
@@ -30,7 +30,7 @@ async function cycleTheme(event: MouseEvent) {
 
     const html = document.documentElement
     const isDark = html.classList.contains('dark')
-    // Set data attribute for CSS to handle z-index if needed
+
     html.setAttribute('data-vt-from', isDark ? 'dark' : 'light')
 
     const transition = document.startViewTransition(async () => {
@@ -40,15 +40,11 @@ async function cycleTheme(event: MouseEvent) {
 
     await transition.ready
 
-    // Generate a wavy polygon (flower/star shape)
-    // We use a polygon with many points to simulate a curve with waves
     const createWavyPolygon = (radius: number, waveCount: number = 8, waveAmp: number = 0.08) => {
         const points = []
-        const steps = 100 // Resolution of the shape
+        const steps = 100
         for (let i = 0; i < steps; i++) {
             const angle = (i / steps) * 2 * Math.PI
-            // Radius changes based on sine wave to create "petals" or "waves"
-            // r = radius * (1 + amplitude * sin(angle * frequency))
             const r = radius * (1 + waveAmp * Math.sin(angle * waveCount))
             const px = x + r * Math.cos(angle)
             const py = y + r * Math.sin(angle)
@@ -57,23 +53,18 @@ async function cycleTheme(event: MouseEvent) {
         return `polygon(${points.join(', ')})`
     }
 
-    // Start with radius 0
+
     const clipPathStart = createWavyPolygon(0)
-    // End with radius covering screen (plus buffer for the wave amplitude)
+
     const clipPathEnd = createWavyPolygon(endRadius * 1.5)
 
-    // We can also rotate the waves by adding phase if we used path(), but for polygon we just expand.
-    // To make it look like "fabric" stretching, maybe we increase amplitude?
 
-    // We will animate from 0 to Full.
-    // NOTE: CSS clip-path polygon interpolation requires same number of points.
 
     const expand = [clipPathStart, clipPathEnd]
-    // For collapse, we reverse
+
     const collapse = [clipPathEnd, clipPathStart]
 
     if (isDark) {
-        // Dark -> Light. Old (Dark) collapses.
         document.documentElement.animate(
             { clipPath: collapse },
             {
@@ -83,7 +74,6 @@ async function cycleTheme(event: MouseEvent) {
             }
         )
     } else {
-        // Light -> Dark. New (Dark) expands.
         document.documentElement.animate(
             { clipPath: expand },
             {
@@ -94,13 +84,13 @@ async function cycleTheme(event: MouseEvent) {
         )
     }
 
-    // Cleanup
+
     transition.finished.finally(() => {
         html.removeAttribute('data-vt-from')
     })
 }
 
-// Get tooltip based on current theme mode
+
 const themeTooltip = computed(() => {
     switch (themeStore.themeMode) {
         case 'auto': return t('theme.auto')

@@ -13,7 +13,7 @@ function onDrop(e: DragEvent) {
     const fileList = Array.from(files).map(file => ({
       id: uuidv4(),
       originalName: file.name,
-      path: file.path, // Electron exposes path
+      path: file.path,
       newName: file.name,
       status: 'pending' as const
     }))
@@ -32,10 +32,6 @@ function onDragLeave() {
 async function openFileDialog() {
   const paths = await window.ipcRenderer.selectFiles()
   if (paths && paths.length > 0) {
-    // We need to get the filename from the path since we don't have the File object directly from dialog
-    // Actually, for consistency, let's assume the main process returns paths and we parse them.
-    // But wait, the previous implementation returned paths.
-    // Let's parse the filename from the path in JS.
     const fileList = paths.map(path => {
       const name = path.split(/[/\\]/).pop() || path
       return {

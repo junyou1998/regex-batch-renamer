@@ -47,7 +47,7 @@ export const useSettingsStore = defineStore('settings', () => {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
     }
 
-    // Auto-save on any change
+
     watch([defaultUseRegex, processFilenameOnly, language, themeMode], () => {
         saveSettings()
     }, { deep: true })
@@ -76,12 +76,10 @@ export const useSettingsStore = defineStore('settings', () => {
     }
 
     return {
-        // State
         defaultUseRegex,
         processFilenameOnly,
         language,
         themeMode,
-        // Actions
         setDefaultUseRegex,
         setProcessFilenameOnly,
         setLanguage,

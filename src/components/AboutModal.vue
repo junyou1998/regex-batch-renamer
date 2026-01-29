@@ -38,7 +38,7 @@ async function handleChangelogClick(event: MouseEvent) {
     }
 }
 
-// Reset view when modal opens
+
 watch(() => props.modelValue, (newVal) => {
     if (newVal) {
         showChangelog.value = false
@@ -52,9 +52,9 @@ async function checkForUpdates() {
         if (!response.ok) return
 
         const data = await response.json()
-        const tagName = data.tag_name.replace(/^v/, '') // Remove 'v' prefix if present
+        const tagName = data.tag_name.replace(/^v/, '')
 
-        // Simple version comparison (assuming semver)
+
         if (tagName !== pkg.version) {
             hasUpdate.value = true
             latestVersion.value = tagName
@@ -65,7 +65,7 @@ async function checkForUpdates() {
 }
 
 async function fetchChangelog() {
-    if (changelogContent.value) return // Already fetched
+    if (changelogContent.value) return
 
     isLoading.value = true
     error.value = ''

@@ -14,7 +14,6 @@ export const useFileStore = defineStore('file', () => {
   const files = ref<FileItem[]>([])
 
   function addFiles(newFiles: FileItem[]) {
-    // Prevent duplicates based on path
     const existingPaths = new Set(files.value.map(f => f.path))
     const uniqueFiles = newFiles.filter(f => !existingPaths.has(f.path))
     files.value.push(...uniqueFiles)
