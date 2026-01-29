@@ -7,7 +7,7 @@
         "email": "junyou1998@gmail.com"
     },
     "private": true,
-    "version": "0.2.0",
+    "version": "0.2.1",
     "type": "module",
     "scripts": {
         "dev": "vite",
@@ -44,7 +44,7 @@
             "dist-electron/**/*"
         ],
         "directories": {
-            "output": "dist",
+            "output": "release",
             "buildResources": "public"
         },
         "mac": {
@@ -52,7 +52,8 @@
             "target": {
                 "target": "default",
                 "arch": [
-                    "universal"
+                    "x64",
+                    "arm64"
                 ]
             },
             "category": "public.app-category.utilities",
