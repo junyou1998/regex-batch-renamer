@@ -137,7 +137,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                             {{ $t('settings.title') }}
                         </h2>
                         <button @click="isOpen = false"
-                            class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                            class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
                                 fill="currentColor">
                                 <path fill-rule="evenodd"
@@ -213,7 +213,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                                 <div class="flex gap-2">
                                     <button v-for="option in themeOptions" :key="option.value"
                                         @click="handleThemeChange($event, option.value)" :class="[
-                                            'flex-1 px-3 py-2 text-sm font-medium rounded-lg border transition-all',
+                                            'flex-1 px-3 py-2 text-sm font-medium rounded-lg border transition-all cursor-pointer',
                                             settingsStore.themeMode === option.value
                                                 ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-500 text-blue-700 dark:text-blue-300'
                                                 : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-slate-400 dark:hover:border-slate-500'
@@ -229,7 +229,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                     <div
                         class="px-6 py-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
                         <button @click="isOpen = false"
-                            class="w-full px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+                            class="w-full px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm cursor-pointer">
                             {{ $t('common.done') }}
                         </button>
                     </div>

@@ -49,10 +49,12 @@
         },
         "mac": {
             "identity": null,
-            "target": [
-                "dmg",
-                "zip"
-            ],
+            "target": {
+                "target": "default",
+                "arch": [
+                    "universal"
+                ]
+            },
             "category": "public.app-category.utilities",
             "icon": "public/icon-mac.png"
         },
