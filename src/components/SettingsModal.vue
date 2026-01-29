@@ -50,6 +50,11 @@ function handleKeydown(e: KeyboardEvent) {
     }
 }
 
+function adjustZoom(delta: number) {
+    const newValue = settingsStore.zoomLevel + delta
+    settingsStore.setZoomLevel(newValue)
+}
+
 function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') {
 
     const isAppearanceTransition = 'startViewTransition' in document
@@ -221,6 +226,43 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                                         {{ $t(option.labelKey) }}
                                     </button>
                                 </div>
+                            </div>
+
+                            <!-- Zoom Level -->
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
+                                    {{ $t('settings.zoomLevel') }}
+                                </label>
+                                <div class="flex items-center gap-3">
+                                    <button @click="adjustZoom(-10)" :disabled="settingsStore.zoomLevel <= 80"
+                                        class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20"
+                                            fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                    <input type="range" v-model.number="settingsStore.zoomLevel" min="80" max="200"
+                                        step="10"
+                                        class="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                                    <button @click="adjustZoom(10)" :disabled="settingsStore.zoomLevel >= 200"
+                                        class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20"
+                                            fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                    <span
+                                        class="w-14 text-center text-sm font-medium text-slate-700 dark:text-slate-300">
+                                        {{ settingsStore.zoomLevel }}%
+                                    </span>
+                                </div>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">
+                                    {{ $t('settings.zoomLevelDesc') }}
+                                </p>
                             </div>
                         </div>
                     </div>
