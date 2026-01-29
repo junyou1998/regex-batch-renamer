@@ -98,7 +98,8 @@ onUnmounted(() => {
         <span class="w-1 h-5 bg-blue-500 rounded-full"></span>
         {{ $t('operations.title') }}
         <button @click="showHelp = true"
-          class="text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors" title="使用說明與 Regex 教學">
+          class="text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer"
+          title="使用說明與 Regex 教學">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd"
               d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z"
@@ -107,7 +108,7 @@ onUnmounted(() => {
         </button>
       </h2>
       <button @click="addRegexOperation"
-        class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500 rounded-lg transition-colors flex items-center gap-1 shadow-sm">
+        class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500 rounded-lg transition-colors flex items-center gap-1 shadow-sm cursor-pointer">
         <span>+</span> {{ $t('operations.add') }}
       </button>
     </div>
@@ -124,13 +125,13 @@ onUnmounted(() => {
           </div>
           <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <button @click="operationStore.moveOperation(op.id, 'up')"
-              class="p-1 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded hover:bg-slate-300 dark:hover:bg-slate-700"
+              class="p-1 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded hover:bg-slate-300 dark:hover:bg-slate-700 cursor-pointer"
               :title="$t('operations.moveUp')">↑</button>
             <button @click="operationStore.moveOperation(op.id, 'down')"
-              class="p-1 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded hover:bg-slate-300 dark:hover:bg-slate-700"
+              class="p-1 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white rounded hover:bg-slate-300 dark:hover:bg-slate-700 cursor-pointer"
               :title="$t('operations.moveDown')">↓</button>
             <button @click="operationStore.removeOperation(op.id)"
-              class="p-1 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 rounded hover:bg-red-100 dark:hover:bg-red-900/30 ml-1"
+              class="p-1 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 rounded hover:bg-red-100 dark:hover:bg-red-900/30 ml-1 cursor-pointer"
               :title="$t('operations.remove')">×</button>
           </div>
         </div>
@@ -153,7 +154,7 @@ onUnmounted(() => {
             <div class="text-xs text-slate-600 dark:text-slate-400 ml-1 flex justify-between items-center">
               <span>{{ $t('operations.replacementLabel') }}</span>
               <button @click="openHelper(op.id)"
-                class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium flex items-center gap-1">
+                class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium flex items-center gap-1 cursor-pointer">
                 <span>⚡ {{ $t('operations.variableHelper') }}</span>
               </button>
             </div>
@@ -187,7 +188,7 @@ onUnmounted(() => {
                 {{ $t('operations.variableHelper') }}
               </h3>
               <button @click="closeHelper"
-                class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd"
                     d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
@@ -217,11 +218,11 @@ onUnmounted(() => {
             <!-- Footer -->
             <div class="flex gap-3 pt-2">
               <button @click="closeHelper"
-                class="flex-1 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+                class="flex-1 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors cursor-pointer">
                 {{ $t('common.cancel') }}
               </button>
               <button @click="insertVariable"
-                class="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+                class="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm cursor-pointer">
                 {{ $t('operations.insert') }}
               </button>
             </div>

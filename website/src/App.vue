@@ -5,9 +5,9 @@ import { useI18n } from 'vue-i18n'
 const { t, locale } = useI18n()
 
 const languages = [
-  { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'zh-TW', name: '繁體中文', flag: '🇹🇼' },
-  { code: 'zh-CN', name: '简体中文', flag: '🇨🇳' }
+  { code: 'en', name: 'English' },
+  { code: 'zh-TW', name: '繁體中文' },
+  { code: 'zh-CN', name: '简体中文' }
 ] as const
 
 const currentLang = ref(locale.value)
@@ -45,6 +45,7 @@ const currentLangInfo = computed(() => {
 // Release URLs
 const latestVersion = ref('')
 const downloadLinks = ref({
+  macUniversal: '',
   macArm: '',
   macIntel: '',
   windows: '',
@@ -69,11 +70,24 @@ onMounted(async () => {
 
     const findAsset = (pattern: RegExp) => assets.find(a => pattern.test(a.name))?.browser_download_url
 
+
+    // Actually, universal usually has 'universal' in name if built with electron-builder default? 
+    // If not, electron-builder might just name it ${productName}-${version}.dmg if it's the only one.
+    // Let's look for 'universal' explicitly first.
+
+    // electron-builder defaults: 
+    // universal: ${productName}-${version}-universal.dmg
+    // arm64: ${productName}-${version}-arm64.dmg
+    // x64: ${productName}-${version}.dmg (sometimes?) or -x64.dmg
+
+    // Let's try to be robust.
+    const universal = findAsset(/universal\.dmg$/i)
     const macArm = findAsset(/arm64\.dmg$/i)
     const macIntel = findAsset(/x64\.dmg$/i)
     const windows = findAsset(/\.exe$/i)
     const linux = findAsset(/\.AppImage$/i)
 
+    if (universal) downloadLinks.value.macUniversal = universal
     if (macArm) downloadLinks.value.macArm = macArm
     if (macIntel) downloadLinks.value.macIntel = macIntel
     if (windows) downloadLinks.value.windows = windows
@@ -100,7 +114,6 @@ onMounted(async () => {
         <div class="relative">
           <button @click="showLangMenu = !showLangMenu"
             class="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors text-sm font-medium text-slate-700 cursor-pointer">
-            <span>{{ currentLangInfo.flag }}</span>
             <span>{{ currentLangInfo.name }}</span>
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -113,7 +126,6 @@ onMounted(async () => {
               'w-full px-4 py-2 text-left text-sm hover:bg-slate-100 transition-colors flex items-center gap-3 cursor-pointer',
               currentLang === lang.code ? 'text-blue-600 font-medium' : 'text-slate-700'
             ]">
-              <span>{{ lang.flag }}</span>
               <span>{{ lang.name }}</span>
             </button>
           </div>
@@ -159,8 +171,10 @@ onMounted(async () => {
             <div
               class="absolute -inset-4 bg-linear-to-r from-blue-500/20 to-cyan-500/20 rounded-3xl blur-3xl transform lg:scale-110">
             </div>
-            <img src="/screenshot.png" alt="Regex Batch Renamer Screenshot"
-              class="relative rounded-2xl shadow-2xl ring-1 ring-slate-900/5 lg:w-[140%] lg:max-w-none hover:scale-[1.02] transition-transform duration-500">
+            <div
+              class="relative rounded-2xl shadow-2xl ring-1 ring-slate-900/5 lg:w-[140%] lg:max-w-none hover:scale-[1.02] transition-transform duration-500 overflow-hidden bg-slate-50">
+              <img src="/screenshot.png" alt="Regex Batch Renamer Screenshot" class="w-full scale-[1.01]">
+            </div>
           </div>
         </div>
       </div>
@@ -228,8 +242,23 @@ onMounted(async () => {
         <p class="text-slate-400 mb-12 text-lg max-w-2xl mx-auto">{{ t('download.description') }}</p>
 
         <div class="flex flex-wrap justify-center gap-4 max-w-5xl mx-auto">
-          <!-- macOS Arm64 -->
-          <a v-if="downloadLinks.macArm" :href="downloadLinks.macArm"
+          <!-- macOS Universal -->
+          <a v-if="downloadLinks.macUniversal" :href="downloadLinks.macUniversal"
+            class="group flex flex-col items-center gap-3 p-6 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 transition-all hover:-translate-y-1 hover:shadow-2xl cursor-pointer w-full sm:w-64">
+            <svg class="w-12 h-12 text-white group-hover:text-blue-400 transition-colors" viewBox="0 0 24 24"
+              fill="currentColor">
+              <path
+                d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701" />
+            </svg>
+            <div class="text-center">
+              <div class="font-bold text-lg">{{ t('download.macos') }}</div>
+              <div class="text-xs text-slate-400 mt-1">Universal (Intel & Apple Silicon)</div>
+            </div>
+            <div class="mt-2 text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded">.dmg</div>
+          </a>
+
+          <!-- macOS Arm64 (Only show if no universal) -->
+          <a v-if="!downloadLinks.macUniversal && downloadLinks.macArm" :href="downloadLinks.macArm"
             class="group flex flex-col items-center gap-3 p-6 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 transition-all hover:-translate-y-1 hover:shadow-2xl cursor-pointer w-full sm:w-64">
             <svg class="w-12 h-12 text-white group-hover:text-blue-400 transition-colors" viewBox="0 0 24 24"
               fill="currentColor">
@@ -243,8 +272,8 @@ onMounted(async () => {
             <div class="mt-2 text-xs bg-blue-500/20 text-blue-300 px-2 py-1 rounded">.dmg</div>
           </a>
 
-          <!-- macOS Intel -->
-          <a v-if="downloadLinks.macIntel" :href="downloadLinks.macIntel"
+          <!-- macOS Intel (Only show if no universal) -->
+          <a v-if="!downloadLinks.macUniversal && downloadLinks.macIntel" :href="downloadLinks.macIntel"
             class="group flex flex-col items-center gap-3 p-6 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/10 transition-all hover:-translate-y-1 hover:shadow-2xl cursor-pointer w-full sm:w-64">
             <svg class="w-12 h-12 text-white group-hover:text-blue-400 transition-colors" viewBox="0 0 24 24"
               fill="currentColor">
