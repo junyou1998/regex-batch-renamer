@@ -23,18 +23,17 @@ function handleClickOutside(event: MouseEvent) {
 function setLanguage(code: string) {
   locale.value = code
   currentLang.value = code
-  localStorage.setItem('user-locale', code) // Persist preference
+  localStorage.setItem('user-locale', code)
   showLangMenu.value = false
 }
 
-// Auto-detect language with persistence
+
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
   const savedLocale = localStorage.getItem('user-locale')
   if (savedLocale && languages.some(l => l.code === savedLocale)) {
     setLanguage(savedLocale)
   } else {
-    // Improved detection logic
     const userLang = navigator.language
     if (userLang.includes('zh-TW') || userLang.includes('zh-HK') || userLang.includes('zh-MO')) {
       setLanguage('zh-TW')
@@ -54,7 +53,7 @@ const currentLangInfo = computed(() => {
   return languages.find(l => l.code === currentLang.value) ?? languages[0]
 })
 
-// Release URLs
+
 const latestVersion = ref('')
 const downloadLinks = ref({
   macUniversal: '',
@@ -74,25 +73,15 @@ onMounted(async () => {
     const data = await response.json()
     latestVersion.value = data.tag_name
 
-    // Update "all releases" link
     downloadLinks.value.all = data.html_url
 
-    // Find assets
+
     const assets = data.assets as Array<{ name: string; browser_download_url: string }>
 
     const findAsset = (pattern: RegExp) => assets.find(a => pattern.test(a.name))?.browser_download_url
 
 
-    // Actually, universal usually has 'universal' in name if built with electron-builder default? 
-    // If not, electron-builder might just name it ${productName}-${version}.dmg if it's the only one.
-    // Let's look for 'universal' explicitly first.
 
-    // electron-builder defaults: 
-    // universal: ${productName}-${version}-universal.dmg
-    // arm64: ${productName}-${version}-arm64.dmg
-    // x64: ${productName}-${version}.dmg (sometimes?) or -x64.dmg
-
-    // Let's try to be robust.
     const universal = findAsset(/universal\.dmg$/i)
     const macArm = findAsset(/arm64\.dmg$/i)
     const macIntel = findAsset(/x64\.dmg$/i) || assets.find(a => /\.dmg$/i.test(a.name) && !/arm64/i.test(a.name) && !/universal/i.test(a.name))?.browser_download_url

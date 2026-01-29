@@ -34,7 +34,7 @@ const themeOptions = [
     { value: 'dark', labelKey: 'theme.dark' }
 ] as const
 
-// Sync settings store with actual locale and theme
+
 watch(() => settingsStore.language, (newLang) => {
     locale.value = newLang
     localStorage.setItem('locale', newLang)
@@ -51,7 +51,7 @@ function handleKeydown(e: KeyboardEvent) {
 }
 
 function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') {
-    // Apply theme with animation
+
     const isAppearanceTransition = 'startViewTransition' in document
         && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
 

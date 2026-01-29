@@ -1,17 +1,15 @@
 export function generateDiffHtml(original: string, modified: string): string {
   if (!original || !modified) return modified || original || '';
-  
-  // Simple diff logic: 
-  // If strings are identical, return as is.
+
   if (original === modified) return original;
 
-  // Find common prefix
+
   let start = 0;
   while (start < original.length && start < modified.length && original[start] === modified[start]) {
     start++;
   }
 
-  // Find common suffix
+
   let endOriginal = original.length - 1;
   let endModified = modified.length - 1;
   while (endOriginal >= start && endModified >= start && original[endOriginal] === modified[endModified]) {

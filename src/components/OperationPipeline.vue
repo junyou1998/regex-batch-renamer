@@ -25,7 +25,7 @@ function addRegexOperation() {
   operationStore.addOperation('regex', { pattern: '', replacement: '', useRegex: settingsStore.defaultUseRegex })
 }
 
-// Variable Helper Modal Logic
+
 const activeHelperId = ref<string | null>(null)
 const helperWidth = ref(3)
 const helperStart = ref(1)

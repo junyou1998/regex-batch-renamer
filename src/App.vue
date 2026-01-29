@@ -22,11 +22,9 @@ const isMac = window.ipcRenderer?.platform === 'darwin'
 const showAbout = ref(false)
 const showSettings = ref(false)
 
-// v0.2.0 Features - now from settings store
 const processFilenameOnly = computed(() => settingsStore.processFilenameOnly)
 const hasConflicts = ref(false)
 
-// Update Check
 const updateAvailable = ref(false)
 const latestVersion = ref('')
 const releaseUrl = ref('')
@@ -75,8 +73,6 @@ function openExternal(url: string) {
 
 onMounted(() => {
   checkForUpdates()
-
-    // Expose function for Electron main process to check pending changes
     ; (window as any).__hasPendingChanges = () => {
       return fileStore.files.some(f => f.originalName !== f.newName)
     }
@@ -86,7 +82,6 @@ onUnmounted(() => {
   delete (window as any).__hasPendingChanges
 })
 
-// Debounce helper
 function debounce<T extends (...args: any[]) => any>(fn: T, delay: number) {
   let timeoutId: ReturnType<typeof setTimeout>
   return (...args: Parameters<T>) => {
@@ -95,30 +90,23 @@ function debounce<T extends (...args: any[]) => any>(fn: T, delay: number) {
   }
 }
 
-// Core Renaming Logic
 const updatePreviews = debounce(() => {
   console.log('Running updatePreviews', fileStore.files.length, operationStore.operations)
   if (fileStore.files.length === 0) return
 
-  // Create a snapshot of operations to avoid reactivity issues during loop
   const ops = operationStore.operations.filter(op => op.enabled)
 
   const generatedNames = new Set<string>()
   let conflictFound = false
 
-  // Process each file
-  // We can optimize this by only processing visible files if the list is huge, 
-  // but for now let's process all since we need the full list for numbering potentially.
-  // Actually, numbering is usually per-file index based on the current sort order.
-
   fileStore.files.forEach((file, index) => {
     let currentName = file.originalName
     let extension = ''
 
-    // v0.2.0 Extension Handling
+
     if (processFilenameOnly.value) {
       const lastDotIndex = currentName.lastIndexOf('.')
-      if (lastDotIndex > 0) { // Ensure it's not a dotfile or empty name
+      if (lastDotIndex > 0) {
         extension = currentName.substring(lastDotIndex)
         currentName = currentName.substring(0, lastDotIndex)
       }
@@ -131,26 +119,17 @@ const updatePreviews = debounce(() => {
           try {
             let regex: RegExp
             if (op.params.useRegex === false) {
-              // Escape special regex characters for plain text matching
               const escapedPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
               regex = new RegExp(escapedPattern, 'g')
             } else {
-              regex = new RegExp(pattern, 'g') // Global replace by default
+              regex = new RegExp(pattern, 'g')
             }
 
-            // Handle ${n} syntax
-            // We need to replace ${n} or ${n:03} with the actual number
-            // This needs to happen FOR EACH match if we want sequential numbering per match?
-            // Or usually it's per file?
-            // The user requirement: "流水號我原本是希望用在替換時 用類似＄等文字作為遞增數字的語法"
-            // usually in batch renamers, ${n} refers to the file's index in the list.
 
 
-            // Function to replace the numbering syntax in the replacement string
+
+
             const processReplacementString = (repStr: string) => {
-              // Supports ${n}, ${n:width}, or ${n:width:start}
-              // width: padding length (default 0, meaning no padding)
-              // start: starting number (default 1)
               return repStr.replace(/\$\{n(?::(\d+)(?::(\d+))?)?\}/g, (_match, width, start) => {
                 const padding = width ? parseInt(width, 10) : 0
                 const startNum = start !== undefined ? parseInt(start, 10) : 1
@@ -163,42 +142,36 @@ const updatePreviews = debounce(() => {
 
             currentName = currentName.replace(regex, finalReplacement)
           } catch (e) {
-            // Invalid regex, ignore
           }
         }
       }
     })
 
-    // Reattach extension if needed
+
     if (processFilenameOnly.value && extension) {
       currentName += extension
     }
 
-    // v0.2.0 Conflict Detection
-    // Simple check: duplicate names in the output list.
-    // Does NOT check against existing files on disk (yet), but prevents internal collisions.
+
     if (generatedNames.has(currentName)) {
       conflictFound = true
-      // We could mark specific file as conflicting here if store supports it
       fileStore.updateFileStatus(file.id, 'error', 'Filename conflict detected')
     } else {
       generatedNames.add(currentName)
-      // Clear previous error if it was a conflict error (optional refinement)
       if (file.status === 'error' && file.errorMessage === 'Filename conflict detected') {
         fileStore.updateFileStatus(file.id, 'idle')
       }
     }
 
-    // Only update if changed to avoid unnecessary reactivity triggers
+
     if (file.newName !== currentName) {
       fileStore.updateNewName(file.id, currentName)
     }
   })
 
   hasConflicts.value = conflictFound
-}, 300) // 300ms debounce
+}, 300)
 
-// Watch for changes in files and operations
 watch(
   [() => fileStore.files, () => operationStore.operations, processFilenameOnly],
   () => {
@@ -208,17 +181,14 @@ watch(
   { deep: true }
 )
 
-// Actions
+
 async function handleRename() {
   if (isProcessing.value) return
   isProcessing.value = true
 
   const filesToRename = fileStore.files.map(f => ({
     oldPath: f.path,
-    newPath: f.path.replace(f.originalName, f.newName) // Construct new full path
-    // Note: This assumes the file stays in the same directory.
-    // If we want to support moving, we need to handle directory changes.
-    // For now, simple rename in place.
+    newPath: f.path.replace(f.originalName, f.newName)
   }))
 
   const results = await window.ipcRenderer.renameFiles(filesToRename)
@@ -227,7 +197,6 @@ async function handleRename() {
     const file = fileStore.files.find(f => f.path === res.path)
     if (file) {
       if (res.success) {
-        // Update file state to reflect the rename
         const newPath = file.path.replace(file.originalName, file.newName)
         fileStore.updateFileAfterRename(file.id, newPath, file.newName)
       } else {
@@ -247,13 +216,6 @@ async function handleCopyTo() {
 
   isProcessing.value = true
 
-  // For Copy To, we need to construct the new path in the target directory
-  // We need to know the path separator (win32 vs posix). 
-  // Since we are in renderer, we can't use path module directly easily without polyfill.
-  // But we can assume '/' for now or handle both.
-  // Actually, we can send the targetDir and filenames to main process and let it handle joining.
-  // But our IPC expects full paths.
-  // Let's do a simple join.
   const separator = targetDir.includes('\\') ? '\\' : '/'
 
   const filesToCopy = fileStore.files.map(f => ({
@@ -267,8 +229,6 @@ async function handleCopyTo() {
     const file = fileStore.files.find(f => f.path === res.path)
     if (file) {
       if (res.success) {
-        // For Copy To, we mark as success but don't update the file state
-        // since the original file remains unchanged
         fileStore.updateFileStatus(file.id, 'success')
       } else {
         fileStore.updateFileStatus(file.id, 'error', res.error)

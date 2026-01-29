@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 
-export type OperationType = 'regex' | 'numbering' // We might merge numbering into regex/replace logic
+export type OperationType = 'regex' | 'numbering'
 
 export interface Operation {
   id: string
@@ -39,7 +39,7 @@ export const useOperationStore = defineStore('operation', () => {
     if (index === -1) return
 
     const newOperations = [...operations.value]
-    
+
     if (direction === 'up' && index > 0) {
       [newOperations[index], newOperations[index - 1]] = [newOperations[index - 1], newOperations[index]]
       operations.value = newOperations
