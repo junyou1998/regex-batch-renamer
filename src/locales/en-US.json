@@ -12,7 +12,9 @@
         "processFilenameOnlyDesc": "Ignore file extension, apply rules to filename only",
         "appearance": "Appearance",
         "language": "Language",
-        "theme": "Theme"
+        "theme": "Theme",
+        "zoomLevel": "Zoom Level",
+        "zoomLevelDesc": "Adjust app interface size (80% - 200%)"
     },
     "app": {
         "title": "Regex Batch Renamer",
@@ -53,7 +55,16 @@
         "variableStart": "Start From",
         "insert": "Insert",
         "placeholderReplacement": "Enter replacement text...",
-        "empty": "No rules added yet"
+        "empty": "No rules added yet",
+        "quickTemplates": "Quick Templates",
+        "template": {
+            "removeSpaces": "Remove Spaces",
+            "spacesToUnderscore": "Spaces to Underscore",
+            "addPrefix": "Add Prefix...",
+            "addSuffix": "Add Suffix...",
+            "enterPrefix": "Enter prefix text",
+            "enterSuffix": "Enter suffix text"
+        }
     },
     "preview": {
         "title": "Preview Changes ({n} files)",

@@ -12,7 +12,9 @@
         "processFilenameOnlyDesc": "忽略副檔名，只對主檔名套用規則",
         "appearance": "外觀",
         "language": "介面語言",
-        "theme": "主題"
+        "theme": "主題",
+        "zoomLevel": "介面縮放",
+        "zoomLevelDesc": "調整應用程式介面大小 (80% - 200%)"
     },
     "app": {
         "title": "Regex Batch Renamer",
@@ -53,7 +55,16 @@
         "variableStart": "起始值",
         "insert": "插入",
         "placeholderReplacement": "輸入取代後的文字...",
-        "empty": "尚未新增任何規則"
+        "empty": "尚未新增任何規則",
+        "quickTemplates": "快速範本",
+        "template": {
+            "removeSpaces": "移除空格",
+            "spacesToUnderscore": "空格轉底線",
+            "addPrefix": "加入前綴...",
+            "addSuffix": "加入後綴...",
+            "enterPrefix": "請輸入前綴文字",
+            "enterSuffix": "請輸入後綴文字"
+        }
     },
     "preview": {
         "title": "預覽變更 ({n} 檔案)",
