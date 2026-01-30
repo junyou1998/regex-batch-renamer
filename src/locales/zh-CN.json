@@ -28,7 +28,13 @@
         "updateAvailable": "发现新版本",
         "download": "下载",
         "processFilenameOnly": "仅处理文件名（保留扩展名）",
-        "conflictDetected": "⚠️ 存在文件名冲突"
+        "conflictDetected": "⚠️ 存在文件名冲突",
+        "renamedSuccess": "已完成重命名",
+        "undo": "撤销",
+        "undoSuccess": "已撤销重命名操作",
+        "targetFileExists": "目标文件已存在，已跳过",
+        "undoConflict": "撤销完成，但有 {n} 个文件因冲突而跳过",
+        "renameConflict": "已跳过 {n} 个冲突文件"
     },
     "dropZone": {
         "text": "拖放文件至此 或",
