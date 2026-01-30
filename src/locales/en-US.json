@@ -50,6 +50,7 @@
         "moveUp": "Move Up",
         "moveDown": "Move Down",
         "remove": "Remove",
+        "toggleEnable": "Enable/Disable Rule",
         "patternLabel": "Find",
         "useRegex": "Use Regex",
         "placeholderPatternRegex": "Enter Regex pattern...",

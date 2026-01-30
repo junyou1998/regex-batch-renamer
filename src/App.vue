@@ -256,6 +256,11 @@ async function handleRename() {
       label: t('app.undo'),
       onClick: handleUndo
     })
+
+    // Auto-disable all operations (layer visibility Concept)
+    operationStore.operations.forEach(op => {
+      op.enabled = false
+    })
   } else if (conflictCount > 0) {
     toastStore.addToast(t('app.renameConflict', { n: conflictCount }), 'error', 5000)
   }
