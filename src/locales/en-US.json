@@ -28,7 +28,13 @@
         "updateAvailable": "New Version Available",
         "download": "Download",
         "processFilenameOnly": "Apply to filename only (Ignore extension)",
-        "conflictDetected": "Conflict Detected: Duplicate filenames"
+        "conflictDetected": "Conflict Detected: Duplicate filenames",
+        "renamedSuccess": "Files renamed successfully",
+        "undo": "Undo",
+        "undoSuccess": "Undo operation successful",
+        "targetFileExists": "Target file exists, skipped",
+        "undoConflict": "Undo completed with {n} conflicts",
+        "renameConflict": "Skipped {n} files due to conflicts"
     },
     "dropZone": {
         "text": "Drag & Drop Files Here or",

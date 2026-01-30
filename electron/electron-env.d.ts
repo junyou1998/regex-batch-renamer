@@ -25,7 +25,7 @@ declare namespace NodeJS {
 interface Window {
   ipcRenderer: import('electron').IpcRenderer & {
     selectFiles: () => Promise<string[]>
-    renameFiles: (files: { oldPath: string, newPath: string }[]) => Promise<{ path: string, success: boolean, error?: string }[]>
+    renameFiles: (files: { oldPath: string, newPath: string }[], options?: { failOnExist?: boolean }) => Promise<{ path: string, success: boolean, error?: string }[]>
     copyRenameFiles: (files: { oldPath: string, newPath: string }[]) => Promise<{ path: string, success: boolean, error?: string }[]>
     selectDirectory: () => Promise<string | undefined>
     platform: string

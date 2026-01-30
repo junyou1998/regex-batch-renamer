@@ -61,6 +61,17 @@ export const useFileStore = defineStore('file', () => {
     files.value.splice(toIndex, 0, movedItem)
   }
 
+  // Undo History
+  const lastRenameBatch = ref<{ id: string; oldPath: string; newPath: string; originalName: string; newName: string }[]>([])
+
+  function setLastRenameBatch(batch: { id: string; oldPath: string; newPath: string; originalName: string; newName: string }[]) {
+    lastRenameBatch.value = batch
+  }
+
+  function clearUndo() {
+    lastRenameBatch.value = []
+  }
+
   return {
     files,
     addFiles,
@@ -69,6 +80,9 @@ export const useFileStore = defineStore('file', () => {
     updateFileStatus,
     updateNewName,
     updateFileAfterRename,
-    reorderFiles
+    reorderFiles,
+    lastRenameBatch,
+    setLastRenameBatch,
+    clearUndo
   }
 })

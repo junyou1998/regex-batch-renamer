@@ -5,12 +5,21 @@ import { useSettingsStore } from '../stores/settingsStore'
 import { useI18n } from 'vue-i18n'
 import HelpModal from './HelpModal.vue'
 
+const props = defineProps<{
+  canUndo?: boolean
+}>()
+
+const emit = defineEmits<{
+  (e: 'undo'): void
+}>()
+
 const operationStore = useOperationStore()
 const settingsStore = useSettingsStore()
 useI18n()
 const showHelp = ref(false)
 
 onMounted(() => {
+  // ... existing onMounted code ...
   const hasSeenHelp = localStorage.getItem('has-seen-help')
   if (!hasSeenHelp) {
     showHelp.value = true
@@ -28,6 +37,7 @@ function addRegexOperation() {
 }
 
 const activeHelperId = ref<string | null>(null)
+// ... existing helper logic ...
 const helperWidth = ref(3)
 const helperStart = ref(1)
 const inputRefs = ref<Record<string, HTMLInputElement>>({})
@@ -59,6 +69,7 @@ function handleKeydown(e: KeyboardEvent) {
 }
 
 function insertVariable() {
+  // ... existing variable logic ...
   if (!activeHelperId.value) return
 
   const op = operationStore.operations.find(o => o.id === activeHelperId.value)
@@ -107,6 +118,7 @@ function toggleTemplateDropdown() {
 }
 
 function applyTemplate(templateId: string) {
+  // ... existing template logic ...
   showTemplateDropdown.value = false
 
   switch (templateId) {
@@ -143,6 +155,7 @@ function closePrefixSuffixModal() {
 }
 
 function confirmPrefixSuffix() {
+  // ... existing prefix/suffix logic ...
   if (!prefixSuffixValue.value.trim()) {
     closePrefixSuffixModal()
     return
@@ -187,12 +200,23 @@ onUnmounted(() => {
       <h2 class="text-lg font-semibold text-slate-800 dark:text-white flex items-center gap-2">
         <span class="w-1 h-5 bg-blue-500 rounded-full"></span>
         {{ $t('operations.title') }}
+
         <button @click="showHelp = true"
           class="text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer"
           title="使用說明與 Regex 教學">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd"
               d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z"
+              clip-rule="evenodd" />
+          </svg>
+        </button>
+
+        <button v-if="canUndo" @click="emit('undo')"
+          class="text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer ml-1"
+          :title="$t('app.undo')">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd"
+              d="M7.707 3.293a1 1 0 010 1.414L5.414 7H11a7 7 0 017 7v2a1 1 0 11-2 0v-2a5 5 0 00-5-5H5.414l2.293 2.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
               clip-rule="evenodd" />
           </svg>
         </button>
