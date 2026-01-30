@@ -50,6 +50,7 @@
         "moveUp": "上へ移動",
         "moveDown": "下へ移動",
         "remove": "削除",
+        "toggleEnable": "ルールの有効/無効",
         "patternLabel": "検索",
         "useRegex": "正規表現を使用 (Regex)",
         "placeholderPatternRegex": "Regexパターンを入力...",
