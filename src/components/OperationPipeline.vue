@@ -5,7 +5,7 @@ import { useSettingsStore } from '../stores/settingsStore'
 import { useI18n } from 'vue-i18n'
 import HelpModal from './HelpModal.vue'
 
-const props = defineProps<{
+defineProps<{
   canUndo?: boolean
 }>()
 
