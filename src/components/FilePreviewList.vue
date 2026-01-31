@@ -126,7 +126,7 @@ function onDrop(event: DragEvent, index: number) {
           fileStore.files.length
       }) }}</h3>
       <button v-if="fileStore.files.length > 0" @click="fileStore.clearFiles"
-        class="text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 px-2 py-1 rounded hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors">
+        class="text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 px-2 py-1 rounded hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors cursor-pointer">
         {{ $t('preview.clear') }}
       </button>
     </div>
@@ -147,27 +147,23 @@ function onDrop(event: DragEvent, index: number) {
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-200 dark:divide-slate-700/50">
-          <tr v-for="(file, index) in fileStore.files" :key="file.id" 
-            draggable="true"
-            @dragstart="onDragStart($event, index)"
-            @dragenter="onDragEnter($event, index)"
-            @dragover.prevent
-            @drop="onDrop($event, index)"
-            @dragend="onDragEnd"
-            :class="[
-            'transition-colors group cursor-grab active:cursor-grabbing',
-            dragOverIndex === index ? 'border-t-2 border-blue-500' : '',
-            index % 2 === 0
-              ? 'bg-white dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-800/50'
-              : 'bg-slate-50 dark:bg-slate-800/30 hover:bg-slate-100 dark:hover:bg-slate-800/50',
-            draggedIndex === index ? 'opacity-50 bg-slate-200 dark:bg-slate-700' : ''
-          ]">
+          <tr v-for="(file, index) in fileStore.files" :key="file.id" draggable="true"
+            @dragstart="onDragStart($event, index)" @dragenter="onDragEnter($event, index)" @dragover.prevent
+            @drop="onDrop($event, index)" @dragend="onDragEnd" :class="[
+              'transition-colors group cursor-grab active:cursor-grabbing',
+              dragOverIndex === index ? 'border-t-2 border-blue-500' : '',
+              index % 2 === 0
+                ? 'bg-white dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-800/50'
+                : 'bg-slate-50 dark:bg-slate-800/30 hover:bg-slate-100 dark:hover:bg-slate-800/50',
+              draggedIndex === index ? 'opacity-50 bg-slate-200 dark:bg-slate-700' : ''
+            ]">
             <td class="px-4 py-2 text-xs text-slate-500 dark:text-slate-500 text-center font-mono relative">
               <div class="flex items-center justify-center">
                 <span class="group-hover:hidden">{{ index + 1 }}</span>
                 <span class="hidden group-hover:block text-slate-400 cursor-grab">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M7 2a2 2 0 10.001 4.001A2 2 0 007 2zm0 6a2 2 0 10.001 4.001A2 2 0 007 8zm0 6a2 2 0 10.001 4.001A2 2 0 007 14zm6-8a2 2 0 10-.001-4.001A2 2 0 0013 6zm0 2a2 2 0 10.001 4.001A2 2 0 0013 8zm0 6a2 2 0 10.001 4.001A2 2 0 0013 14z" />
+                    <path
+                      d="M7 2a2 2 0 10.001 4.001A2 2 0 007 2zm0 6a2 2 0 10.001 4.001A2 2 0 007 8zm0 6a2 2 0 10.001 4.001A2 2 0 007 14zm6-8a2 2 0 10-.001-4.001A2 2 0 0013 6zm0 2a2 2 0 10.001 4.001A2 2 0 0013 8zm0 6a2 2 0 10.001 4.001A2 2 0 0013 14z" />
                   </svg>
                 </span>
               </div>
@@ -202,7 +198,7 @@ function onDrop(event: DragEvent, index: number) {
             </td>
             <td class="px-4 py-2 text-center">
               <button @click="removeFile(file.id)"
-                class="text-slate-500 dark:text-slate-600 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                class="text-slate-500 dark:text-slate-600 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
                 :title="$t('preview.remove')">
                 ×
               </button>
