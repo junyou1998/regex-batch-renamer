@@ -83,7 +83,7 @@ onMounted(async () => {
     // Let's try to be robust.
     const universal = findAsset(/universal\.dmg$/i)
     const macArm = findAsset(/arm64\.dmg$/i)
-    const macIntel = findAsset(/x64\.dmg$/i)
+    const macIntel = findAsset(/x64\.dmg$/i) || assets.find(a => /\.dmg$/i.test(a.name) && !/arm64/i.test(a.name) && !/universal/i.test(a.name))?.browser_download_url
     const windows = findAsset(/\.exe$/i)
     const linux = findAsset(/\.AppImage$/i)
 
