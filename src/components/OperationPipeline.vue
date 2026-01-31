@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, onUnmounted } from 'vue'
 import { useOperationStore } from '../stores/operationStore'
+import { useSettingsStore } from '../stores/settingsStore'
 import HelpModal from './HelpModal.vue'
 
 const operationStore = useOperationStore()
+const settingsStore = useSettingsStore()
 const showHelp = ref(false)
 
 onMounted(() => {
@@ -15,17 +17,78 @@ onMounted(() => {
 
 watch(showHelp, (newValue) => {
   if (!newValue) {
-    // When closed, mark as seen
     localStorage.setItem('has-seen-help', 'true')
   }
 })
 
 function addRegexOperation() {
-  operationStore.addOperation('regex', { pattern: '', replacement: '', useRegex: true })
+  operationStore.addOperation('regex', { pattern: '', replacement: '', useRegex: settingsStore.defaultUseRegex })
 }
 
-// We are merging numbering into regex replacement, so we might not need a separate button for it,
-// but the user might still want a quick way to add a "Replace" block.
+// Variable Helper Modal Logic
+const activeHelperId = ref<string | null>(null)
+const helperWidth = ref(3)
+const helperStart = ref(1)
+const inputRefs = ref<Record<string, HTMLInputElement>>({})
+
+function setInputRef(el: any, id: string) {
+  if (el) inputRefs.value[id] = el
+}
+
+function openHelper(id: string) {
+  activeHelperId.value = id
+  helperWidth.value = 0
+  helperStart.value = 1
+}
+
+function closeHelper() {
+  activeHelperId.value = null
+}
+
+function handleKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape' && activeHelperId.value) {
+    closeHelper()
+  }
+}
+
+function insertVariable() {
+  if (!activeHelperId.value) return
+
+  const op = operationStore.operations.find(o => o.id === activeHelperId.value)
+  if (!op) return
+
+  const width = helperWidth.value
+  const start = helperStart.value
+
+  let varStr = '${n'
+  if (width > 0 || start !== 1) {
+    varStr += `:${width}`
+    if (start !== 1) {
+      varStr += `:${start}`
+    }
+  }
+  varStr += '}'
+
+  const inputEl = inputRefs.value[op.id]
+  if (inputEl) {
+    const startPos = inputEl.selectionStart || 0
+    const endPos = inputEl.selectionEnd || 0
+    const text = op.params.replacement || ''
+    op.params.replacement = text.substring(0, startPos) + varStr + text.substring(endPos)
+  } else {
+    op.params.replacement = (op.params.replacement || '') + varStr
+  }
+
+  closeHelper()
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeydown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown)
+})
 </script>
 
 <template>
@@ -87,12 +150,15 @@ function addRegexOperation() {
               class="w-full bg-white dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all font-mono" />
           </div>
           <div class="space-y-1">
-            <label class="text-xs text-slate-600 dark:text-slate-400 ml-1 flex justify-between">
+            <div class="text-xs text-slate-600 dark:text-slate-400 ml-1 flex justify-between items-center">
               <span>{{ $t('operations.replacementLabel') }}</span>
-              <span class="text-xs text-blue-600 dark:text-blue-400/80" title="使用 ${n} 代表從 1 開始的序號，${n:03} 代表補零至3位數">ℹ️
-                {{ $t('operations.supportSequence') }}</span>
-            </label>
-            <input v-model="op.params.replacement" type="text" :placeholder="$t('operations.placeholderReplacement')"
+              <button @click="openHelper(op.id)"
+                class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium flex items-center gap-1">
+                <span>⚡ {{ $t('operations.variableHelper') }}</span>
+              </button>
+            </div>
+            <input :ref="(el) => setInputRef(el, op.id)" v-model="op.params.replacement" type="text"
+              :placeholder="$t('operations.placeholderReplacement')"
               class="w-full bg-white dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all" />
           </div>
         </div>
@@ -103,6 +169,79 @@ function addRegexOperation() {
         {{ $t('operations.empty') }}
       </div>
     </div>
+
+    <!-- Variable Helper Modal -->
+    <Teleport to="body">
+      <Transition name="fade">
+        <div v-if="activeHelperId" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <!-- Backdrop -->
+          <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="closeHelper"></div>
+
+          <!-- Modal -->
+          <div
+            class="relative bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 w-full max-w-sm space-y-5 animate-in zoom-in-95 duration-200">
+            <!-- Header -->
+            <div class="flex items-center justify-between">
+              <h3 class="text-base font-semibold text-slate-800 dark:text-white flex items-center gap-2">
+                <span class="text-lg">⚡</span>
+                {{ $t('operations.variableHelper') }}
+              </h3>
+              <button @click="closeHelper"
+                class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clip-rule="evenodd" />
+                </svg>
+              </button>
+            </div>
+
+            <!-- Content -->
+            <div class="space-y-4">
+              <div class="space-y-2">
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                  {{ $t('operations.variableWidth') }}
+                </label>
+                <input type="number" v-model.number="helperWidth" min="0" max="10"
+                  class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50">
+              </div>
+              <div class="space-y-2">
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                  {{ $t('operations.variableStart') }}
+                </label>
+                <input type="number" v-model.number="helperStart" min="0"
+                  class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50">
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="flex gap-3 pt-2">
+              <button @click="closeHelper"
+                class="flex-1 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+                {{ $t('common.cancel') }}
+              </button>
+              <button @click="insertVariable"
+                class="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+                {{ $t('operations.insert') }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
     <HelpModal v-model="showHelp" />
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

@@ -138,11 +138,18 @@ async function copyToClipboard(text: string) {
               <div class="truncate" v-html="generateDiffHtml(file.originalName, file.newName)"></div>
             </td>
             <td class="px-4 py-2 text-center">
-              <!-- Only show status if there's a pending change or error -->
-              <span v-if="file.originalName !== file.newName && file.status === 'pending'"
-                class="text-slate-500 text-xs">⏳</span>
-              <span v-else-if="file.status === 'success'" class="text-green-400 text-xs">✓</span>
-              <span v-else-if="file.status === 'error'" class="text-red-400 text-xs" :title="file.errorMessage">✗</span>
+              <!-- Status Icons -->
+              <span v-if="file.status === 'success'" class="text-green-500 text-sm font-bold" title="成功">✓</span>
+              <span v-else-if="file.status === 'error'" class="text-red-500 text-sm font-bold"
+                :title="file.errorMessage">✗</span>
+              <span v-else-if="file.originalName !== file.newName"
+                class="inline-flex items-center justify-center w-5 h-5 text-amber-500" title="待處理">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                    clip-rule="evenodd" />
+                </svg>
+              </span>
             </td>
             <td class="px-4 py-2 text-center">
               <button @click="removeFile(file.id)"
@@ -164,7 +171,7 @@ async function copyToClipboard(text: string) {
     <!-- Teleported Tooltip -->
     <Teleport to="body">
       <div v-show="tooltip.visible" ref="tooltipRef"
-        class="fixed z-[9999] bg-slate-800 dark:bg-slate-900 text-slate-200 dark:text-slate-200 px-3 py-2 rounded-lg shadow-xl text-xs border border-slate-600 dark:border-slate-700 pointer-events-none whitespace-nowrap"
+        class="fixed z-9999 bg-slate-800 dark:bg-slate-900 text-slate-200 dark:text-slate-200 px-3 py-2 rounded-lg shadow-xl text-xs border border-slate-600 dark:border-slate-700 pointer-events-none whitespace-nowrap"
         :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }">
         <span v-if="!tooltip.isHtml">{{ tooltip.content }}</span>
         <span v-else v-html="tooltip.content"></span>

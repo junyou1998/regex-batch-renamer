@@ -1,4 +1,19 @@
 {
+    "common": {
+        "cancel": "Cancel",
+        "done": "Done"
+    },
+    "settings": {
+        "title": "Settings",
+        "defaults": "Defaults",
+        "defaultUseRegex": "Use Regex by Default",
+        "defaultUseRegexDesc": "Enable Regex mode when adding new rules",
+        "processFilenameOnly": "Process Filename Only",
+        "processFilenameOnlyDesc": "Ignore file extension, apply rules to filename only",
+        "appearance": "Appearance",
+        "language": "Language",
+        "theme": "Theme"
+    },
     "app": {
         "title": "Regex Batch Renamer",
         "subtitle": "Batch Renaming Tool",
@@ -9,7 +24,9 @@
         "copyTo": "Copy To...",
         "processing": "Processing...",
         "updateAvailable": "New Version Available",
-        "download": "Download"
+        "download": "Download",
+        "processFilenameOnly": "Apply to filename only (Ignore extension)",
+        "conflictDetected": "Conflict Detected: Duplicate filenames"
     },
     "dropZone": {
         "text": "Drag & Drop Files Here or",
@@ -31,6 +48,10 @@
         "placeholderPatternText": "Enter text to find...",
         "replacementLabel": "Replace with",
         "supportSequence": "Supports ${n} sequence with start",
+        "variableHelper": "Insert Sequence Number",
+        "variableWidth": "Width (0 for none)",
+        "variableStart": "Start From",
+        "insert": "Insert",
         "placeholderReplacement": "Enter replacement text...",
         "empty": "No rules added yet"
     },

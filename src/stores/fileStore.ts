@@ -6,7 +6,7 @@ export interface FileItem {
   originalName: string
   path: string
   newName: string
-  status: 'pending' | 'success' | 'error'
+  status: 'idle' | 'pending' | 'success' | 'error'
   errorMessage?: string
 }
 
