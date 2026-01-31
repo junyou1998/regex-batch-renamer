@@ -1,0 +1,43 @@
+{
+    "app": {
+        "title": "Regex Batch Renamer",
+        "subtitle": "强大的批量文件重命名工具",
+        "description": "现代化且直观的批量文件重命名工具，支持正则表达式与实时预览。"
+    },
+    "hero": {
+        "headline": "前所未有的快速重命名体验",
+        "subheadline": "基于正则表达式的强大批量重命名，配合实时预览",
+        "cta": "免费下载",
+        "learnMore": "了解更多"
+    },
+    "features": {
+        "title": "为什么选择 Regex Batch Renamer？",
+        "subtitle": "不再浪费时间在繁琐的手动文件整理上",
+        "batch": {
+            "title": "驾驭海量文件",
+            "description": "将数小时的手动工作缩减为几秒钟。通过强大的正则表达式，瞬间整理成千上万的照片与项目文件。"
+        },
+        "preview": {
+            "title": "所见即所得的安心感",
+            "description": "独家的实时比对引擎，在按下执行前精确预览每一个变更。确保路径正确，绝不出错。"
+        },
+        "opensource": {
+            "title": "开源・安全・隐私",
+            "description": "完全免费且开源 (MIT)。全离线运行，您的文件绝不需上传至云端。无追踪、无广告。"
+        }
+    },
+    "download": {
+        "title": "下载",
+        "description": "支持 macOS、Windows 及 Linux",
+        "macos": "macOS (Apple Silicon)",
+        "macosIntel": "macOS (Intel)",
+        "windows": "Windows",
+        "linux": "Linux",
+        "viewAll": "在 GitHub 查看所有版本"
+    },
+    "footer": {
+        "copyright": "© 2024 Regex Batch Renamer。MIT 许可。",
+        "github": "GitHub",
+        "releases": "发布页面"
+    }
+}

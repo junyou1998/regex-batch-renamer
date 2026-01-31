@@ -1,0 +1,43 @@
+{
+    "app": {
+        "title": "Regex Batch Renamer",
+        "subtitle": "強大的批次檔案更名工具",
+        "description": "現代化且直觀的批次檔案更名工具，支援正規表達式與即時預覽。"
+    },
+    "hero": {
+        "headline": "前所未有的快速更名體驗",
+        "subheadline": "基於正規表達式的強大批次更名，搭配即時預覽",
+        "cta": "免費下載",
+        "learnMore": "了解更多"
+    },
+    "features": {
+        "title": "為什麼選擇 Regex Batch Renamer？",
+        "subtitle": "不再浪費時間在繁瑣的手動檔案整理上",
+        "batch": {
+            "title": "駕馭繁雜檔案",
+            "description": "將數小時的手動工作縮減為幾秒鐘。透過強大的正規表達式，瞬間整理成千上萬的照片與專案檔案。"
+        },
+        "preview": {
+            "title": "所見即所得的安心感",
+            "description": "獨家的即時比對引擎，在按下執行前精確預覽每一個變更。確保路徑正確，絕不出錯。"
+        },
+        "opensource": {
+            "title": "開源・安全・隱私",
+            "description": "完全免費且開源 (MIT)。全離線執行，您的檔案絕不需上傳至雲端。無追蹤、無廣告。"
+        }
+    },
+    "download": {
+        "title": "下載",
+        "description": "支援 macOS、Windows 及 Linux",
+        "macos": "macOS (Apple Silicon)",
+        "macosIntel": "macOS (Intel)",
+        "windows": "Windows",
+        "linux": "Linux",
+        "viewAll": "在 GitHub 查看所有版本"
+    },
+    "footer": {
+        "copyright": "© 2024 Regex Batch Renamer。MIT 授權。",
+        "github": "GitHub",
+        "releases": "發布頁面"
+    }
+}
