@@ -50,6 +50,7 @@
         "moveUp": "上移",
         "moveDown": "下移",
         "remove": "移除",
+        "toggleEnable": "启用/停用规则",
         "patternLabel": "查找目标",
         "useRegex": "使用正则表达式 (Regex)",
         "placeholderPatternRegex": "输入 Regex 模式...",
