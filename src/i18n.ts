@@ -4,44 +4,44 @@ import zhCN from './locales/zh-CN.json'
 import enUS from './locales/en-US.json'
 import jaJP from './locales/ja-JP.json'
 
-// Type-define 'en-US' as the master schema for the resource
+
 type MessageSchema = typeof zhTW
 type Locale = 'zh-TW' | 'zh-CN' | 'en-US' | 'ja-JP'
 
 function getUserLocale(): Locale {
   const savedLocale = localStorage.getItem('locale')
   console.log('Saved Locale:', savedLocale)
-  
+
   if (savedLocale && ['zh-TW', 'zh-CN', 'en-US', 'ja-JP'].includes(savedLocale)) {
     return savedLocale as Locale
   }
 
   const systemLocale = navigator.language
   console.log('System Locale:', systemLocale)
-  
+
   const lowerLocale = systemLocale.toLowerCase()
-  
-  // Handle Traditional Chinese (Taiwan, Hong Kong, Macau)
+
+
   if (['zh-tw', 'zh-hk', 'zh-mo', 'zh-hant'].includes(lowerLocale) || lowerLocale.startsWith('zh-hant')) {
     return 'zh-TW'
   }
-  
-  // Handle Simplified Chinese (China, Singapore, etc.)
+
+
   if (lowerLocale.startsWith('zh')) {
     return 'zh-CN'
   }
 
-  // Handle Japanese
+
   if (lowerLocale.startsWith('ja')) {
     return 'ja-JP'
   }
 
-  // Default to English for all other languages
+
   return 'en-US'
 }
 
 const i18n = createI18n<[MessageSchema], Locale>({
-  legacy: false, // Use Composition API
+  legacy: false,
   locale: getUserLocale(),
   fallbackLocale: 'en-US',
   messages: {

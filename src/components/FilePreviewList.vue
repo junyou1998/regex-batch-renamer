@@ -9,7 +9,7 @@ const fileStore = useFileStore()
 const toastStore = useToastStore()
 const { t } = useI18n()
 
-// Tooltip State
+
 const tooltip = ref({
   visible: false,
   x: 0,
@@ -25,7 +25,7 @@ async function showTooltip(event: MouseEvent, content: string, isHtml = false) {
   const target = event.currentTarget as HTMLElement
   const rect = target.getBoundingClientRect()
 
-  // Initial position
+
   let x = rect.left
   let y = rect.bottom + 5
 
@@ -37,7 +37,7 @@ async function showTooltip(event: MouseEvent, content: string, isHtml = false) {
     isHtml
   }
 
-  // Adjust position after render to prevent overflow
+
   await nextTick()
 
   if (tooltipRef.value) {
@@ -45,22 +45,22 @@ async function showTooltip(event: MouseEvent, content: string, isHtml = false) {
     const viewportWidth = window.innerWidth
     const viewportHeight = window.innerHeight
 
-    // Check right edge
+
     if (x + tooltipRect.width > viewportWidth - 20) {
-      x = viewportWidth - tooltipRect.width - 20 // 20px padding from right
+      x = viewportWidth - tooltipRect.width - 20
     }
 
-    // Check bottom edge
+
     if (y + tooltipRect.height > viewportHeight - 20) {
-      y = rect.top - tooltipRect.height - 5 // Flip to top
+      y = rect.top - tooltipRect.height - 5
     }
 
-    // Ensure left edge doesn't go off screen
+
     if (x < 20) {
       x = 20
     }
 
-    // Update position
+
     tooltip.value.x = x
     tooltip.value.y = y
   }
@@ -84,7 +84,7 @@ async function copyToClipboard(text: string) {
   }
 }
 
-// Drag and Drop Reordering
+
 const draggedIndex = ref<number | null>(null)
 const dragOverIndex = ref<number | null>(null)
 
@@ -93,7 +93,6 @@ function onDragStart(event: DragEvent, index: number) {
   if (event.dataTransfer) {
     event.dataTransfer.effectAllowed = 'move'
     event.dataTransfer.dropEffect = 'move'
-    // Optional: Set a custom drag image or data if needed
   }
 }
 
