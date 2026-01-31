@@ -12,7 +12,9 @@
         "processFilenameOnlyDesc": "忽略扩展名，只对文件名应用规则",
         "appearance": "外观",
         "language": "界面语言",
-        "theme": "主题"
+        "theme": "主题",
+        "zoomLevel": "界面缩放",
+        "zoomLevelDesc": "调整应用程序界面大小 (80% - 200%)"
     },
     "app": {
         "title": "Regex Batch Renamer",
@@ -53,7 +55,16 @@
         "variableHelper": "插入序号",
         "variableWidth": "位数 (0 为不补零)",
         "variableStart": "起始值",
-        "insert": "插入"
+        "insert": "插入",
+        "quickTemplates": "快速模板",
+        "template": {
+            "removeSpaces": "移除空格",
+            "spacesToUnderscore": "空格转下划线",
+            "addPrefix": "添加前缀...",
+            "addSuffix": "添加后缀...",
+            "enterPrefix": "请输入前缀文本",
+            "enterSuffix": "请输入后缀文本"
+        }
     },
     "preview": {
         "title": "预览变更 ({n} 文件)",

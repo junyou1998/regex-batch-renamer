@@ -8,13 +8,15 @@ interface Settings {
     processFilenameOnly: boolean
     language: string
     themeMode: 'auto' | 'light' | 'dark'
+    zoomLevel: number
 }
 
 const defaultSettings: Settings = {
     defaultUseRegex: true,
     processFilenameOnly: true,
     language: 'zh-TW',
-    themeMode: 'auto'
+    themeMode: 'auto',
+    zoomLevel: 100
 }
 
 function loadSettings(): Settings {
@@ -36,21 +38,33 @@ export const useSettingsStore = defineStore('settings', () => {
     const processFilenameOnly = ref(initial.processFilenameOnly)
     const language = ref(initial.language)
     const themeMode = ref<'auto' | 'light' | 'dark'>(initial.themeMode)
+    const zoomLevel = ref(initial.zoomLevel)
 
     function saveSettings() {
         const settings: Settings = {
             defaultUseRegex: defaultUseRegex.value,
             processFilenameOnly: processFilenameOnly.value,
             language: language.value,
-            themeMode: themeMode.value
+            themeMode: themeMode.value,
+            zoomLevel: zoomLevel.value
         }
         localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
     }
 
+    function applyZoom() {
+        const factor = zoomLevel.value / 100
+        if (window.ipcRenderer?.setZoomFactor) {
+            window.ipcRenderer.setZoomFactor(factor)
+        }
+    }
 
-    watch([defaultUseRegex, processFilenameOnly, language, themeMode], () => {
+    watch([defaultUseRegex, processFilenameOnly, language, themeMode, zoomLevel], () => {
         saveSettings()
     }, { deep: true })
+
+    watch(zoomLevel, () => {
+        applyZoom()
+    })
 
     function setDefaultUseRegex(value: boolean) {
         defaultUseRegex.value = value
@@ -68,11 +82,20 @@ export const useSettingsStore = defineStore('settings', () => {
         themeMode.value = value
     }
 
+    function setZoomLevel(value: number) {
+        zoomLevel.value = Math.max(80, Math.min(200, value))
+    }
+
     function resetToDefaults() {
         defaultUseRegex.value = defaultSettings.defaultUseRegex
         processFilenameOnly.value = defaultSettings.processFilenameOnly
         language.value = defaultSettings.language
         themeMode.value = defaultSettings.themeMode
+        zoomLevel.value = defaultSettings.zoomLevel
+    }
+
+    function initZoom() {
+        applyZoom()
     }
 
     return {
@@ -80,10 +103,13 @@ export const useSettingsStore = defineStore('settings', () => {
         processFilenameOnly,
         language,
         themeMode,
+        zoomLevel,
         setDefaultUseRegex,
         setProcessFilenameOnly,
         setLanguage,
         setThemeMode,
-        resetToDefaults
+        setZoomLevel,
+        resetToDefaults,
+        initZoom
     }
 })

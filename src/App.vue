@@ -22,6 +22,13 @@ const isMac = window.ipcRenderer?.platform === 'darwin'
 const showAbout = ref(false)
 const showSettings = ref(false)
 
+const dragRegionHeight = computed(() => {
+  if (!isMac) return '0px'
+  const visualHeight = 32
+  const zoomFactor = settingsStore.zoomLevel / 100
+  return `${visualHeight / zoomFactor}px`
+})
+
 const processFilenameOnly = computed(() => settingsStore.processFilenameOnly)
 const hasConflicts = ref(false)
 
@@ -73,14 +80,33 @@ function openExternal(url: string) {
 
 onMounted(() => {
   checkForUpdates()
+  settingsStore.initZoom()
+  window.addEventListener('keydown', handleGlobalKeydown)
     ; (window as any).__hasPendingChanges = () => {
       return fileStore.files.some(f => f.originalName !== f.newName)
     }
 })
 
 onUnmounted(() => {
+  window.removeEventListener('keydown', handleGlobalKeydown)
   delete (window as any).__hasPendingChanges
 })
+
+function handleGlobalKeydown(e: KeyboardEvent) {
+  // Handle Zoom Shortcuts: Cmd/Ctrl + (+/-)
+  if (e.metaKey || e.ctrlKey) {
+    if (e.key === '=' || e.key === '+') {
+      e.preventDefault()
+      settingsStore.setZoomLevel(settingsStore.zoomLevel + 10)
+    } else if (e.key === '-') {
+      e.preventDefault()
+      settingsStore.setZoomLevel(settingsStore.zoomLevel - 10)
+    } else if (e.key === '0') {
+      e.preventDefault()
+      settingsStore.setZoomLevel(100)
+    }
+  }
+}
 
 function debounce<T extends (...args: any[]) => any>(fn: T, delay: number) {
   let timeoutId: ReturnType<typeof setTimeout>
@@ -244,7 +270,9 @@ async function handleCopyTo() {
   <div
     class="flex h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 font-sans selection:bg-blue-200 dark:selection:bg-blue-500/30 selection:text-blue-900 dark:selection:text-blue-200 transition-colors">
     <!-- Draggable Title Bar (macOS only) -->
-    <div v-if="isMac" class="drag-region fixed top-0 left-0 right-0 h-12 z-50"></div>
+    <div v-if="isMac" class="drag-region fixed top-0 left-0 right-0 z-50 transition-all duration-200"
+      :style="{ height: dragRegionHeight }">
+    </div>
 
     <!-- Sidebar -->
     <aside :class="[
@@ -334,10 +362,11 @@ async function handleCopyTo() {
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 flex flex-col bg-white dark:bg-slate-950">
+    <main class="flex-1 flex flex-col bg-white dark:bg-slate-950"
+      :style="{ paddingTop: isMac ? dragRegionHeight : '0px' }">
       <!-- Update Banner -->
       <div v-if="updateAvailable"
-        :class="['bg-blue-600 text-white px-4 py-3 flex items-center justify-between text-sm shadow-md z-40 shrink-0', isMac ? 'mt-12' : '']">
+        :class="['bg-blue-600 text-white px-4 py-3 flex items-center justify-between text-sm shadow-md z-40 shrink-0']">
         <div class="flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd"
@@ -361,7 +390,7 @@ async function handleCopyTo() {
         </div>
       </div>
 
-      <div class="flex-1 p-6 overflow-hidden">
+      <div class="flex-1 p-6 overflow-hidden min-w-0">
         <FilePreviewList />
       </div>
     </main>

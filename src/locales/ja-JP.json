@@ -12,7 +12,9 @@
         "processFilenameOnlyDesc": "拡張子を無視し、ファイル名のみにルールを適用",
         "appearance": "外観",
         "language": "言語",
-        "theme": "テーマ"
+        "theme": "テーマ",
+        "zoomLevel": "画面の拡大率",
+        "zoomLevelDesc": "アプリのインターフェースサイズを調整 (80% - 200%)"
     },
     "app": {
         "title": "Regex Batch Renamer",
@@ -53,7 +55,16 @@
         "variableHelper": "連番を挿入",
         "variableWidth": "桁数 (0 はゼロ埋めなし)",
         "variableStart": "開始番号",
-        "insert": "挿入"
+        "insert": "挿入",
+        "quickTemplates": "クイックテンプレート",
+        "template": {
+            "removeSpaces": "スペースを削除",
+            "spacesToUnderscore": "スペースをアンダースコアに",
+            "addPrefix": "プレフィックスを追加...",
+            "addSuffix": "サフィックスを追加...",
+            "enterPrefix": "プレフィックスを入力してください",
+            "enterSuffix": "サフィックスを入力してください"
+        }
     },
     "preview": {
         "title": "プレビュー ({n} ファイル)",
