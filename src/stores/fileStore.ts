@@ -56,6 +56,12 @@ export const useFileStore = defineStore('file', () => {
     }
   }
 
+  function reorderFiles(fromIndex: number, toIndex: number) {
+    if (fromIndex < 0 || fromIndex >= files.value.length || toIndex < 0 || toIndex >= files.value.length) return
+    const [movedItem] = files.value.splice(fromIndex, 1)
+    files.value.splice(toIndex, 0, movedItem)
+  }
+
   return {
     files,
     addFiles,
@@ -63,6 +69,7 @@ export const useFileStore = defineStore('file', () => {
     clearFiles,
     updateFileStatus,
     updateNewName,
-    updateFileAfterRename
+    updateFileAfterRename,
+    reorderFiles
   }
 })
