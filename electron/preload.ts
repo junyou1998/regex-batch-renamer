@@ -20,7 +20,7 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
   },
   // Custom APIs
   selectFiles: () => ipcRenderer.invoke('select-files'),
-  renameFiles: (files: { oldPath: string, newPath: string }[]) => ipcRenderer.invoke('rename-files', files),
+  renameFiles: (files: { oldPath: string, newPath: string }[], options?: { failOnExist?: boolean }) => ipcRenderer.invoke('rename-files', files, options),
   copyRenameFiles: (files: { oldPath: string, newPath: string }[]) => ipcRenderer.invoke('copy-rename-files', files),
   selectDirectory: () => ipcRenderer.invoke('select-directory'),
   platform: process.platform,

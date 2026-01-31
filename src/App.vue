@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import FileDropZone from './components/FileDropZone.vue'
 import OperationPipeline from './components/OperationPipeline.vue'
 import FilePreviewList from './components/FilePreviewList.vue'
@@ -9,6 +10,7 @@ import SettingsModal from './components/SettingsModal.vue'
 import { useFileStore } from './stores/fileStore'
 import { useOperationStore } from './stores/operationStore'
 import { useSettingsStore } from './stores/settingsStore'
+import { useToastStore } from './stores/toastStore'
 
 // @ts-ignore
 import { version as currentVersion } from '../package.json'
@@ -16,6 +18,8 @@ import { version as currentVersion } from '../package.json'
 const fileStore = useFileStore()
 const operationStore = useOperationStore()
 const settingsStore = useSettingsStore()
+const toastStore = useToastStore()
+const { t } = useI18n()
 const isProcessing = ref(false)
 const isSidebarCollapsed = ref(false)
 const isMac = window.ipcRenderer?.platform === 'darwin'
@@ -108,9 +112,10 @@ function handleGlobalKeydown(e: KeyboardEvent) {
   }
 }
 
-function debounce<T extends (...args: any[]) => any>(fn: T, delay: number) {
+
+function debounce(fn: Function, delay: number) {
   let timeoutId: ReturnType<typeof setTimeout>
-  return (...args: Parameters<T>) => {
+  return (...args: any[]) => {
     clearTimeout(timeoutId)
     timeoutId = setTimeout(() => fn(...args), delay)
   }
@@ -151,10 +156,6 @@ const updatePreviews = debounce(() => {
               regex = new RegExp(pattern, 'g')
             }
 
-
-
-
-
             const processReplacementString = (repStr: string) => {
               return repStr.replace(/\$\{n(?::(\d+)(?::(\d+))?)?\}/g, (_match, width, start) => {
                 const padding = width ? parseInt(width, 10) : 0
@@ -189,7 +190,6 @@ const updatePreviews = debounce(() => {
       }
     }
 
-
     if (file.newName !== currentName) {
       fileStore.updateNewName(file.id, currentName)
     }
@@ -207,7 +207,6 @@ watch(
   { deep: true }
 )
 
-
 async function handleRename() {
   if (isProcessing.value) return
   isProcessing.value = true
@@ -217,20 +216,102 @@ async function handleRename() {
     newPath: f.path.replace(f.originalName, f.newName)
   }))
 
-  const results = await window.ipcRenderer.renameFiles(filesToRename)
+  const results = await window.ipcRenderer.renameFiles(filesToRename, { failOnExist: true })
+  const successfulRenames: { id: string; oldPath: string; newPath: string; originalName: string; newName: string }[] = []
 
+  let conflictCount = 0
   results.forEach(res => {
     const file = fileStore.files.find(f => f.path === res.path)
     if (file) {
       if (res.success) {
         const newPath = file.path.replace(file.originalName, file.newName)
+        successfulRenames.push({
+          id: file.id,
+          oldPath: file.path,
+          newPath: newPath,
+          originalName: file.originalName,
+          newName: file.newName
+        })
         fileStore.updateFileAfterRename(file.id, newPath, file.newName)
       } else {
-        fileStore.updateFileStatus(file.id, 'error', res.error)
+        if (res.error === 'FILE_EXISTS') {
+          conflictCount++
+          fileStore.updateFileStatus(file.id, 'error', t('app.targetFileExists'))
+        } else {
+          fileStore.updateFileStatus(file.id, 'error', res.error)
+        }
       }
     }
   })
 
+  if (successfulRenames.length > 0) {
+    fileStore.setLastRenameBatch(successfulRenames)
+
+    const toastMessage = conflictCount > 0
+      ? t('app.renamedSuccess') + ` (${t('app.renameConflict', { n: conflictCount })})`
+      : t('app.renamedSuccess')
+
+    // Show toast with Undo action
+    toastStore.addToast(toastMessage, conflictCount > 0 ? 'warning' : 'success', 10000, {
+      label: t('app.undo'),
+      onClick: handleUndo
+    })
+  } else if (conflictCount > 0) {
+    toastStore.addToast(t('app.renameConflict', { n: conflictCount }), 'error', 5000)
+  }
+
+  isProcessing.value = false
+}
+
+async function handleUndo() {
+  if (isProcessing.value || fileStore.lastRenameBatch.length === 0) return
+  isProcessing.value = true
+
+  const undoBatch = fileStore.lastRenameBatch.map(item => ({
+    oldPath: item.newPath,
+    newPath: item.oldPath
+  }))
+
+  // Skip files that would conflict with current files (e.g. if a new file took the old name)
+  const currentPaths = new Set(fileStore.files.map(f => f.path))
+  const safeUndoBatch = undoBatch.filter(item => !currentPaths.has(item.newPath))
+  const skippedCount = undoBatch.length - safeUndoBatch.length
+
+  if (skippedCount > 0) {
+    fileStore.updateFileStatus(fileStore.lastRenameBatch[0].id, 'error', `Skipped ${skippedCount} files due to conflicts`) // Just a way to show error, maybe toast is better but this works for now
+  }
+
+  const results = await window.ipcRenderer.renameFiles(safeUndoBatch, { failOnExist: true })
+
+  let conflictCount = 0
+  results.forEach(res => {
+    // Find the original item in history to get original ID and names
+    // Note: res.path is the 'oldPath' of the undo operation, which is 'newPath' of the original rename
+    const historyItem = fileStore.lastRenameBatch.find(h => h.newPath === res.path)
+    if (historyItem) {
+      const file = fileStore.files.find(f => f.id === historyItem.id)
+      if (file) {
+        if (res.success) {
+          fileStore.updateFileAfterRename(file.id, historyItem.oldPath, historyItem.originalName)
+          fileStore.updateNewName(file.id, historyItem.originalName) // Reset newName preview to match
+        } else {
+          if (res.error === 'FILE_EXISTS') {
+            conflictCount++
+            fileStore.updateFileStatus(file.id, 'error', t('app.targetFileExists'))
+          } else {
+            fileStore.updateFileStatus(file.id, 'error', res.error)
+          }
+        }
+      }
+    }
+  })
+
+  if (conflictCount > 0) {
+    toastStore.addToast(t('app.undoConflict', { n: conflictCount }), 'error', 5000)
+  } else {
+    fileStore.clearUndo()
+    toastStore.addToast(t('app.undoSuccess'), 'success', 3000)
+  }
   isProcessing.value = false
 }
 
@@ -333,7 +414,7 @@ async function handleCopyTo() {
 
         <div class="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar min-h-0">
           <FileDropZone />
-          <OperationPipeline />
+          <OperationPipeline :canUndo="fileStore.lastRenameBatch.length > 0" @undo="handleUndo" />
         </div>
 
         <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-100/80 dark:bg-slate-900/80 space-y-3">
@@ -347,9 +428,10 @@ async function handleCopyTo() {
             </svg>
             {{ $t('app.conflictDetected') }}
           </div>
-          <div class="grid grid-cols-2 gap-3">
-            <button @click="handleRename" :disabled="isProcessing || fileStore.files.length === 0 || hasConflicts"
-              class="px-4 py-2.5 bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-500 dark:to-blue-600 dark:hover:from-blue-600 dark:hover:to-blue-700 text-white rounded-lg font-medium transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+          <div class="grid grid-cols-2 gap-3 mt-4">
+            <button @click="handleRename" :disabled="isProcessing || fileStore.files.length === 0"
+              class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2">
+              <span v-if="isProcessing" class="animate-spin">⏳</span>
               {{ isProcessing ? $t('app.processing') : $t('app.rename') }}
             </button>
             <button @click="handleCopyTo" :disabled="isProcessing || fileStore.files.length === 0 || hasConflicts"

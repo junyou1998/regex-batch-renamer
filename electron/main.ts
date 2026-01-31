@@ -124,10 +124,26 @@ app.whenReady().then(() => {
     return result.filePaths
   })
 
-  ipcMain.handle('rename-files', async (_event: any, files: any[]) => {
+  ipcMain.handle('rename-files', async (_event: any, files: any[], options?: { failOnExist?: boolean }) => {
     const results = []
     for (const file of files) {
+      // If paths are identical, it's a no-op success (avoids self-collision check)
+      if (file.oldPath === file.newPath) {
+        results.push({ path: file.oldPath, success: true })
+        continue
+      }
+
       try {
+        if (options?.failOnExist) {
+          try {
+            await fs.access(file.newPath)
+            // If access succeeds, file exists
+            throw new Error('FILE_EXISTS')
+          } catch (e: any) {
+            if (e.message === 'FILE_EXISTS') throw e
+            // If access fails (ENOENT), file does not exist, safe to proceed
+          }
+        }
         await fs.rename(file.oldPath, file.newPath)
         results.push({ path: file.oldPath, success: true })
       } catch (error: any) {

@@ -43,7 +43,12 @@ const toastStore = useToastStore()
                         </svg>
                     </span>
 
-                    <span class="text-sm font-medium">{{ toast.message }}</span>
+                    <span class="text-sm font-medium flex-1">{{ toast.message }}</span>
+
+                    <button v-if="toast.action" @click="toast.action.onClick"
+                        class="ml-2 px-3 py-1 text-xs font-bold text-white bg-slate-900/20 hover:bg-slate-900/30 dark:bg-white/10 dark:hover:bg-white/20 rounded transition-colors cursor-pointer whitespace-nowrap">
+                        {{ toast.action.label }}
+                    </button>
                 </div>
             </TransitionGroup>
         </div>

@@ -28,7 +28,13 @@
         "updateAvailable": "發現新版本",
         "download": "下載",
         "processFilenameOnly": "僅處理主檔名 (忽略副檔名)",
-        "conflictDetected": "偵測到檔名衝突，請檢查規則"
+        "conflictDetected": "偵測到檔名衝突，請檢查規則",
+        "renamedSuccess": "已完成重命名",
+        "undo": "復原",
+        "undoSuccess": "復原成功",
+        "targetFileExists": "目標檔案已存在，已略過",
+        "undoConflict": "復原完成，但有 {n} 個檔案因衝突而略過",
+        "renameConflict": "已略過 {n} 個衝突檔案"
     },
     "dropZone": {
         "text": "拖放檔案至此 或",

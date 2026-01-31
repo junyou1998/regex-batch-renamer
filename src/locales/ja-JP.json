@@ -28,7 +28,13 @@
         "updateAvailable": "新しいバージョンがあります",
         "download": "ダウンロード",
         "processFilenameOnly": "ファイル名のみ処理（拡張子を保持）",
-        "conflictDetected": "⚠️ ファイル名の競合が検出されました"
+        "conflictDetected": "⚠️ ファイル名の競合が検出されました",
+        "renamedSuccess": "リネームが完了しました",
+        "undo": "元に戻す",
+        "undoSuccess": "元に戻しました",
+        "targetFileExists": "ターゲットファイルが存在するためスキップしました",
+        "undoConflict": "元に戻しましたが、{n} 個のファイルが競合のためスキップされました",
+        "renameConflict": "競合により {n} ファイルをスキップしました"
     },
     "dropZone": {
         "text": "ファイルをドラッグ",
