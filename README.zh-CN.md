@@ -9,6 +9,7 @@
 一个强大且直观的跨平台批量重命名工具 (支持 Windows / macOS / Linux)。支持正则表达式 (Regex)、纯文本替换以及流水号功能，让繁琐的文件重命名工作变得轻松简单。
 
 <br clear="left"/>
+<br />
 
 <img src="public/screenshot.png" alt="App Screenshot" width="800" />
 

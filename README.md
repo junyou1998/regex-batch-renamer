@@ -9,6 +9,7 @@
 A powerful and intuitive cross-platform batch file renaming tool (Windows / macOS / Linux). Supports Regular Expressions (Regex), plain text replacement, and sequential numbering, making tedious file renaming tasks easy and simple.
 
 <br clear="left"/>
+<br />
 
 <img src="public/screenshot.png" alt="App Screenshot" width="800" />
 
