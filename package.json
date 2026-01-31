@@ -7,7 +7,7 @@
         "email": "junyou1998@gmail.com"
     },
     "private": true,
-    "version": "0.1.6",
+    "version": "0.1.7",
     "type": "module",
     "scripts": {
         "dev": "vite",
@@ -23,13 +23,12 @@
     },
     "devDependencies": {
         "@tailwindcss/typography": "^0.5.19",
+        "@tailwindcss/vite": "^4.1.18",
         "@types/uuid": "^10.0.0",
         "@vitejs/plugin-vue": "^5.0.4",
-        "autoprefixer": "^10.4.19",
         "electron": "^28.3.3",
         "electron-builder": "^24.13.3",
-        "postcss": "^8.4.38",
-        "tailwindcss": "^3.4.3",
+        "tailwindcss": "^4.1.18",
         "typescript": "^5.2.2",
         "vite": "^5.1.6",
         "vite-plugin-electron": "^0.28.4",
@@ -78,5 +77,11 @@
             "oneClick": false,
             "allowToChangeInstallationDirectory": true
         }
+    },
+    "pnpm": {
+        "onlyBuiltDependencies": [
+            "electron",
+            "esbuild"
+        ]
     }
 }
