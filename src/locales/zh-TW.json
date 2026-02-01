@@ -34,7 +34,8 @@
         "undoSuccess": "復原成功",
         "targetFileExists": "目標檔案已存在，已略過",
         "undoConflict": "復原完成，但有 {n} 個檔案因衝突而略過",
-        "renameConflict": "已略過 {n} 個衝突檔案"
+        "renameConflict": "已略過 {n} 個衝突檔案",
+        "invalidChar": "檔名包含非法字元"
     },
     "dropZone": {
         "text": "拖放檔案至此 或",
