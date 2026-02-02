@@ -437,7 +437,8 @@ onUnmounted(() => {
                 {{ prefixSuffixMode === 'prefix' ? $t('operations.template.enterPrefix') :
                   $t('operations.template.enterSuffix') }}
               </label>
-              <input type="text" v-model="prefixSuffixValue" @keydown.enter="confirmPrefixSuffix" autofocus
+              <input type="text" v-model="prefixSuffixValue"
+                @keydown.enter="!$event.isComposing && confirmPrefixSuffix()" autofocus
                 class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50" />
             </div>
 
