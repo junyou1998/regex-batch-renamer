@@ -37,6 +37,11 @@
         "renameConflict": "Skipped {n} files due to conflicts",
         "invalidChar": "Filename contains invalid characters"
     },
+    "badges": {
+        "prefix": "Prefix",
+        "suffix": "Suffix",
+        "sequence": "Sequence"
+    },
     "dropZone": {
         "text": "Drag & Drop Files Here or",
         "action": "Click to Select",
