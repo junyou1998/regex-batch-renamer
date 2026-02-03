@@ -37,6 +37,11 @@
         "renameConflict": "競合により {n} ファイルをスキップしました",
         "invalidChar": "ファイル名に不正な文字が含まれています"
     },
+    "badges": {
+        "prefix": "プレフィックス",
+        "suffix": "サフィックス",
+        "sequence": "シーケンス"
+    },
     "dropZone": {
         "text": "ファイルをドラッグ",
         "action": "または選択",

@@ -37,6 +37,11 @@
         "renameConflict": "已跳过 {n} 个冲突文件",
         "invalidChar": "文件名包含非法字符"
     },
+    "badges": {
+        "prefix": "前缀",
+        "suffix": "后缀",
+        "sequence": "序号"
+    },
     "dropZone": {
         "text": "拖放文件至此 或",
         "action": "点击选择",

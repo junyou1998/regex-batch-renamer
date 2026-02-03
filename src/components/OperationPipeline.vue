@@ -18,6 +18,39 @@ const settingsStore = useSettingsStore()
 useI18n()
 const showHelp = ref(false)
 
+// Badge logic
+interface Badge {
+  type: string
+  label: string
+  color: string
+}
+
+function getBadges(op: any): Badge[] {
+  const badges: Badge[] = []
+  if (op.type !== 'regex') return badges
+
+  const pattern = op.params.pattern || ''
+  const replacement = op.params.replacement || ''
+
+  // Prefix detection: Pattern is exactly '^'
+  if (pattern === '^') {
+    badges.push({ type: 'prefix', label: 'badges.prefix', color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300' })
+  }
+
+  // Suffix detection: Pattern is exactly '$'
+  if (pattern === '$') {
+    badges.push({ type: 'suffix', label: 'badges.suffix', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300' })
+  }
+
+  // Sequence detection: Replacement contains '${n'
+  if (replacement.includes('${n')) {
+    badges.push({ type: 'sequence', label: 'badges.sequence', color: 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300' })
+  }
+
+  return badges
+}
+
+
 onMounted(() => {
   // ... existing onMounted code ...
   const hasSeenHelp = localStorage.getItem('has-seen-help')
@@ -321,6 +354,14 @@ onUnmounted(() => {
               class="p-1 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 rounded hover:bg-red-100 dark:hover:bg-red-900/30 ml-1 cursor-pointer"
               :title="$t('operations.remove')">×</button>
           </div>
+        </div>
+
+        <!-- Smart Badges (New Row) -->
+        <div v-if="getBadges(op).length" class="flex gap-1 mb-3 -mt-1">
+          <span v-for="badge in getBadges(op)" :key="badge.type"
+            class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-md" :class="badge.color">
+            {{ $t(badge.label) }}
+          </span>
         </div>
 
         <div v-if="op.type === 'regex'" class="space-y-3">
