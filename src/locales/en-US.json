@@ -34,7 +34,8 @@
         "undoSuccess": "Undo operation successful",
         "targetFileExists": "Target file exists, skipped",
         "undoConflict": "Undo completed with {n} conflicts",
-        "renameConflict": "Skipped {n} files due to conflicts"
+        "renameConflict": "Skipped {n} files due to conflicts",
+        "invalidChar": "Filename contains invalid characters"
     },
     "dropZone": {
         "text": "Drag & Drop Files Here or",
