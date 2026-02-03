@@ -434,9 +434,13 @@ async function handleCopyTo() {
           </div>
         </div>
 
-        <div class="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar min-h-0">
-          <FileDropZone />
-          <OperationPipeline :canUndo="fileStore.lastRenameBatch.length > 0" @undo="handleUndo" />
+        <div class="flex-1 overflow-y-auto custom-scrollbar min-h-0">
+          <div class="p-4 pb-0">
+            <FileDropZone />
+          </div>
+          <div class="p-4 pt-6">
+            <OperationPipeline :canUndo="fileStore.lastRenameBatch.length > 0" @undo="handleUndo" />
+          </div>
         </div>
 
         <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-100/80 dark:bg-slate-900/80 space-y-3">
