@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch, onUnmounted } from 'vue'
+import { ref, onMounted, watch, onUnmounted, nextTick } from 'vue'
 import { useOperationStore } from '../stores/operationStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { useI18n } from 'vue-i18n'
@@ -32,8 +32,19 @@ watch(showHelp, (newValue) => {
   }
 })
 
+const operationsList = ref<HTMLElement | null>(null)
+
+function scrollToBottom() {
+  nextTick(() => {
+    if (operationsList.value && operationsList.value.lastElementChild) {
+      operationsList.value.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  })
+}
+
 function addRegexOperation() {
   operationStore.addOperation('regex', { pattern: '', replacement: '', useRegex: settingsStore.defaultUseRegex })
+  scrollToBottom()
 }
 
 const activeHelperId = ref<string | null>(null)
@@ -128,6 +139,7 @@ function applyTemplate(templateId: string) {
         replacement: '',
         useRegex: true
       })
+      scrollToBottom()
       break
     case 'spacesToUnderscore':
       operationStore.addOperation('regex', {
@@ -135,6 +147,7 @@ function applyTemplate(templateId: string) {
         replacement: '_',
         useRegex: true
       })
+      scrollToBottom()
       break
     case 'addPrefix':
       prefixSuffixMode.value = 'prefix'
@@ -196,7 +209,8 @@ onUnmounted(() => {
 
 <template>
   <div class="space-y-4">
-    <div class="flex items-center justify-between flex-wrap gap-2">
+    <div
+      class="flex items-center justify-between flex-wrap gap-2 sticky top-0 z-30 bg-slate-100/95 dark:bg-slate-900/95 backdrop-blur-md py-3 -mx-4 px-4 border-b border-slate-200/50 dark:border-slate-700/50 shadow-sm transition-all">
       <h2 class="text-lg font-semibold text-slate-800 dark:text-white flex items-center gap-2">
         <span class="w-1 h-5 bg-blue-500 rounded-full"></span>
         {{ $t('operations.title') }}
@@ -267,7 +281,7 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <div class="space-y-3">
+    <div class="space-y-3" ref="operationsList">
       <div v-for="(op, index) in operationStore.operations" :key="op.id"
         class="bg-slate-200/50 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-300 dark:border-slate-700 rounded-xl p-4 shadow-sm transition-all hover:border-slate-400 dark:hover:border-slate-600 group"
         :class="{ 'opacity-50 grayscale': !op.enabled }">
