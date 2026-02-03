@@ -34,7 +34,8 @@
         "undoSuccess": "元に戻しました",
         "targetFileExists": "ターゲットファイルが存在するためスキップしました",
         "undoConflict": "元に戻しましたが、{n} 個のファイルが競合のためスキップされました",
-        "renameConflict": "競合により {n} ファイルをスキップしました"
+        "renameConflict": "競合により {n} ファイルをスキップしました",
+        "invalidChar": "ファイル名に不正な文字が含まれています"
     },
     "dropZone": {
         "text": "ファイルをドラッグ",
