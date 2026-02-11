@@ -1,18 +1,23 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import { useSettingsStore } from '../stores/settingsStore'
+import type { Locale } from '../services/preferences'
 
 const { locale } = useI18n()
+const settingsStore = useSettingsStore()
 
 const availableLocales = [
     { code: 'zh-TW', name: '繁體中文' },
     { code: 'zh-CN', name: '简体中文' },
     { code: 'en-US', name: 'English' },
     { code: 'ja-JP', name: '日本語' }
-]
+ ] as const satisfies ReadonlyArray<{ code: Locale; name: string }>
 
-function switchLanguage(code: string) {
+type AvailableLocale = typeof availableLocales[number]['code']
+
+function switchLanguage(code: AvailableLocale) {
     locale.value = code
-    localStorage.setItem('locale', code)
+    settingsStore.setLanguage(code)
 }
 </script>
 

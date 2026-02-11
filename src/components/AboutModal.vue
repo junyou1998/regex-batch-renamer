@@ -4,6 +4,7 @@ import { marked } from 'marked'
 import pkg from '../../package.json'
 import { useToastStore } from '../stores/toastStore'
 import { useI18n } from 'vue-i18n'
+import { getLatestRelease } from '../services/updateService'
 
 const props = defineProps<{
     modelValue: boolean
@@ -48,12 +49,10 @@ watch(() => props.modelValue, (newVal) => {
 
 async function checkForUpdates() {
     try {
-        const response = await fetch('https://api.github.com/repos/junyou1998/regex-batch-renamer/releases/latest')
-        if (!response.ok) return
+        const release = await getLatestRelease()
+        if (!release) return
 
-        const data = await response.json()
-        const tagName = data.tag_name.replace(/^v/, '')
-
+        const tagName = release.tagName.replace(/^v/, '')
 
         if (tagName !== pkg.version) {
             hasUpdate.value = true
@@ -70,11 +69,10 @@ async function fetchChangelog() {
     isLoading.value = true
     error.value = ''
     try {
-        const response = await fetch('https://api.github.com/repos/junyou1998/regex-batch-renamer/releases/latest')
-        if (!response.ok) throw new Error('Failed to fetch')
+        const release = await getLatestRelease()
+        if (!release) throw new Error('Failed to fetch')
 
-        const data = await response.json()
-        changelogContent.value = await marked.parse(data.body, { breaks: true, gfm: true })
+        changelogContent.value = await marked.parse(release.body, { breaks: true, gfm: true })
     } catch (e) {
         error.value = 'Failed to load changelog'
         console.error(e)

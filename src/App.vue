@@ -11,14 +11,19 @@ import { useFileStore } from './stores/fileStore'
 import { useOperationStore } from './stores/operationStore'
 import { useSettingsStore } from './stores/settingsStore'
 import { useToastStore } from './stores/toastStore'
+import { useThemeStore } from './stores/themeStore'
 
 // @ts-ignore
 import { version as currentVersion } from '../package.json'
+import { getLatestRelease } from './services/updateService'
+import { generateRenamePreview } from './services/renameEngine'
+import { replaceBasename } from './utils/path'
 
 const fileStore = useFileStore()
 const operationStore = useOperationStore()
 const settingsStore = useSettingsStore()
 const toastStore = useToastStore()
+useThemeStore()
 const { t } = useI18n()
 const isProcessing = ref(false)
 const isSidebarCollapsed = ref(false)
@@ -55,17 +60,15 @@ function isNewerVersion(oldVer: string, newVer: string) {
 
 async function checkForUpdates() {
   try {
-    const res = await fetch('https://api.github.com/repos/junyou1998/regex-batch-renamer/releases/latest')
-    if (res.ok) {
-      const data = await res.json()
-      const tagName = data.tag_name
-      const remoteVersion = tagName.startsWith('v') ? tagName.slice(1) : tagName
+    const release = await getLatestRelease()
+    if (!release) return
 
-      if (isNewerVersion(currentVersion, remoteVersion)) {
-        updateAvailable.value = true
-        latestVersion.value = tagName
-        releaseUrl.value = data.html_url
-      }
+    const remoteVersion = release.tagName.startsWith('v') ? release.tagName.slice(1) : release.tagName
+
+    if (isNewerVersion(currentVersion, remoteVersion)) {
+      updateAvailable.value = true
+      latestVersion.value = release.tagName
+      releaseUrl.value = release.htmlUrl
     }
   } catch (e) {
     console.error('Update check failed:', e)
@@ -123,102 +126,50 @@ function debounce(fn: Function, delay: number) {
 }
 
 const updatePreviews = debounce(() => {
-  console.log('Running updatePreviews', fileStore.files.length, operationStore.operations)
-  if (fileStore.files.length === 0) return
+  if (fileStore.files.length === 0) {
+    hasConflicts.value = false
+    conflictMessage.value = ''
+    return
+  }
 
-  const ops = operationStore.operations.filter(op => op.enabled)
+  const preview = generateRenamePreview(
+    fileStore.files,
+    operationStore.operations,
+    { processFilenameOnly: processFilenameOnly.value }
+  )
 
-  const generatedNames = new Set<string>()
-  let conflictFound = false
-  let currentConflictMsg = ''
+  const fileMap = new Map(fileStore.files.map(file => [file.id, file]))
 
-  fileStore.files.forEach((file, index) => {
-    let currentName = file.originalName
-    let extension = ''
+  preview.items.forEach(item => {
+    const file = fileMap.get(item.id)
+    if (!file) return
 
-
-    if (processFilenameOnly.value) {
-      const lastDotIndex = currentName.lastIndexOf('.')
-      if (lastDotIndex > 0) {
-        extension = currentName.substring(lastDotIndex)
-        currentName = currentName.substring(0, lastDotIndex)
-      }
-    }
-
-    ops.forEach(op => {
-      if (op.type === 'regex') {
-        const { pattern, replacement } = op.params
-        if (pattern) {
-          try {
-            let regex: RegExp
-            if (op.params.useRegex === false) {
-              const escapedPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-              regex = new RegExp(escapedPattern, 'g')
-            } else {
-              regex = new RegExp(pattern, 'g')
-            }
-
-            const processReplacementString = (repStr: string) => {
-              return repStr.replace(/\$\{n(?::(\d+)(?::(\d+))?)?\}/g, (_match, width, start) => {
-                const padding = width ? parseInt(width, 10) : 0
-                const startNum = start !== undefined ? parseInt(start, 10) : 1
-                const currentNum = index + startNum
-                return currentNum.toString().padStart(padding, '0')
-              })
-            }
-
-            const finalReplacement = processReplacementString(replacement || '')
-
-            currentName = currentName.replace(regex, finalReplacement)
-          } catch (e) {
-          }
-        }
-      }
-    })
-
-
-    if (processFilenameOnly.value && extension) {
-      currentName += extension
-    }
-
-
-
-
-    // Invalid character check (Universal check for Win/Mac/Linux)
-    // Windows: <>:"/\|?*
-    // Mac/Linux: / and null bytes
-    // Combined: /[<>:"/\\|?*\x00-\x1F]/
-    const invalidCharsRegex = /[<>:"/\\|?*\x00-\x1F]/g
-    if (invalidCharsRegex.test(currentName)) {
-      conflictFound = true // Treat as conflict style error (blocker)
-      currentConflictMsg = t('app.invalidChar')
+    if (item.issue === 'invalid-char') {
       fileStore.updateFileStatus(file.id, 'error', t('app.invalidChar'))
-    } else if (generatedNames.has(currentName)) {
-      conflictFound = true
-      currentConflictMsg = t('app.conflictDetected')
+    } else if (item.issue === 'duplicate') {
       fileStore.updateFileStatus(file.id, 'error', t('app.conflictDetected'))
-
-    } else {
-      generatedNames.add(currentName)
-      // Clear error status if it was previously an error
-      if (file.status === 'error') {
-        fileStore.updateFileStatus(file.id, 'idle')
-      }
+    } else if (file.status === 'error') {
+      fileStore.updateFileStatus(file.id, 'idle')
     }
 
-    if (file.newName !== currentName) {
-      fileStore.updateNewName(file.id, currentName)
+    if (file.newName !== item.newName) {
+      fileStore.updateNewName(file.id, item.newName)
     }
   })
 
-  hasConflicts.value = conflictFound
-  conflictMessage.value = currentConflictMsg || t('app.conflictDetected')
+  hasConflicts.value = preview.hasConflicts
+  if (preview.hasConflicts) {
+    conflictMessage.value = preview.conflictReason === 'invalid-char'
+      ? t('app.invalidChar')
+      : t('app.conflictDetected')
+  } else {
+    conflictMessage.value = t('app.conflictDetected')
+  }
 }, 300)
 
 watch(
   [() => fileStore.files, () => operationStore.operations, processFilenameOnly],
   () => {
-    console.log('Triggering updatePreviews due to change')
     updatePreviews()
   },
   { deep: true }
@@ -230,7 +181,7 @@ async function handleRename() {
 
   const filesToRename = fileStore.files.map(f => ({
     oldPath: f.path,
-    newPath: f.path.replace(f.originalName, f.newName)
+    newPath: replaceBasename(f.path, f.newName)
   }))
 
   const results = await window.ipcRenderer.renameFiles(filesToRename, { failOnExist: true })
@@ -241,7 +192,7 @@ async function handleRename() {
     const file = fileStore.files.find(f => f.path === res.path)
     if (file) {
       if (res.success) {
-        const newPath = file.path.replace(file.originalName, file.newName)
+        const newPath = replaceBasename(file.path, file.newName)
         successfulRenames.push({
           id: file.id,
           oldPath: file.path,
