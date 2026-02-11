@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, watch } from 'vue'
 import { useSettingsStore } from '../stores/settingsStore'
-import { useThemeStore } from '../stores/themeStore'
 import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
@@ -13,7 +12,6 @@ const emit = defineEmits<{
 }>()
 
 const settingsStore = useSettingsStore()
-const themeStore = useThemeStore()
 const { locale } = useI18n()
 
 const isOpen = computed({
@@ -37,11 +35,6 @@ const themeOptions = [
 
 watch(() => settingsStore.language, (newLang) => {
     locale.value = newLang
-    localStorage.setItem('locale', newLang)
-}, { immediate: true })
-
-watch(() => settingsStore.themeMode, (newTheme) => {
-    themeStore.setTheme(newTheme)
 }, { immediate: true })
 
 function handleKeydown(e: KeyboardEvent) {

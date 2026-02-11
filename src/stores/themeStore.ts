@@ -1,11 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
+import { useSettingsStore } from './settingsStore'
 
 export type ThemeMode = 'auto' | 'light' | 'dark'
 
 export const useThemeStore = defineStore('theme', () => {
-  const savedTheme = localStorage.getItem('theme-mode') as ThemeMode | null
-  const themeMode = ref<ThemeMode>(savedTheme || 'auto')
+  const settingsStore = useSettingsStore()
+  const themeMode = computed<ThemeMode>(() => settingsStore.themeMode)
 
 
   const systemTheme = ref<'light' | 'dark'>('dark')
@@ -26,8 +27,7 @@ export const useThemeStore = defineStore('theme', () => {
 
 
   function setTheme(mode: ThemeMode) {
-    themeMode.value = mode
-    localStorage.setItem('theme-mode', mode)
+    settingsStore.setThemeMode(mode)
   }
 
 
