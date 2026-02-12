@@ -4,6 +4,9 @@ import { useOperationStore } from '../stores/operationStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { useI18n } from 'vue-i18n'
 import HelpModal from './HelpModal.vue'
+import PresetManager from './PresetManager.vue'
+import { savePreset, loadPresets, type Preset } from '../services/presetService'
+import { useToastStore } from '../stores/toastStore'
 
 defineProps<{
   canUndo?: boolean
@@ -13,9 +16,10 @@ const emit = defineEmits<{
   (e: 'undo'): void
 }>()
 
+const { t } = useI18n()
 const operationStore = useOperationStore()
 const settingsStore = useSettingsStore()
-useI18n()
+const toastStore = useToastStore()
 const showHelp = ref(false)
 
 // Badge logic
@@ -110,6 +114,9 @@ function handleKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape' && showPrefixSuffixModal.value) {
     closePrefixSuffixModal()
   }
+  if (e.key === 'Escape' && showSavePresetModal.value) {
+    closeSavePresetModal()
+  }
 }
 
 function insertVariable() {
@@ -156,10 +163,90 @@ const showTemplateDropdown = ref(false)
 const showPrefixSuffixModal = ref(false)
 const prefixSuffixMode = ref<'prefix' | 'suffix'>('prefix')
 const prefixSuffixValue = ref('')
+const showPresetManager = ref(false)
+const showSavePresetModal = ref(false)
+const savePresetName = ref('')
+const templateTriggerRef = ref<HTMLElement | null>(null)
+const dropdownStyle = ref<Record<string, string>>({})
+const savedTemplates = ref<Preset[]>([])
+
+function refreshSavedTemplates() {
+  savedTemplates.value = loadPresets()
+}
+
+function handleSaveTemplate() {
+  showTemplateDropdown.value = false
+  if (operationStore.operations.length === 0) return
+  savePresetName.value = ''
+  showSavePresetModal.value = true
+}
+
+function confirmSavePreset() {
+  const name = savePresetName.value.trim()
+  if (!name) return
+  const snapshot = operationStore.getSnapshot()
+  savePreset(name, snapshot.map(op => ({ ...op, enabled: true })))
+  toastStore.addToast(t('templates.saveSuccess', { name }), 'success')
+  closeSavePresetModal()
+}
+
+function closeSavePresetModal() {
+  showSavePresetModal.value = false
+  savePresetName.value = ''
+}
+
+function loadSavedTemplate(preset: Preset) {
+  showTemplateDropdown.value = false
+  operationStore.loadFromPreset(preset.operations)
+  toastStore.addToast(t('templates.loadSuccess', { name: preset.name }), 'success')
+}
+
+function handlePresetLoaded(name: string) {
+  toastStore.addToast(t('templates.loadSuccess', { name }), 'success')
+}
+
+function openManageTemplates() {
+  showTemplateDropdown.value = false
+  showPresetManager.value = true
+}
+
+function updateDropdownPosition() {
+  if (!templateTriggerRef.value) return
+  const rect = templateTriggerRef.value.getBoundingClientRect()
+  const gap = 4
+  const padding = 12
+  const top = rect.bottom + gap
+  const maxH = Math.max(120, window.innerHeight - top - padding)
+  dropdownStyle.value = {
+    top: `${top}px`,
+    left: `${rect.left}px`,
+    maxHeight: `${maxH}px`,
+  }
+}
+
+function onResizeOrScroll() {
+  if (showTemplateDropdown.value) updateDropdownPosition()
+}
 
 function toggleTemplateDropdown() {
+  if (!showTemplateDropdown.value) {
+    refreshSavedTemplates()
+  }
   showTemplateDropdown.value = !showTemplateDropdown.value
+  if (showTemplateDropdown.value) {
+    nextTick(() => updateDropdownPosition())
+  }
 }
+
+watch(showTemplateDropdown, (open) => {
+  if (open) {
+    window.addEventListener('resize', onResizeOrScroll)
+    window.addEventListener('scroll', onResizeOrScroll, true)
+  } else {
+    window.removeEventListener('resize', onResizeOrScroll)
+    window.removeEventListener('scroll', onResizeOrScroll, true)
+  }
+})
 
 function applyTemplate(templateId: string) {
   // ... existing template logic ...
@@ -226,7 +313,7 @@ function confirmPrefixSuffix() {
 
 function handleClickOutside(event: MouseEvent) {
   const target = event.target as HTMLElement
-  if (!target.closest('.template-dropdown-container')) {
+  if (!target.closest('.template-dropdown-container') && !target.closest('.template-dropdown-portal')) {
     showTemplateDropdown.value = false
   }
 }
@@ -237,6 +324,8 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
+  window.removeEventListener('resize', onResizeOrScroll)
+  window.removeEventListener('scroll', onResizeOrScroll, true)
 })
 </script>
 
@@ -269,9 +358,9 @@ onUnmounted(() => {
         </button>
       </h2>
       <div class="flex items-center gap-2">
-        <!-- Quick Templates Dropdown -->
+        <!-- Templates Dropdown (built-in + custom) -->
         <div class="relative template-dropdown-container">
-          <button @click.stop="toggleTemplateDropdown"
+          <button ref="templateTriggerRef" @click.stop="toggleTemplateDropdown"
             class="px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg transition-colors flex items-center gap-1 cursor-pointer">
             <span>⚡</span>
             {{ $t('operations.quickTemplates') }}
@@ -281,11 +370,20 @@ onUnmounted(() => {
                 clip-rule="evenodd" />
             </svg>
           </button>
+        </div>
 
-          <!-- Dropdown Menu -->
+        <!-- Teleported Dropdown Menu -->
+        <Teleport to="body">
           <Transition name="dropdown">
             <div v-if="showTemplateDropdown"
-              class="absolute left-0 mt-1 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 py-1 z-50">
+              class="template-dropdown-portal fixed w-56 bg-white dark:bg-slate-800 rounded-lg shadow-2xl border border-slate-200 dark:border-slate-700 py-1 z-9999 overflow-y-auto custom-scrollbar"
+              :style="dropdownStyle">
+
+              <!-- Built-in Templates Section -->
+              <div
+                class="px-3 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                {{ $t('templates.sectionBuiltIn') }}
+              </div>
               <button @click="applyTemplate('removeSpaces')"
                 class="w-full px-4 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer">
                 {{ $t('operations.template.removeSpaces') }}
@@ -294,7 +392,6 @@ onUnmounted(() => {
                 class="w-full px-4 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer">
                 {{ $t('operations.template.spacesToUnderscore') }}
               </button>
-              <div class="border-t border-slate-200 dark:border-slate-700 my-1"></div>
               <button @click="applyTemplate('addPrefix')"
                 class="w-full px-4 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer">
                 {{ $t('operations.template.addPrefix') }}
@@ -303,9 +400,42 @@ onUnmounted(() => {
                 class="w-full px-4 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer">
                 {{ $t('operations.template.addSuffix') }}
               </button>
+
+              <!-- Custom Templates Section -->
+              <div class="border-t border-slate-200 dark:border-slate-700 my-1"></div>
+              <div
+                class="px-3 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                {{ $t('templates.sectionCustom') }}
+              </div>
+              <template v-if="savedTemplates.length > 0">
+                <button v-for="tpl in savedTemplates" :key="tpl.id" @click="loadSavedTemplate(tpl)"
+                  class="w-full px-4 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer flex items-center justify-between gap-2">
+                  <span class="flex items-center gap-1.5 truncate">
+                    <span class="text-xs">📄</span>
+                    <span class="truncate">{{ tpl.name }}</span>
+                  </span>
+                  <span class="text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap">{{ $t('templates.ops', {
+                    n: tpl.operations.length
+                  }) }}</span>
+                </button>
+              </template>
+              <div v-else class="px-4 py-2 text-xs text-slate-400 dark:text-slate-500 italic">
+                {{ $t('templates.empty') }}
+              </div>
+
+              <!-- Actions Section -->
+              <div class="border-t border-slate-200 dark:border-slate-700 my-1"></div>
+              <button @click="handleSaveTemplate" :disabled="operationStore.operations.length === 0"
+                class="w-full px-4 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed">
+                <span class="text-xs">💾</span> {{ $t('templates.saveCurrent') }}
+              </button>
+              <button @click="openManageTemplates"
+                class="w-full px-4 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer flex items-center gap-1.5">
+                <span class="text-xs">⚙️</span> {{ $t('templates.manageTemplates') }}
+              </button>
             </div>
           </Transition>
-        </div>
+        </Teleport>
 
         <button @click="addRegexOperation"
           class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500 rounded-lg transition-colors flex items-center gap-1 shadow-sm cursor-pointer">
@@ -513,7 +643,54 @@ onUnmounted(() => {
       </Transition>
     </Teleport>
 
+    <!-- Save Preset Name Modal -->
+    <Teleport to="body">
+      <Transition name="fade">
+        <div v-if="showSavePresetModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="closeSavePresetModal"></div>
+          <div
+            class="relative bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 w-full max-w-sm space-y-5 animate-in zoom-in-95 duration-200">
+            <div class="flex items-center justify-between">
+              <h3 class="text-base font-semibold text-slate-800 dark:text-white flex items-center gap-2">
+                <span class="text-lg">💾</span>
+                {{ $t('templates.saveCurrent') }}
+              </h3>
+              <button @click="closeSavePresetModal"
+                class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clip-rule="evenodd" />
+                </svg>
+              </button>
+            </div>
+            <div class="space-y-2">
+              <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                {{ $t('templates.enterName') }}
+              </label>
+              <input type="text" v-model="savePresetName" @keydown.enter="!$event.isComposing && confirmSavePreset()"
+                autofocus
+                class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50" />
+            </div>
+            <div class="flex gap-3 pt-2">
+              <button @click="closeSavePresetModal"
+                class="flex-1 px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors cursor-pointer">
+                {{ $t('common.cancel') }}
+              </button>
+              <button @click="confirmSavePreset"
+                class="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm cursor-pointer"
+                :disabled="!savePresetName.trim()">
+                {{ $t('common.confirm') }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
+
     <HelpModal v-model="showHelp" />
+
+    <PresetManager v-if="showPresetManager" @close="showPresetManager = false" @loaded="handlePresetLoaded" />
   </div>
 </template>
 

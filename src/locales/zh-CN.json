@@ -1,6 +1,7 @@
 {
     "common": {
         "cancel": "取消",
+        "confirm": "确认",
         "done": "完成"
     },
     "settings": {
@@ -173,5 +174,26 @@
             }
         },
         "close": "关闭"
+    },
+    "templates": {
+        "sectionBuiltIn": "快速模板",
+        "sectionCustom": "自定义模板",
+        "saveCurrent": "保存当前流程为模板…",
+        "manageTemplates": "管理模板…",
+        "title": "模板管理",
+        "load": "加载",
+        "delete": "删除",
+        "rename": "重命名",
+        "export": "导出全部",
+        "import": "导入",
+        "empty": "尚未保存任何模板",
+        "saveSuccess": "已保存模板「{name}」",
+        "loadSuccess": "已加载模板「{name}」",
+        "deleteConfirm": "确定删除「{name}」？",
+        "importSuccess": "已导入 {n} 个模板",
+        "importSuccessWithSkip": "已导入 {n} 个模板（跳过 {s} 个重复）",
+        "importError": "导入失败：格式不正确",
+        "enterName": "请输入模板名称",
+        "ops": "{n} 个规则"
     }
 }
