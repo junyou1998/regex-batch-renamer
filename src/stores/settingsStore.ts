@@ -1,35 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
-
-const STORAGE_KEY = 'regex-batch-renamer-settings'
-
-interface Settings {
-    defaultUseRegex: boolean
-    processFilenameOnly: boolean
-    language: string
-    themeMode: 'auto' | 'light' | 'dark'
-    zoomLevel: number
-}
-
-const defaultSettings: Settings = {
-    defaultUseRegex: true,
-    processFilenameOnly: true,
-    language: 'zh-TW',
-    themeMode: 'auto',
-    zoomLevel: 100
-}
-
-function loadSettings(): Settings {
-    try {
-        const stored = localStorage.getItem(STORAGE_KEY)
-        if (stored) {
-            return { ...defaultSettings, ...JSON.parse(stored) }
-        }
-    } catch (e) {
-        console.error('Failed to load settings:', e)
-    }
-    return { ...defaultSettings }
-}
+import { defaultSettings, loadSettings, saveSettings, type Settings, type ThemeMode } from '../services/preferences'
 
 export const useSettingsStore = defineStore('settings', () => {
     const initial = loadSettings()
@@ -37,10 +8,10 @@ export const useSettingsStore = defineStore('settings', () => {
     const defaultUseRegex = ref(initial.defaultUseRegex)
     const processFilenameOnly = ref(initial.processFilenameOnly)
     const language = ref(initial.language)
-    const themeMode = ref<'auto' | 'light' | 'dark'>(initial.themeMode)
+    const themeMode = ref<ThemeMode>(initial.themeMode)
     const zoomLevel = ref(initial.zoomLevel)
 
-    function saveSettings() {
+    function persistSettings() {
         const settings: Settings = {
             defaultUseRegex: defaultUseRegex.value,
             processFilenameOnly: processFilenameOnly.value,
@@ -48,7 +19,7 @@ export const useSettingsStore = defineStore('settings', () => {
             themeMode: themeMode.value,
             zoomLevel: zoomLevel.value
         }
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
+        saveSettings(settings)
     }
 
     function applyZoom() {
@@ -59,7 +30,7 @@ export const useSettingsStore = defineStore('settings', () => {
     }
 
     watch([defaultUseRegex, processFilenameOnly, language, themeMode, zoomLevel], () => {
-        saveSettings()
+        persistSettings()
     }, { deep: true })
 
     watch(zoomLevel, () => {
@@ -74,11 +45,11 @@ export const useSettingsStore = defineStore('settings', () => {
         processFilenameOnly.value = value
     }
 
-    function setLanguage(value: string) {
+    function setLanguage(value: Settings['language']) {
         language.value = value
     }
 
-    function setThemeMode(value: 'auto' | 'light' | 'dark') {
+    function setThemeMode(value: ThemeMode) {
         themeMode.value = value
     }
 
