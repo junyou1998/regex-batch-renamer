@@ -1,6 +1,7 @@
 {
     "common": {
         "cancel": "取消",
+        "confirm": "確認",
         "done": "完成"
     },
     "settings": {
@@ -173,5 +174,26 @@
             }
         },
         "close": "關閉"
+    },
+    "templates": {
+        "sectionBuiltIn": "快速範本",
+        "sectionCustom": "自訂範本",
+        "saveCurrent": "儲存目前流程為範本…",
+        "manageTemplates": "管理範本…",
+        "title": "範本管理",
+        "load": "載入",
+        "delete": "刪除",
+        "rename": "重新命名",
+        "export": "匯出全部",
+        "import": "匯入",
+        "empty": "尚未儲存任何範本",
+        "saveSuccess": "已儲存範本「{name}」",
+        "loadSuccess": "已載入範本「{name}」",
+        "deleteConfirm": "確定刪除「{name}」？",
+        "importSuccess": "已匯入 {n} 個範本",
+        "importSuccessWithSkip": "已匯入 {n} 個範本（跳過 {s} 個重複）",
+        "importError": "匯入失敗：格式不正確",
+        "enterName": "請輸入範本名稱",
+        "ops": "{n} 個規則"
     }
 }

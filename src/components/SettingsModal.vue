@@ -146,7 +146,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                     </div>
 
                     <!-- Content -->
-                    <div class="px-6 py-5 space-y-6 max-h-[70vh] overflow-y-auto">
+                    <div class="px-6 py-5 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
                         <!-- Default Settings Section -->
                         <div class="space-y-4">
                             <h3 class="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">

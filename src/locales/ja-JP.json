@@ -1,6 +1,7 @@
 {
     "common": {
         "cancel": "キャンセル",
+        "confirm": "確認",
         "done": "完了"
     },
     "settings": {
@@ -173,5 +174,26 @@
             }
         },
         "close": "閉じる"
+    },
+    "templates": {
+        "sectionBuiltIn": "クイックテンプレート",
+        "sectionCustom": "カスタムテンプレート",
+        "saveCurrent": "現在のパイプラインをテンプレートとして保存…",
+        "manageTemplates": "テンプレート管理…",
+        "title": "テンプレート管理",
+        "load": "読み込む",
+        "delete": "削除",
+        "rename": "名前変更",
+        "export": "すべてエクスポート",
+        "import": "インポート",
+        "empty": "テンプレートはまだ保存されていません",
+        "saveSuccess": "テンプレート「{name}」を保存しました",
+        "loadSuccess": "テンプレート「{name}」を読み込みました",
+        "deleteConfirm": "「{name}」を削除しますか？",
+        "importSuccess": "{n} 個のテンプレートをインポートしました",
+        "importSuccessWithSkip": "{n} 個のテンプレートをインポートしました（{s} 個の重複をスキップ）",
+        "importError": "インポート失敗：フォーマットが無効です",
+        "enterName": "テンプレート名を入力してください",
+        "ops": "{n} 個のルール"
     }
 }

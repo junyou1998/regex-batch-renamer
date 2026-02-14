@@ -56,12 +56,30 @@ export const useOperationStore = defineStore('operation', () => {
     }
   }
 
+  function getSnapshot(): { type: string; params: Record<string, any> }[] {
+    return operations.value.map(op => ({
+      type: op.type,
+      params: { ...op.params },
+    }))
+  }
+
+  function loadFromPreset(presetOps: { type: string; params: Record<string, any> }[]) {
+    operations.value = presetOps.map(op => ({
+      id: uuidv4(),
+      type: op.type as OperationType,
+      enabled: true,
+      params: { ...op.params },
+    }))
+  }
+
   return {
     operations,
     addOperation,
     removeOperation,
     updateOperation,
     moveOperation,
-    toggleOperation
+    toggleOperation,
+    getSnapshot,
+    loadFromPreset
   }
 })

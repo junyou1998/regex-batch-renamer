@@ -1,6 +1,7 @@
 {
     "common": {
         "cancel": "Cancel",
+        "confirm": "Confirm",
         "done": "Done"
     },
     "settings": {
@@ -173,5 +174,26 @@
             }
         },
         "close": "Close"
+    },
+    "templates": {
+        "sectionBuiltIn": "Quick Templates",
+        "sectionCustom": "Custom Templates",
+        "saveCurrent": "Save current pipeline as template…",
+        "manageTemplates": "Manage templates…",
+        "title": "Template Manager",
+        "load": "Load",
+        "delete": "Delete",
+        "rename": "Rename",
+        "export": "Export All",
+        "import": "Import",
+        "empty": "No templates saved",
+        "saveSuccess": "Template \"{name}\" saved",
+        "loadSuccess": "Template \"{name}\" loaded",
+        "deleteConfirm": "Delete \"{name}\"?",
+        "importSuccess": "Imported {n} templates",
+        "importSuccessWithSkip": "Imported {n} templates ({s} duplicates skipped)",
+        "importError": "Import failed: invalid format",
+        "enterName": "Enter template name",
+        "ops": "{n} rules"
     }
 }
