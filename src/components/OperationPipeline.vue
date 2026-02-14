@@ -54,8 +54,8 @@ function getBadges(op: any): Badge[] {
     badges.push({ type: 'suffix', label: 'badges.suffix', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300' })
   }
 
-  // Sequence detection: Replacement contains '${n'
-  if (replacement.includes('${n')) {
+  // Sequence detection: Replacement contains strictly valid ${n...}
+  if (/\$\{n(?::\d+(?::\d+)?)?\}/.test(replacement)) {
     badges.push({ type: 'sequence', label: 'badges.sequence', color: 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300' })
   }
 
@@ -511,7 +511,7 @@ onUnmounted(() => {
             <div class="space-y-1">
               <div class="flex justify-between items-center">
                 <label class="text-xs text-slate-600 dark:text-slate-400 ml-1">{{ $t('operations.patternLabel')
-                }}</label>
+                  }}</label>
                 <label class="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" v-model="op.params.useRegex"
                     class="w-3.5 h-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
