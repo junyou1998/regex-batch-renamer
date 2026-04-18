@@ -2,7 +2,7 @@
 import { useFileStore } from '../stores/fileStore'
 import { useToastStore } from '../stores/toastStore'
 import { generateDiffHtml } from '../utils/diff'
-import { ref, watch } from 'vue'
+import { ref, watch, nextTick, onBeforeUnmount, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useVirtualList } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
@@ -21,6 +21,7 @@ const { list: virtualList, containerProps, wrapperProps, scrollTo } = useVirtual
     itemHeight: ROW_HEIGHT,
   }
 )
+const virtualContainerRef = containerProps.ref as Ref<HTMLElement | null>
 
 watch(() => fileStore.files.length, () => {
   scrollTo(0)
@@ -34,8 +35,6 @@ const tooltip = ref({
   isHtml: false
 })
 const tooltipRef = ref<HTMLElement | null>(null)
-
-import { nextTick } from 'vue'
 
 async function showTooltip(event: MouseEvent, content: string, isHtml = false) {
   const target = event.currentTarget as HTMLElement
@@ -94,34 +93,101 @@ async function copyToClipboard(text: string) {
   }
 }
 
-const draggedIndex = ref<number | null>(null)
-const dragOverIndex = ref<number | null>(null)
+const draggedFileId = ref<string | null>(null)
+const dragOverFileId = ref<string | null>(null)
 
-function onDragStart(event: DragEvent, index: number) {
-  draggedIndex.value = index
+const AUTO_SCROLL_EDGE_THRESHOLD = 32
+const AUTO_SCROLL_STEP = 16
+const AUTO_SCROLL_INTERVAL = 16
+
+const autoScrollDirection = ref<-1 | 1 | 0>(0)
+let autoScrollTimer: ReturnType<typeof setInterval> | null = null
+
+function getFileIndexById(id: string) {
+  return fileStore.files.findIndex(file => file.id === id)
+}
+
+function stopAutoScroll() {
+  autoScrollDirection.value = 0
+  if (autoScrollTimer) {
+    clearInterval(autoScrollTimer)
+    autoScrollTimer = null
+  }
+}
+
+function startAutoScroll(direction: -1 | 1) {
+  if (autoScrollDirection.value === direction && autoScrollTimer) return
+
+  stopAutoScroll()
+  autoScrollDirection.value = direction
+  autoScrollTimer = setInterval(() => {
+    const container = virtualContainerRef.value
+    if (!container || !draggedFileId.value) {
+      stopAutoScroll()
+      return
+    }
+    container.scrollTop += AUTO_SCROLL_STEP * direction
+  }, AUTO_SCROLL_INTERVAL)
+}
+
+function handleAutoScroll(clientY: number) {
+  const container = virtualContainerRef.value
+  if (!container || !draggedFileId.value) return
+
+  const { top, bottom } = container.getBoundingClientRect()
+  if (clientY <= top + AUTO_SCROLL_EDGE_THRESHOLD) {
+    startAutoScroll(-1)
+    return
+  }
+
+  if (clientY >= bottom - AUTO_SCROLL_EDGE_THRESHOLD) {
+    startAutoScroll(1)
+    return
+  }
+
+  stopAutoScroll()
+}
+
+function onDragStart(event: DragEvent, fileId: string) {
+  draggedFileId.value = fileId
   if (event.dataTransfer) {
     event.dataTransfer.effectAllowed = 'move'
     event.dataTransfer.dropEffect = 'move'
   }
 }
 
-function onDragEnter(index: number) {
-  if (draggedIndex.value !== null && draggedIndex.value !== index) {
-    dragOverIndex.value = index
+function onDragEnter(fileId: string) {
+  if (draggedFileId.value !== null && draggedFileId.value !== fileId) {
+    dragOverFileId.value = fileId
   }
+}
+
+function onDragOver(event: DragEvent, fileId: string) {
+  event.preventDefault()
+  onDragEnter(fileId)
+  handleAutoScroll(event.clientY)
 }
 
 function onDragEnd() {
-  draggedIndex.value = null
-  dragOverIndex.value = null
+  draggedFileId.value = null
+  dragOverFileId.value = null
+  stopAutoScroll()
 }
 
-function onDrop(index: number) {
-  if (draggedIndex.value !== null && draggedIndex.value !== index) {
-    fileStore.reorderFiles(draggedIndex.value, index)
+function onDrop(fileId: string) {
+  if (draggedFileId.value !== null && draggedFileId.value !== fileId) {
+    const fromIndex = getFileIndexById(draggedFileId.value)
+    const toIndex = getFileIndexById(fileId)
+    if (fromIndex !== -1 && toIndex !== -1) {
+      fileStore.reorderFiles(fromIndex, toIndex)
+    }
   }
   onDragEnd()
 }
+
+onBeforeUnmount(() => {
+  stopAutoScroll()
+})
 </script>
 
 <template>
@@ -157,14 +223,14 @@ function onDrop(index: number) {
     <div v-if="fileStore.files.length > 0" v-bind="containerProps" class="flex-1 overflow-auto custom-scrollbar w-full">
       <div v-bind="wrapperProps" class="w-full">
         <div v-for="{ data: file, index: virtualIndex } in virtualList" :key="file.id" draggable="true"
-          @dragstart="onDragStart($event, virtualIndex)" @dragenter="onDragEnter(virtualIndex)" @dragover.prevent
-          @drop="onDrop(virtualIndex)" @dragend="onDragEnd" :style="{ height: ROW_HEIGHT + 'px' }" :class="[
+          @dragstart="onDragStart($event, file.id)" @dragenter="onDragEnter(file.id)" @dragover="onDragOver($event, file.id)"
+          @drop.prevent="onDrop(file.id)" @dragend="onDragEnd" :style="{ height: ROW_HEIGHT + 'px' }" :class="[
             'file-list-row items-center transition-colors group cursor-grab active:cursor-grabbing',
-            dragOverIndex === virtualIndex ? 'border-t-2 border-blue-500' : '',
+            dragOverFileId === file.id ? 'border-t-2 border-blue-500' : '',
             virtualIndex % 2 === 0
               ? 'bg-white dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-800/50'
               : 'bg-slate-50 dark:bg-slate-800/30 hover:bg-slate-100 dark:hover:bg-slate-800/50',
-            draggedIndex === virtualIndex ? 'opacity-50 bg-slate-200 dark:bg-slate-700' : ''
+            draggedFileId === file.id ? 'opacity-50 bg-slate-200 dark:bg-slate-700' : ''
           ]">
           <!-- Index Column -->
           <div class="px-4 py-2 text-xs text-slate-500 dark:text-slate-500 text-center font-mono">
