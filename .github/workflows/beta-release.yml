@@ -1,0 +1,78 @@
+name: Beta Release
+
+on:
+    push:
+        tags:
+            - "beta-v*"
+
+jobs:
+    release:
+        runs-on: ${{ matrix.os }}
+        permissions:
+            contents: write
+
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - os: macos-latest
+                      bundles: app
+                    - os: ubuntu-latest
+                      bundles: appimage,deb
+                    - os: windows-latest
+                      bundles: nsis
+
+        steps:
+            - name: Check out Git repository
+              uses: actions/checkout@v4
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 8
+
+            - name: Install Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: "pnpm"
+
+            - name: Install Rust toolchain
+              uses: dtolnay/rust-toolchain@stable
+
+            - name: Install Linux system dependencies
+              if: matrix.os == 'ubuntu-latest'
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y libwebkit2gtk-4.1-dev \
+                    libappindicator3-dev \
+                    librsvg2-dev \
+                    patchelf
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Build Tauri beta artifacts
+              env:
+                  TAURI_BUNDLES: ${{ matrix.bundles }}
+                  TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+                  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+                  TAURI_UPDATER_PUBKEY: ${{ secrets.TAURI_UPDATER_PUBKEY }}
+                  BETA_UPDATER_ENDPOINT: ${{ secrets.BETA_UPDATER_ENDPOINT }}
+                  APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+                  APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+                  APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+                  APPLE_ID: ${{ secrets.APPLE_ID }}
+                  APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+                  APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+                  CSC_LINK: ${{ secrets.CSC_LINK }}
+                  CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+              run: pnpm run tauri:build:release
+
+            - name: Publish beta pre-release
+              uses: softprops/action-gh-release@v2
+              with:
+                  prerelease: true
+                  generate_release_notes: true
+                  files: |
+                      src-tauri/target/release/bundle/**/*

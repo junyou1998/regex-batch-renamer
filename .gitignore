@@ -3,3 +3,19 @@
 /node_modules
 .DS_Store
 /release
+.vite
+
+# Tauri build artifacts
+/src-tauri/target/
+/src-tauri/gen/
+/src-tauri/tauri.release.conf.json
+/src-tauri/.DS_Store
+
+# AI tooling artifacts
+.agent/
+.agents/
+.spectra/
+.spectra.yaml
+AGENTS.md
+openspec/
+openspec/.vector-search.db*

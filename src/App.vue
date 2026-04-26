@@ -12,12 +12,14 @@ import { useOperationStore } from './stores/operationStore'
 import { useSettingsStore } from './stores/settingsStore'
 import { useToastStore } from './stores/toastStore'
 import { useThemeStore } from './stores/themeStore'
+import { ChevronsLeft, ChevronsRight, CircleAlert, Info, LoaderCircle, Settings, X } from 'lucide-vue-next'
 
 // @ts-ignore
 import { version as currentVersion } from '../package.json'
 import { getLatestRelease } from './services/updateService'
 import { generateRenamePreview } from './services/renameEngine'
 import { replaceBasename } from './utils/path'
+import { desktop, type DesktopRuntimeInfo } from './services/desktop'
 
 const fileStore = useFileStore()
 const operationStore = useOperationStore()
@@ -26,13 +28,18 @@ const toastStore = useToastStore()
 useThemeStore()
 const { t } = useI18n()
 const isProcessing = ref(false)
+const isInstallingUpdate = ref(false)
 const isSidebarCollapsed = ref(false)
-const isMac = window.ipcRenderer?.platform === 'darwin'
+const isMac = ref(false)
+const runtimeInfo = ref<DesktopRuntimeInfo | null>(null)
 const showAbout = ref(false)
 const showSettings = ref(false)
+const isFileDragActive = ref(false)
+let unlistenFileDrop: null | (() => void) = null
+let unlistenFileDragState: null | (() => void) = null
 
 const dragRegionHeight = computed(() => {
-  if (!isMac) return '0px'
+  if (!isMac.value) return '0px'
   const visualHeight = 32
   const zoomFactor = settingsStore.zoomLevel / 100
   return `${visualHeight / zoomFactor}px`
@@ -60,10 +67,22 @@ function isNewerVersion(oldVer: string, newVer: string) {
 
 async function checkForUpdates() {
   try {
-    const release = await getLatestRelease()
+    const release = await getLatestRelease({
+      channel: runtimeInfo.value?.channel,
+    })
     if (!release) return
 
-    const remoteVersion = release.tagName.startsWith('v') ? release.tagName.slice(1) : release.tagName
+    if (runtimeInfo.value?.runtime === 'tauri' && runtimeInfo.value.channel === 'beta' && desktop.checkForAppUpdate) {
+      const appUpdate = await desktop.checkForAppUpdate()
+      if (appUpdate?.available) {
+        updateAvailable.value = true
+        latestVersion.value = appUpdate.version ?? release.tagName
+        releaseUrl.value = release.htmlUrl
+      }
+      return
+    }
+
+    const remoteVersion = release.tagName.replace(/^beta-v|^v/, '')
 
     if (isNewerVersion(currentVersion, remoteVersion)) {
       updateAvailable.value = true
@@ -75,29 +94,76 @@ async function checkForUpdates() {
   }
 }
 
-function openReleasePage() {
+async function openReleasePage() {
+  if (runtimeInfo.value?.runtime === 'tauri' && runtimeInfo.value.channel === 'beta' && desktop.installAppUpdate) {
+    try {
+      isInstallingUpdate.value = true
+      await desktop.installAppUpdate()
+      return
+    } catch (e) {
+      console.error('Tauri update install failed:', e)
+    } finally {
+      isInstallingUpdate.value = false
+    }
+  }
+
   if (releaseUrl.value) {
     openExternal(releaseUrl.value)
   }
 }
 
 function openExternal(url: string) {
-  window.ipcRenderer?.invoke('open-external', url)
+  void desktop.openExternal(url)
 }
 
+function addDroppedFiles(paths: string[]) {
+  if (paths.length === 0) return
+  isFileDragActive.value = false
+  fileStore.addFilePaths(paths)
+}
 
-onMounted(() => {
+onMounted(async () => {
+  runtimeInfo.value = await desktop.getRuntimeInfo()
+  isMac.value = runtimeInfo.value.platform === 'darwin'
+
   checkForUpdates()
   settingsStore.initZoom()
   window.addEventListener('keydown', handleGlobalKeydown)
-    ; (window as any).__hasPendingChanges = () => {
-      return fileStore.files.some(f => f.originalName !== f.newName)
+  void desktop.setPendingChangesHandler(() => {
+    return fileStore.files.some(f => f.originalName !== f.newName)
+  })
+
+  if (desktop.onFilesDropped) {
+    try {
+      unlistenFileDrop = await desktop.onFilesDropped(addDroppedFiles)
+    } catch (error) {
+      console.error('Failed to register file drop handler:', error)
+      toastStore.addToast(t('dropZone.openFailed'), 'error')
     }
+  }
+
+  if (desktop.onFileDragStateChanged) {
+    try {
+      unlistenFileDragState = await desktop.onFileDragStateChanged((isDragging) => {
+        isFileDragActive.value = isDragging
+      })
+    } catch (error) {
+      console.error('Failed to register file drag state handler:', error)
+    }
+  }
 })
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleGlobalKeydown)
-  delete (window as any).__hasPendingChanges
+  void desktop.clearPendingChangesHandler()
+  if (unlistenFileDrop) {
+    unlistenFileDrop()
+    unlistenFileDrop = null
+  }
+  if (unlistenFileDragState) {
+    unlistenFileDragState()
+    unlistenFileDragState = null
+  }
 })
 
 function handleGlobalKeydown(e: KeyboardEvent) {
@@ -184,7 +250,7 @@ async function handleRename() {
     newPath: replaceBasename(f.path, f.newName)
   }))
 
-  const results = await window.ipcRenderer.renameFiles(filesToRename, { failOnExist: true })
+  const results = await desktop.renameFiles(filesToRename, { failOnExist: true })
   const successfulRenames: { id: string; oldPath: string; newPath: string; originalName: string; newName: string }[] = []
 
   let conflictCount = 0
@@ -202,7 +268,7 @@ async function handleRename() {
         })
         fileStore.updateFileAfterRename(file.id, newPath, file.newName)
       } else {
-        if (res.error === 'FILE_EXISTS') {
+        if (res.code === 'FILE_EXISTS' || res.error === 'FILE_EXISTS') {
           conflictCount++
           fileStore.updateFileStatus(file.id, 'error', t('app.targetFileExists'))
         } else {
@@ -254,7 +320,7 @@ async function handleUndo() {
     fileStore.updateFileStatus(fileStore.lastRenameBatch[0].id, 'error', `Skipped ${skippedCount} files due to conflicts`) // Just a way to show error, maybe toast is better but this works for now
   }
 
-  const results = await window.ipcRenderer.renameFiles(safeUndoBatch, { failOnExist: true })
+  const results = await desktop.renameFiles(safeUndoBatch, { failOnExist: true })
 
   let conflictCount = 0
   results.forEach(res => {
@@ -268,7 +334,7 @@ async function handleUndo() {
           fileStore.updateFileAfterRename(file.id, historyItem.oldPath, historyItem.originalName)
           fileStore.updateNewName(file.id, historyItem.originalName) // Reset newName preview to match
         } else {
-          if (res.error === 'FILE_EXISTS') {
+          if (res.code === 'FILE_EXISTS' || res.error === 'FILE_EXISTS') {
             conflictCount++
             fileStore.updateFileStatus(file.id, 'error', t('app.targetFileExists'))
           } else {
@@ -291,7 +357,15 @@ async function handleUndo() {
 async function handleCopyTo() {
   if (isProcessing.value) return
 
-  const targetDir = await window.ipcRenderer.selectDirectory()
+  let targetDir: string | undefined
+  try {
+    targetDir = await desktop.selectDirectory()
+  } catch (error) {
+    console.error('Failed to select directory:', error)
+    toastStore.addToast(t('errors.selectDirectoryFailed'), 'error')
+    return
+  }
+
   if (!targetDir) return
 
   isProcessing.value = true
@@ -303,7 +377,7 @@ async function handleCopyTo() {
     newPath: `${targetDir}${separator}${f.newName}`
   }))
 
-  const results = await window.ipcRenderer.copyRenameFiles(filesToCopy)
+  const results = await desktop.copyRenameFiles(filesToCopy)
 
   results.forEach(res => {
     const file = fileStore.files.find(f => f.path === res.path)
@@ -324,7 +398,7 @@ async function handleCopyTo() {
   <div
     class="flex h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 font-sans selection:bg-blue-200 dark:selection:bg-blue-500/30 selection:text-blue-900 dark:selection:text-blue-200 transition-colors">
     <!-- Draggable Title Bar (macOS only) -->
-    <div v-if="isMac" class="drag-region fixed top-0 left-0 right-0 z-50 transition-all duration-200"
+    <div v-if="isMac" class="drag-region fixed top-0 right-0 z-50 transition-all duration-200"
       :style="{ height: dragRegionHeight }">
     </div>
 
@@ -337,10 +411,7 @@ async function handleCopyTo() {
       <div v-if="isSidebarCollapsed" class="flex-1 flex items-center justify-center pt-14">
         <button @click="isSidebarCollapsed = false" :title="$t('app.showSidebar')"
           class="p-1.5 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-            stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-          </svg>
+          <ChevronsRight class="w-5 h-5" />
         </button>
       </div>
 
@@ -361,33 +432,22 @@ async function handleCopyTo() {
           <div class="flex items-center gap-1">
             <button @click="showAbout = true" :title="$t('app.about')"
               class="p-1.5 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <Info class="w-5 h-5" />
             </button>
             <button @click="showSettings = true" :title="$t('settings.title')"
               class="p-1.5 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd"
-                  d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
-                  clip-rule="evenodd" />
-              </svg>
+              <Settings class="w-5 h-5" />
             </button>
             <button @click="isSidebarCollapsed = true" :title="$t('app.hideSidebar')"
               class="p-1.5 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-              </svg>
+              <ChevronsLeft class="w-5 h-5" />
             </button>
           </div>
         </div>
 
         <div class="flex-1 overflow-y-auto custom-scrollbar min-h-0">
           <div class="p-4 pb-0">
-            <FileDropZone />
+            <FileDropZone :is-file-drag-active="isFileDragActive" />
           </div>
           <div class="p-4 pt-6">
             <OperationPipeline :canUndo="fileStore.lastRenameBatch.length > 0" @undo="handleUndo" />
@@ -398,17 +458,13 @@ async function handleCopyTo() {
           <!-- Conflict Warning -->
           <div v-if="hasConflicts"
             class="text-xs text-red-600 dark:text-red-400 font-medium flex items-center gap-1 animate-pulse">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd"
-                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                clip-rule="evenodd" />
-            </svg>
+            <CircleAlert class="w-4 h-4" />
             {{ conflictMessage }}
           </div>
           <div class="grid grid-cols-2 gap-3 mt-4">
             <button @click="handleRename" :disabled="isProcessing || fileStore.files.length === 0 || hasConflicts"
               class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2">
-              <span v-if="isProcessing" class="animate-spin">⏳</span>
+              <LoaderCircle v-if="isProcessing" class="w-4 h-4 animate-spin" />
               {{ isProcessing ? $t('app.processing') : $t('app.rename') }}
             </button>
             <button @click="handleCopyTo" :disabled="isProcessing || fileStore.files.length === 0 || hasConflicts"
@@ -427,24 +483,17 @@ async function handleCopyTo() {
       <div v-if="updateAvailable"
         :class="['bg-blue-600 text-white px-4 py-3 flex items-center justify-between text-sm shadow-md z-40 shrink-0']">
         <div class="flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd"
-              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-              clip-rule="evenodd" />
-          </svg>
+          <Info class="w-5 h-5" />
           <span class="font-medium">{{ $t('app.updateAvailable') }} ({{ latestVersion }})</span>
         </div>
         <div class="flex items-center gap-4">
           <button @click="openReleasePage"
-            class="bg-white text-blue-600 px-3 py-1 rounded font-bold hover:bg-blue-50 transition-colors cursor-pointer">
-            {{ $t('app.download') }}
+            :disabled="isInstallingUpdate"
+            class="bg-white text-blue-600 px-3 py-1 rounded font-bold hover:bg-blue-50 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed">
+            {{ isInstallingUpdate ? $t('app.processing') : $t('app.download') }}
           </button>
           <button @click="updateAvailable = false" class="opacity-80 hover:opacity-100 cursor-pointer">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd"
-                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                clip-rule="evenodd" />
-            </svg>
+            <X class="w-5 h-5" />
           </button>
         </div>
       </div>
@@ -462,6 +511,7 @@ async function handleCopyTo() {
 <style>
 /* Draggable title bar */
 .drag-region {
+  left: 80px;
   -webkit-app-region: drag;
 }
 

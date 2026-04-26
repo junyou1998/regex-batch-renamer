@@ -78,6 +78,29 @@ This project is built using modern web technologies:
 - **Build Tool**: [Vite](https://vitejs.dev/)
 - **State Management**: [Pinia](https://pinia.vuejs.org/)
 
+## 🧪 Beta Migration Track
+
+The stable application line remains on Electron in `main`.
+
+The Tauri migration is isolated to the `beta` branch with a separate delivery path:
+
+- `main` + `v*` tags: stable Electron releases
+- `beta` branch pushes: Tauri beta validation CI only
+- `beta-v*` tags: Tauri GitHub pre-releases
+
+Useful commands:
+
+```bash
+pnpm run electron:dev
+pnpm run electron:build
+pnpm run tauri:dev
+pnpm run tauri:build
+```
+
+If `TAURI_UPDATER_PUBKEY` and `BETA_UPDATER_ENDPOINT` are provided, `pnpm run tauri:build:release` generates a release config with updater metadata. Without those values, the beta build still completes, but updater artifacts are not enabled.
+
+Beta packaging intentionally avoids forcing every possible bundle type on every platform. In particular, macOS beta builds use the `.app` bundle and updater archive path instead of requiring `.dmg` generation for every local or CI build.
+
 ## ☕ Support Development
 
 If you find this tool helpful, consider buying me a coffee to support continued development!
