@@ -1,23 +1,32 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { v4 as uuidv4 } from 'uuid'
+import { useI18n } from 'vue-i18n'
 import { useFileStore } from '../stores/fileStore'
+import { useToastStore } from '../stores/toastStore'
+import { desktop } from '../services/desktop'
 
 const fileStore = useFileStore()
+const toastStore = useToastStore()
+const { t } = useI18n()
 const isDragging = ref(false)
+
+defineProps<{
+  isFileDragActive?: boolean
+}>()
+
+function addFiles(paths: string[]) {
+  fileStore.addFilePaths(paths)
+}
 
 function onDrop(e: DragEvent) {
   isDragging.value = false
   const files = e.dataTransfer?.files
   if (files) {
-    const fileList = Array.from(files).map(file => ({
-      id: uuidv4(),
-      originalName: file.name,
-      path: file.path,
-      newName: file.name,
-      status: 'pending' as const
-    }))
-    fileStore.addFiles(fileList)
+    const paths = Array.from(files)
+      .map(file => file.path)
+      .filter((path): path is string => Boolean(path))
+
+    addFiles(paths)
   }
 }
 
@@ -30,19 +39,12 @@ function onDragLeave() {
 }
 
 async function openFileDialog() {
-  const paths = await window.ipcRenderer.selectFiles()
-  if (paths && paths.length > 0) {
-    const fileList = paths.map(path => {
-      const name = path.split(/[/\\]/).pop() || path
-      return {
-        id: uuidv4(),
-        originalName: name,
-        path: path,
-        newName: name,
-        status: 'pending' as const
-      }
-    })
-    fileStore.addFiles(fileList)
+  try {
+    const paths = await desktop.selectFiles()
+    addFiles(paths)
+  } catch (error) {
+    console.error('Failed to select files:', error)
+    toastStore.addToast(t('dropZone.openFailed'), 'error')
   }
 }
 </script>
@@ -51,7 +53,7 @@ async function openFileDialog() {
   <div @drop.prevent="onDrop" @dragover.prevent="onDragOver" @dragleave.prevent="onDragLeave" @click="openFileDialog"
     class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl transition-all duration-300 cursor-pointer group"
     :class="[
-      isDragging
+      isDragging || isFileDragActive
         ? 'border-blue-500 bg-blue-500/10 scale-[1.02]'
         : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 hover:bg-slate-200/30 dark:hover:bg-slate-700/30 bg-slate-100/50 dark:bg-slate-800/50'
     ]">

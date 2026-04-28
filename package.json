@@ -10,12 +10,23 @@
     "version": "0.4.2",
     "type": "module",
     "scripts": {
-        "dev": "vite",
-        "build": "vue-tsc && vite build && electron-builder",
-        "preview": "vite preview"
+        "dev": "vite --config vite.config.mts",
+        "build": "vue-tsc && vite build --config vite.config.mts && electron-builder",
+        "preview": "vite preview --config vite.config.mts",
+        "electron:dev": "vite --config vite.config.mts",
+        "electron:build": "vue-tsc && vite build --config vite.config.mts && electron-builder",
+        "tauri:dev": "pnpm tauri dev",
+        "tauri:build": "vue-tsc && node scripts/run-tauri-build.mjs",
+        "tauri:build:release": "node scripts/prepare-tauri-release-config.mjs /tmp/regex-batch-renamer-tauri.release.conf.json && vue-tsc && node scripts/run-tauri-build.mjs --config /tmp/regex-batch-renamer-tauri.release.conf.json",
+        "beta:ci": "vue-tsc && vite build --config vite.config.tauri.mts"
     },
     "dependencies": {
+        "@tauri-apps/api": "^2.8.0",
+        "@tauri-apps/plugin-dialog": "^2.4.0",
+        "@tauri-apps/plugin-opener": "^2.4.0",
+        "@tauri-apps/plugin-updater": "^2.9.0",
         "@vueuse/core": "^14.1.0",
+        "lucide-vue-next": "^1.0.0",
         "marked": "^17.0.1",
         "pinia": "^3.0.4",
         "uuid": "^13.0.0",
@@ -26,6 +37,7 @@
     "devDependencies": {
         "@tailwindcss/typography": "^0.5.19",
         "@tailwindcss/vite": "^4.1.18",
+        "@tauri-apps/cli": "^2.9.1",
         "@types/uuid": "^10.0.0",
         "@vitejs/plugin-vue": "^5.0.4",
         "electron": "^28.3.3",

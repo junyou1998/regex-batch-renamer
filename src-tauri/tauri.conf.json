@@ -1,0 +1,43 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "Regex Batch Renamer Beta",
+  "version": "0.4.2-beta.0",
+  "identifier": "com.junyou.regexbatchrenamer.beta",
+  "build": {
+    "beforeDevCommand": "pnpm vite --config vite.config.tauri.mts",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "pnpm vite build --config vite.config.tauri.mts",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Regex Batch Renamer Beta",
+        "width": 1200,
+        "height": 800,
+        "dragDropEnabled": true
+      }
+    ]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "",
+      "endpoints": []
+    }
+  },
+  "bundle": {
+    "active": true,
+    "createUpdaterArtifacts": false,
+    "icon": [
+      "icons/icon.png",
+      "icons/icon.ico",
+      "icons/icon.icns"
+    ],
+    "resources": [
+      "../public/icon.png",
+      "../public/icon.ico",
+      "../public/icon-mac.png"
+    ]
+  }
+}

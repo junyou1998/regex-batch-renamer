@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { v4 as uuidv4 } from 'uuid'
 
 export interface FileItem {
   id: string
@@ -17,6 +18,23 @@ export const useFileStore = defineStore('file', () => {
     const existingPaths = new Set(files.value.map(f => f.path))
     const uniqueFiles = newFiles.filter(f => !existingPaths.has(f.path))
     files.value.push(...uniqueFiles)
+  }
+
+  function addFilePaths(paths: string[]) {
+    const fileItems = paths
+      .filter(Boolean)
+      .map(path => {
+        const name = path.split(/[/\\]/).pop() || path
+        return {
+          id: uuidv4(),
+          originalName: name,
+          path,
+          newName: name,
+          status: 'pending' as const,
+        }
+      })
+
+    addFiles(fileItems)
   }
 
   function removeFile(id: string) {
@@ -79,6 +97,7 @@ export const useFileStore = defineStore('file', () => {
   return {
     files,
     addFiles,
+    addFilePaths,
     removeFile,
     clearFiles,
     updateFileStatus,

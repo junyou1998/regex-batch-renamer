@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
 import { defaultSettings, loadSettings, saveSettings, type Settings, type ThemeMode } from '../services/preferences'
+import { desktop } from '../services/desktop'
 
 export const useSettingsStore = defineStore('settings', () => {
     const initial = loadSettings()
@@ -24,9 +25,7 @@ export const useSettingsStore = defineStore('settings', () => {
 
     function applyZoom() {
         const factor = zoomLevel.value / 100
-        if (window.ipcRenderer?.setZoomFactor) {
-            window.ipcRenderer.setZoomFactor(factor)
-        }
+        void desktop.setZoomFactor(factor)
     }
 
     watch([defaultUseRegex, processFilenameOnly, language, themeMode, zoomLevel], () => {
