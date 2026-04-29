@@ -29,7 +29,7 @@
         "updateAvailable": "发现新版本",
         "download": "下载",
         "processFilenameOnly": "仅处理文件名（保留扩展名）",
-        "conflictDetected": "⚠️ 存在文件名冲突",
+        "conflictDetected": "存在文件名冲突",
         "renamedSuccess": "已完成重命名",
         "undo": "撤销",
         "undoSuccess": "已撤销重命名操作",
@@ -46,7 +46,8 @@
     "dropZone": {
         "text": "拖放文件至此 或",
         "action": "点击选择",
-        "supports": "支持多选与文件夹"
+        "supports": "支持多选与文件夹",
+        "openFailed": "打开文件选择器失败"
     },
     "operations": {
         "title": "操作流程",
@@ -58,6 +59,7 @@
         "moveDown": "下移",
         "remove": "移除",
         "toggleEnable": "启用/停用规则",
+        "reorder": "拖拽排序",
         "patternLabel": "查找目标",
         "useRegex": "使用正则表达式 (Regex)",
         "placeholderPatternRegex": "输入 Regex 模式...",
@@ -92,6 +94,9 @@
         "copied": "已复制: {text}",
         "copyFailed": "复制失败"
     },
+    "errors": {
+        "selectDirectoryFailed": "打开文件夹选择器失败"
+    },
     "theme": {
         "light": "亮色模式",
         "dark": "暗色模式",
@@ -103,7 +108,7 @@
         "description": "一个简单、强大且开源的跨平台批量重命名工具，支持 Windows、macOS 与 Linux。",
         "developer": "开发者资讯",
         "bio": "嗨！我是 Junyou。这个专案是为了让繁琐的档案重命名工作变得更简单。如果您觉得这个工具对您有帮助，欢迎赞助我一杯咖啡，这将成为我持续开发与维护的动力！",
-        "thanks": "感谢您的支持与鼓励 ❤️",
+        "thanks": "感谢您的支持与鼓励",
         "version": "版本",
         "changelog": "更新日志",
         "changelogLoading": "正在加载更新日志...",

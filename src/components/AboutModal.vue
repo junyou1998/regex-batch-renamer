@@ -5,6 +5,8 @@ import pkg from '../../package.json'
 import { useToastStore } from '../stores/toastStore'
 import { useI18n } from 'vue-i18n'
 import { getLatestRelease } from '../services/updateService'
+import { desktop } from '../services/desktop'
+import { ArrowLeft, LoaderCircle, X } from 'lucide-vue-next'
 
 const props = defineProps<{
     modelValue: boolean
@@ -89,7 +91,7 @@ function toggleChangelog() {
 }
 
 function openExternal(url: string) {
-    window.ipcRenderer?.invoke('open-external', url)
+    void desktop.openExternal(url)
 }
 </script>
 
@@ -110,12 +112,7 @@ function openExternal(url: string) {
                         <div class="flex items-center gap-3">
                             <button v-if="showChangelog" @click="showChangelog = false"
                                 class="text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
-                                    fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                        d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-                                        clip-rule="evenodd" />
-                                </svg>
+                                <ArrowLeft class="h-5 w-5" />
                             </button>
                             <h3 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
                                 {{ showChangelog ? $t('about.changelog') : $t('about.title') }}
@@ -123,12 +120,7 @@ function openExternal(url: string) {
                         </div>
                         <button @click="$emit('update:modelValue', false)"
                             class="p-2 rounded-lg text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
-                                fill="currentColor">
-                                <path fill-rule="evenodd"
-                                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                    clip-rule="evenodd" />
-                            </svg>
+                            <X class="h-5 w-5" />
                         </button>
                     </div>
 
@@ -138,14 +130,7 @@ function openExternal(url: string) {
                         <!-- Changelog View -->
                         <div v-if="showChangelog" class="space-y-4">
                             <div v-if="isLoading" class="flex justify-center py-8 text-slate-500">
-                                <svg class="animate-spin h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                    viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                        stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor"
-                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                    </path>
-                                </svg>
+                                <LoaderCircle class="animate-spin h-6 w-6" />
                                 <span class="ml-2">{{ $t('about.changelogLoading') }}</span>
                             </div>
                             <div v-else-if="error" class="text-center text-red-500 py-8">

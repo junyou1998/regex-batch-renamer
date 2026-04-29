@@ -29,7 +29,7 @@
         "updateAvailable": "新しいバージョンがあります",
         "download": "ダウンロード",
         "processFilenameOnly": "ファイル名のみ処理（拡張子を保持）",
-        "conflictDetected": "⚠️ ファイル名の競合が検出されました",
+        "conflictDetected": "ファイル名の競合が検出されました",
         "renamedSuccess": "リネームが完了しました",
         "undo": "元に戻す",
         "undoSuccess": "元に戻しました",
@@ -46,7 +46,8 @@
     "dropZone": {
         "text": "ファイルをドラッグ",
         "action": "または選択",
-        "supports": "複数選択・フォルダ対応"
+        "supports": "複数選択・フォルダ対応",
+        "openFailed": "ファイル選択ダイアログを開けませんでした"
     },
     "operations": {
         "title": "操作一覧",
@@ -58,6 +59,7 @@
         "moveDown": "下へ移動",
         "remove": "削除",
         "toggleEnable": "ルールの有効/無効",
+        "reorder": "ドラッグして並べ替え",
         "patternLabel": "検索",
         "useRegex": "正規表現を使用 (Regex)",
         "placeholderPatternRegex": "Regexパターンを入力...",
@@ -92,6 +94,9 @@
         "copied": "コピーしました: {text}",
         "copyFailed": "コピーに失敗しました"
     },
+    "errors": {
+        "selectDirectoryFailed": "フォルダ選択ダイアログを開けませんでした"
+    },
     "theme": {
         "light": "ライトモード",
         "dark": "ダークモード",
@@ -103,7 +108,7 @@
         "description": "Windows、macOS、Linuxに対応した、シンプルで強力なオープンソースの一括リネームツールです。",
         "developer": "開発者情報",
         "bio": "こんにちは！Junyouです。このプロジェクトは、面倒なファイルリネーム作業を簡単にするために作られました。もしこのツールが役立ったら、コーヒーを一杯奢っていただけると、開発とメンテナンスの励みになります！",
-        "thanks": "ご支援と励ましに感謝します ❤️",
+        "thanks": "ご支援と励ましに感謝します",
         "version": "バージョン",
         "changelog": "更新履歴",
         "changelogLoading": "更新履歴を読み込み中...",

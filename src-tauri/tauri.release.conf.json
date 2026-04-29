@@ -1,0 +1,16 @@
+{
+  "bundle": {
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "__TAURI_UPDATER_PUBKEY__",
+      "endpoints": [
+        "__BETA_UPDATER_ENDPOINT__"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  }
+}

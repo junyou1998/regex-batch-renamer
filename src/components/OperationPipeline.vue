@@ -7,7 +7,21 @@ import HelpModal from './HelpModal.vue'
 import PresetManager from './PresetManager.vue'
 import { savePreset, loadPresets, type Preset } from '../services/presetService'
 import { useToastStore } from '../stores/toastStore'
-import { VueDraggable } from 'vue-draggable-plus'
+import {
+  ChevronDown,
+  Eye,
+  EyeOff,
+  FileText,
+  GripVertical,
+  HelpCircle,
+  Pencil,
+  Plus,
+  Save,
+  Settings,
+  Undo2,
+  X,
+  Zap,
+} from 'lucide-vue-next'
 
 defineProps<{
   canUndo?: boolean
@@ -29,6 +43,178 @@ const operationsModel = computed({
     operationStore.operations = val
   }
 })
+
+const activeOperationDragId = ref<string | null>(null)
+const operationDropTargetId = ref<string | null>(null)
+const operationDropPosition = ref<'before' | 'after' | null>(null)
+const operationDragPreview = ref({ visible: false, x: 0, y: 0 })
+const draggedOperation = computed(() => operationStore.operations.find(op => op.id === activeOperationDragId.value))
+
+const OPERATION_AUTO_SCROLL_EDGE_THRESHOLD = 40
+const OPERATION_AUTO_SCROLL_STEP = 16
+const OPERATION_AUTO_SCROLL_INTERVAL = 16
+
+const operationAutoScrollDirection = ref<-1 | 1 | 0>(0)
+let operationAutoScrollTimer: ReturnType<typeof setInterval> | null = null
+let lastOperationPointer: { x: number; y: number } | null = null
+
+function getOperationIndexById(id: string) {
+  return operationStore.operations.findIndex(op => op.id === id)
+}
+
+function getOperationScrollContainer() {
+  let node = operationsList.value?.parentElement ?? null
+
+  while (node) {
+    const style = window.getComputedStyle(node)
+    const canScroll = /(auto|scroll)/.test(`${style.overflowY}${style.overflow}`)
+    if (canScroll && node.scrollHeight > node.clientHeight) {
+      return node
+    }
+    node = node.parentElement
+  }
+
+  return null
+}
+
+function stopOperationAutoScroll() {
+  operationAutoScrollDirection.value = 0
+  if (operationAutoScrollTimer) {
+    clearInterval(operationAutoScrollTimer)
+    operationAutoScrollTimer = null
+  }
+}
+
+function startOperationAutoScroll(direction: -1 | 1) {
+  if (operationAutoScrollDirection.value === direction && operationAutoScrollTimer) return
+
+  stopOperationAutoScroll()
+  operationAutoScrollDirection.value = direction
+  operationAutoScrollTimer = setInterval(() => {
+    const container = getOperationScrollContainer()
+    if (!container || !activeOperationDragId.value) {
+      stopOperationAutoScroll()
+      return
+    }
+
+    container.scrollTop += OPERATION_AUTO_SCROLL_STEP * direction
+    if (lastOperationPointer) {
+      updateOperationDropTarget(lastOperationPointer.x, lastOperationPointer.y)
+    }
+  }, OPERATION_AUTO_SCROLL_INTERVAL)
+}
+
+function handleOperationAutoScroll(clientY: number) {
+  const container = getOperationScrollContainer()
+  if (!container || !activeOperationDragId.value) return
+
+  const { top, bottom } = container.getBoundingClientRect()
+  if (clientY <= top + OPERATION_AUTO_SCROLL_EDGE_THRESHOLD) {
+    startOperationAutoScroll(-1)
+    return
+  }
+
+  if (clientY >= bottom - OPERATION_AUTO_SCROLL_EDGE_THRESHOLD) {
+    startOperationAutoScroll(1)
+    return
+  }
+
+  stopOperationAutoScroll()
+}
+
+function getOperationDropTarget(clientX: number, clientY: number) {
+  const container = operationsList.value
+  if (!container) return null
+
+  const hit = document.elementFromPoint(clientX, clientY)
+  const card = hit instanceof HTMLElement
+    ? hit.closest<HTMLElement>('[data-operation-id]')
+    : null
+
+  if (card && container.contains(card)) {
+    const id = card.dataset.operationId
+    if (!id || id === activeOperationDragId.value) return null
+    const rect = card.getBoundingClientRect()
+    return {
+      id,
+      position: clientY < rect.top + rect.height / 2 ? 'before' as const : 'after' as const,
+    }
+  }
+
+  const visibleCards = Array.from(container.querySelectorAll<HTMLElement>('[data-operation-id]'))
+    .filter(cardEl => cardEl.dataset.operationId !== activeOperationDragId.value)
+
+  const first = visibleCards.at(0)
+  const last = visibleCards.at(-1)
+  if (first && clientY < first.getBoundingClientRect().top) {
+    return { id: first.dataset.operationId || '', position: 'before' as const }
+  }
+  if (last && clientY > last.getBoundingClientRect().bottom) {
+    return { id: last.dataset.operationId || '', position: 'after' as const }
+  }
+
+  return null
+}
+
+function updateOperationDropTarget(clientX: number, clientY: number) {
+  const target = getOperationDropTarget(clientX, clientY)
+  operationDropTargetId.value = target?.id || null
+  operationDropPosition.value = target?.position || null
+}
+
+function startOperationReorder(event: PointerEvent, operationId: string) {
+  if (event.button !== 0) return
+  event.preventDefault()
+  activeOperationDragId.value = operationId
+  lastOperationPointer = { x: event.clientX, y: event.clientY }
+  operationDragPreview.value = { visible: true, x: event.clientX, y: event.clientY }
+  updateOperationDropTarget(event.clientX, event.clientY)
+  window.addEventListener('pointermove', onOperationPointerMove)
+  window.addEventListener('pointerup', onOperationPointerUp)
+  window.addEventListener('pointercancel', cancelOperationReorder)
+}
+
+function onOperationPointerMove(event: PointerEvent) {
+  if (!activeOperationDragId.value) return
+  event.preventDefault()
+  lastOperationPointer = { x: event.clientX, y: event.clientY }
+  operationDragPreview.value = { visible: true, x: event.clientX, y: event.clientY }
+  handleOperationAutoScroll(event.clientY)
+  updateOperationDropTarget(event.clientX, event.clientY)
+}
+
+function onOperationPointerUp() {
+  if (activeOperationDragId.value && operationDropTargetId.value && operationDropPosition.value) {
+    const fromIndex = getOperationIndexById(activeOperationDragId.value)
+    const targetIndex = getOperationIndexById(operationDropTargetId.value)
+    if (fromIndex !== -1 && targetIndex !== -1) {
+      const nextOperations = [...operationStore.operations]
+      const [movedOperation] = nextOperations.splice(fromIndex, 1)
+      if (movedOperation) {
+        let insertIndex = targetIndex + (operationDropPosition.value === 'after' ? 1 : 0)
+        if (fromIndex < insertIndex) {
+          insertIndex -= 1
+        }
+        insertIndex = Math.max(0, Math.min(nextOperations.length, insertIndex))
+        nextOperations.splice(insertIndex, 0, movedOperation)
+        operationStore.operations = nextOperations
+      }
+    }
+  }
+  cancelOperationReorder()
+}
+
+function cancelOperationReorder() {
+  activeOperationDragId.value = null
+  operationDropTargetId.value = null
+  operationDropPosition.value = null
+  operationDragPreview.value = { visible: false, x: 0, y: 0 }
+  lastOperationPointer = null
+  stopOperationAutoScroll()
+  window.removeEventListener('pointermove', onOperationPointerMove)
+  window.removeEventListener('pointerup', onOperationPointerUp)
+  window.removeEventListener('pointercancel', cancelOperationReorder)
+}
 
 // Badge logic
 interface Badge {
@@ -165,6 +351,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown)
+  cancelOperationReorder()
 })
 
 const showTemplateDropdown = ref(false)
@@ -348,21 +535,13 @@ onUnmounted(() => {
         <button @click="showHelp = true"
           class="text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer"
           title="使用說明與 Regex 教學">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd"
-              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z"
-              clip-rule="evenodd" />
-          </svg>
+          <HelpCircle class="h-5 w-5" />
         </button>
 
         <button v-if="canUndo" @click="emit('undo')"
           class="text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer ml-1"
           :title="$t('app.undo')">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd"
-              d="M7.707 3.293a1 1 0 010 1.414L5.414 7H11a7 7 0 017 7v2a1 1 0 11-2 0v-2a5 5 0 00-5-5H5.414l2.293 2.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-              clip-rule="evenodd" />
-          </svg>
+          <Undo2 class="h-5 w-5" />
         </button>
       </h2>
       <div class="flex items-center gap-2">
@@ -370,13 +549,9 @@ onUnmounted(() => {
         <div class="relative template-dropdown-container">
           <button ref="templateTriggerRef" @click.stop="toggleTemplateDropdown"
             class="px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg transition-colors flex items-center gap-1 cursor-pointer">
-            <span>⚡</span>
+            <Zap class="h-3.5 w-3.5" />
             {{ $t('operations.quickTemplates') }}
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 ml-0.5" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd"
-                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                clip-rule="evenodd" />
-            </svg>
+            <ChevronDown class="h-3 w-3 ml-0.5" />
           </button>
         </div>
 
@@ -419,7 +594,7 @@ onUnmounted(() => {
                 <button v-for="tpl in savedTemplates" :key="tpl.id" @click="loadSavedTemplate(tpl)"
                   class="w-full px-4 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer flex items-center justify-between gap-2">
                   <span class="flex items-center gap-1.5 truncate">
-                    <span class="text-xs">📄</span>
+                    <FileText class="h-3.5 w-3.5 shrink-0" />
                     <span class="truncate">{{ tpl.name }}</span>
                   </span>
                   <span class="text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap">{{ $t('templates.ops', {
@@ -435,11 +610,11 @@ onUnmounted(() => {
               <div class="border-t border-slate-200 dark:border-slate-700 my-1"></div>
               <button @click="handleSaveTemplate" :disabled="operationStore.operations.length === 0"
                 class="w-full px-4 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed">
-                <span class="text-xs">💾</span> {{ $t('templates.saveCurrent') }}
+                <Save class="h-3.5 w-3.5" /> {{ $t('templates.saveCurrent') }}
               </button>
               <button @click="openManageTemplates"
                 class="w-full px-4 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer flex items-center gap-1.5">
-                <span class="text-xs">⚙️</span> {{ $t('templates.manageTemplates') }}
+                <Settings class="h-3.5 w-3.5" /> {{ $t('templates.manageTemplates') }}
               </button>
             </div>
           </Transition>
@@ -447,28 +622,29 @@ onUnmounted(() => {
 
         <button @click="addRegexOperation"
           class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500 rounded-lg transition-colors flex items-center gap-1 shadow-sm cursor-pointer">
-          <span>+</span> {{ $t('operations.add') }}
+          <Plus class="h-3.5 w-3.5" /> {{ $t('operations.add') }}
         </button>
       </div>
     </div>
 
     <div class="space-y-3" ref="operationsList">
-      <VueDraggable v-model="operationsModel" :animation="150" handle=".drag-handle" class="space-y-3"
-        ghost-class="sortable-ghost">
-        <div v-for="(op, index) in operationsModel" :key="op.id"
-          class="bg-slate-200/50 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-300 dark:border-slate-700 rounded-xl p-4 shadow-sm transition-colors hover:border-slate-400 dark:hover:border-slate-600 group"
-          :class="{ 'opacity-50 grayscale': !op.enabled }">
-          <!-- Drag Handle (Top Edge) -->
-          <div
-            class="absolute top-1 left-1/2 -translate-x-1/2 w-full h-4 flex items-center justify-center cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity drag-handle z-10">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M5 9a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 6a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6-6a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 6a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6-6a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 6a2 2 0 1 1 0-4 2 2 0 0 1 0 4z" />
-            </svg>
-          </div>
-
+      <div class="space-y-3">
+        <div v-for="(op, index) in operationsModel" :key="op.id" :data-operation-id="op.id"
+          class="relative bg-slate-200/50 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-300 dark:border-slate-700 rounded-xl p-4 shadow-sm transition-colors hover:border-slate-400 dark:hover:border-slate-600 group"
+          :class="{
+            'opacity-50 grayscale': !op.enabled,
+            'ring-2 ring-blue-400/50 bg-blue-50 dark:bg-blue-950/30': activeOperationDragId === op.id,
+            '!border-t-4 !border-t-blue-500 dark:!border-t-blue-400': operationDropTargetId === op.id && operationDropPosition === 'before',
+            '!border-b-4 !border-b-blue-500 dark:!border-b-blue-400': operationDropTargetId === op.id && operationDropPosition === 'after'
+          }">
           <div class="flex items-center justify-between mb-3 select-none group/header">
             <div class="flex items-center gap-2">
+              <button type="button"
+                class="drag-handle inline-flex h-7 w-7 items-center justify-center rounded-md text-slate-400 hover:bg-slate-300/70 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-700 dark:hover:text-slate-300 cursor-grab active:cursor-grabbing"
+                @pointerdown.stop="startOperationReorder($event, op.id)"
+                :title="$t('operations.reorder')">
+                <GripVertical class="h-4 w-4" />
+              </button>
               <span class="text-xs font-bold text-slate-500 dark:text-slate-500">#{{ index + 1 }}</span>
               <span class="text-sm font-medium text-slate-700 dark:text-slate-200">
                 {{ op.type === 'regex' ? $t('operations.regex') : $t('operations.other') }}
@@ -478,24 +654,14 @@ onUnmounted(() => {
               <button @click="operationStore.toggleOperation(op.id)"
                 class="p-1 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 rounded hover:bg-slate-300 dark:hover:bg-slate-700 cursor-pointer mr-2"
                 :title="$t('operations.toggleEnable')">
-                <svg v-if="op.enabled" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20"
-                  fill="currentColor">
-                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                  <path fill-rule="evenodd"
-                    d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                    clip-rule="evenodd" />
-                </svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd"
-                    d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z"
-                    clip-rule="evenodd" />
-                  <path
-                    d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.064 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
-                </svg>
+                <Eye v-if="op.enabled" class="h-4 w-4" />
+                <EyeOff v-else class="h-4 w-4" />
               </button>
               <button @click="operationStore.removeOperation(op.id)"
                 class="p-1 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 rounded hover:bg-red-100 dark:hover:bg-red-900/30 ml-1 cursor-pointer"
-                :title="$t('operations.remove')">×</button>
+                :title="$t('operations.remove')">
+                <X class="h-4 w-4" />
+              </button>
             </div>
           </div>
 
@@ -527,7 +693,8 @@ onUnmounted(() => {
                 <span>{{ $t('operations.replacementLabel') }}</span>
                 <button @click="openHelper(op.id)"
                   class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium flex items-center gap-1 cursor-pointer">
-                  <span>⚡ {{ $t('operations.variableHelper') }}</span>
+                  <Zap class="h-3.5 w-3.5" />
+                  <span>{{ $t('operations.variableHelper') }}</span>
                 </button>
               </div>
               <input :ref="(el) => setInputRef(el, op.id)" v-model="op.params.replacement" type="text"
@@ -536,7 +703,7 @@ onUnmounted(() => {
             </div>
           </div>
         </div>
-      </VueDraggable>
+      </div>
 
       <div v-if="operationStore.operations.length === 0"
         class="text-center py-8 text-slate-500 dark:text-slate-500 text-sm italic">
@@ -546,6 +713,15 @@ onUnmounted(() => {
 
     <!-- Variable Helper Modal -->
     <Teleport to="body">
+      <div v-if="operationDragPreview.visible && draggedOperation"
+        class="fixed z-[100000] pointer-events-none max-w-xs rounded-lg border border-blue-300 dark:border-blue-500 bg-white/95 dark:bg-slate-900/95 px-3 py-2 shadow-xl ring-1 ring-blue-500/20"
+        :style="{ left: `${operationDragPreview.x + 14}px`, top: `${operationDragPreview.y + 14}px` }">
+        <div class="text-xs font-semibold text-blue-600 dark:text-blue-300">#{{ getOperationIndexById(draggedOperation.id)
+          + 1 }}</div>
+        <div class="truncate text-sm text-slate-800 dark:text-slate-100">
+          {{ draggedOperation.type === 'regex' ? $t('operations.regex') : $t('operations.other') }}
+        </div>
+      </div>
       <Transition name="fade">
         <div v-if="activeHelperId" class="fixed inset-0 z-50 flex items-center justify-center p-4">
           <!-- Backdrop -->
@@ -557,16 +733,12 @@ onUnmounted(() => {
             <!-- Header -->
             <div class="flex items-center justify-between">
               <h3 class="text-base font-semibold text-slate-800 dark:text-white flex items-center gap-2">
-                <span class="text-lg">⚡</span>
+                <Zap class="h-5 w-5" />
                 {{ $t('operations.variableHelper') }}
               </h3>
               <button @click="closeHelper"
                 class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd"
-                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                    clip-rule="evenodd" />
-                </svg>
+                <X class="h-5 w-5" />
               </button>
             </div>
 
@@ -617,17 +789,13 @@ onUnmounted(() => {
             <!-- Header -->
             <div class="flex items-center justify-between">
               <h3 class="text-base font-semibold text-slate-800 dark:text-white flex items-center gap-2">
-                <span class="text-lg">📝</span>
+                <Pencil class="h-5 w-5" />
                 {{ prefixSuffixMode === 'prefix' ? $t('operations.template.addPrefix') :
                   $t('operations.template.addSuffix') }}
               </h3>
               <button @click="closePrefixSuffixModal"
                 class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd"
-                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                    clip-rule="evenodd" />
-                </svg>
+                <X class="h-5 w-5" />
               </button>
             </div>
 
@@ -667,16 +835,12 @@ onUnmounted(() => {
             class="relative bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 w-full max-w-sm space-y-5 animate-in zoom-in-95 duration-200">
             <div class="flex items-center justify-between">
               <h3 class="text-base font-semibold text-slate-800 dark:text-white flex items-center gap-2">
-                <span class="text-lg">💾</span>
+                <Save class="h-5 w-5" />
                 {{ $t('templates.saveCurrent') }}
               </h3>
               <button @click="closeSavePresetModal"
                 class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd"
-                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                    clip-rule="evenodd" />
-                </svg>
+                <X class="h-5 w-5" />
               </button>
             </div>
             <div class="space-y-2">
@@ -731,17 +895,4 @@ onUnmounted(() => {
   transform: translateY(-4px);
 }
 
-/* Drag and Drop Transitions */
-.sortable-ghost {
-  opacity: 0.5;
-  background: #e2e8f0;
-}
-
-.dark .sortable-ghost {
-  background: #1e293b;
-}
-
-.sortable-drag {
-  cursor: grabbing;
-}
 </style>

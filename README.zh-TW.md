@@ -78,6 +78,29 @@ _更多教學請點擊軟體介面中的「？」按鈕查看。_
 - **建置工具**：[Vite](https://vitejs.dev/)
 - **狀態管理**：[Pinia](https://pinia.vuejs.org/)
 
+## 🧪 Beta 遷移線
+
+穩定版目前仍維持在 `main` 分支上的 Electron 架構。
+
+Tauri 重構會隔離在 `beta` 分支，並使用獨立發佈流程：
+
+- `main` + `v*` tag：Electron 穩定版 release
+- `beta` 分支 push：只跑 Tauri beta 驗證 CI
+- `beta-v*` tag：發佈 Tauri GitHub pre-release
+
+常用指令：
+
+```bash
+pnpm run electron:dev
+pnpm run electron:build
+pnpm run tauri:dev
+pnpm run tauri:build
+```
+
+若有提供 `TAURI_UPDATER_PUBKEY` 與 `BETA_UPDATER_ENDPOINT`，`pnpm run tauri:build:release` 會產生包含 updater 設定的 release config；若沒有提供，beta 版本仍可建置，但不會啟用 updater artifact。
+
+Beta 打包流程不會強制每個平台都產出所有封裝格式。以 macOS 為例，beta 版目前以 `.app` 與 updater archive 為主，不把 `.dmg` 視為每次本地或 CI 建置都必須成功的前提。
+
 ## ☕ 贊助開發
 
 如果您覺得這個工具對您有幫助，歡迎贊助我一杯咖啡，這將成為我持續開發與維護的動力！
