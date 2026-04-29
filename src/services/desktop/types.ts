@@ -23,6 +23,7 @@ export interface DesktopRuntimeInfo {
   platform: string
   runtime: RuntimeKind
   channel: ReleaseChannel
+  version: string
 }
 
 export interface AppUpdateInfo {
