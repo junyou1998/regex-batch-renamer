@@ -99,14 +99,19 @@ export const tauriDesktopBridge: DesktopBridge = {
     })
   },
   async checkForAppUpdate(): Promise<AppUpdateInfo | null> {
-    const update = await check()
-    if (!update) {
-      return { available: false }
-    }
+    try {
+      const update = await check()
+      if (!update) {
+        return { available: false }
+      }
 
-    return {
-      available: true,
-      version: update.version,
+      return {
+        available: true,
+        version: update.version,
+      }
+    } catch (error) {
+      console.warn('Tauri updater check is unavailable', error)
+      return null
     }
   },
   async installAppUpdate() {

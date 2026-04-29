@@ -115,6 +115,12 @@
         "changelogError": "更新履歴の読み込みに失敗しました",
         "viewOnGithub": "GitHubで見る",
         "newVersionAvailable": "新しいバージョンが利用可能です",
+        "installUpdate": "更新をインストール",
+        "installingUpdate": "インストール中...",
+        "downloadUpdate": "ダウンロード",
+        "updateCheckFailed": "更新の確認に失敗しました",
+        "updateInstallStarted": "更新のインストールを開始しました。完了後にアプリを再起動してください。",
+        "updateInstallFailed": "更新のインストールに失敗しました",
         "close": "閉じる"
     },
     "help": {

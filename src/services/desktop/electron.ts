@@ -5,6 +5,7 @@ import type {
   FileOperationRequest,
   PendingChangesHandler,
 } from './types'
+import pkg from '../../../package.json'
 
 declare global {
   interface Window {
@@ -51,6 +52,7 @@ export const electronDesktopBridge: DesktopBridge = {
       platform: window.ipcRenderer.platform,
       runtime: 'electron',
       channel: 'stable',
+      version: pkg.version,
     }
   },
   setPendingChangesHandler(handler: PendingChangesHandler) {

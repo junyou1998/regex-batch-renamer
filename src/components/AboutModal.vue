@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { marked } from 'marked'
-import pkg from '../../package.json'
 import { useToastStore } from '../stores/toastStore'
 import { useI18n } from 'vue-i18n'
-import { getLatestRelease } from '../services/updateService'
+import { getLatestRelease, isNewerVersion, normalizeReleaseVersion } from '../services/updateService'
 import { desktop } from '../services/desktop'
-import { ArrowLeft, LoaderCircle, X } from 'lucide-vue-next'
+import type { DesktopRuntimeInfo } from '../services/desktop'
+import { ArrowLeft, Download, LoaderCircle, RefreshCw, ScrollText, X } from 'lucide-vue-next'
 
 const props = defineProps<{
     modelValue: boolean
@@ -23,6 +23,9 @@ const error = ref('')
 
 const hasUpdate = ref(false)
 const latestVersion = ref('')
+const currentVersion = ref('')
+const runtimeInfo = ref<DesktopRuntimeInfo | null>(null)
+const isInstallingUpdate = ref(false)
 
 const toastStore = useToastStore()
 const { t } = useI18n()
@@ -45,23 +48,51 @@ async function handleChangelogClick(event: MouseEvent) {
 watch(() => props.modelValue, (newVal) => {
     if (newVal) {
         showChangelog.value = false
-        checkForUpdates()
+        void initializeAboutState()
     }
 })
 
-async function checkForUpdates() {
+async function initializeAboutState() {
+    await loadRuntimeInfo()
+    await checkForUpdates()
+}
+
+async function loadRuntimeInfo() {
     try {
-        const release = await getLatestRelease()
-        if (!release) return
+        const info = await desktop.getRuntimeInfo()
+        runtimeInfo.value = info
+        currentVersion.value = info.version
+    } catch (e) {
+        console.error('Failed to get runtime info', e)
+        currentVersion.value = ''
+    }
+}
 
-        const tagName = release.tagName.replace(/^v/, '')
+async function checkForUpdates() {
+    hasUpdate.value = false
+    latestVersion.value = ''
 
-        if (tagName !== pkg.version) {
+    try {
+        if (runtimeInfo.value?.runtime === 'tauri' && desktop.checkForAppUpdate) {
+            const update = await desktop.checkForAppUpdate()
+            if (update?.available && update.version) {
+                hasUpdate.value = true
+                latestVersion.value = normalizeReleaseVersion(update.version)
+            }
+            return
+        }
+
+        const release = await getLatestRelease({ channel: runtimeInfo.value?.channel })
+        if (!release || !currentVersion.value) return
+
+        const tagName = normalizeReleaseVersion(release.tagName)
+        if (isNewerVersion(currentVersion.value, tagName)) {
             hasUpdate.value = true
             latestVersion.value = tagName
         }
     } catch (e) {
         console.error('Failed to check for updates', e)
+        toastStore.addToast(t('about.updateCheckFailed'), 'error')
     }
 }
 
@@ -71,7 +102,7 @@ async function fetchChangelog() {
     isLoading.value = true
     error.value = ''
     try {
-        const release = await getLatestRelease()
+        const release = await getLatestRelease({ channel: runtimeInfo.value?.channel })
         if (!release) throw new Error('Failed to fetch')
 
         changelogContent.value = await marked.parse(release.body, { breaks: true, gfm: true })
@@ -92,6 +123,21 @@ function toggleChangelog() {
 
 function openExternal(url: string) {
     void desktop.openExternal(url)
+}
+
+async function installUpdate() {
+    if (!desktop.installAppUpdate) return
+
+    isInstallingUpdate.value = true
+    try {
+        await desktop.installAppUpdate()
+        toastStore.addToast(t('about.updateInstallStarted'), 'success')
+    } catch (e) {
+        console.error('Failed to install update', e)
+        toastStore.addToast(t('about.updateInstallFailed'), 'error')
+    } finally {
+        isInstallingUpdate.value = false
+    }
 }
 </script>
 
@@ -174,7 +220,7 @@ function openExternal(url: string) {
                                 </a>
                                 <div
                                     class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 mb-2 ml-2 relative">
-                                    v{{ pkg.version }}
+                                    v{{ currentVersion || '...' }}
                                     <span v-if="hasUpdate" class="absolute -top-1 -right-1 flex h-2.5 w-2.5">
                                         <span
                                             class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
@@ -194,8 +240,20 @@ function openExternal(url: string) {
                             <div class="flex justify-center gap-3">
                                 <button @click="toggleChangelog"
                                     class="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 cursor-pointer">
-                                    <span>📜</span> {{ $t('about.changelog') }}
+                                    <ScrollText class="h-4 w-4" /> {{ $t('about.changelog') }}
                                 </button>
+                                <button v-if="hasUpdate && runtimeInfo?.runtime === 'tauri'" @click="installUpdate"
+                                    :disabled="isInstallingUpdate"
+                                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2 cursor-pointer">
+                                    <LoaderCircle v-if="isInstallingUpdate" class="animate-spin h-4 w-4" />
+                                    <Download v-else class="h-4 w-4" />
+                                    {{ isInstallingUpdate ? $t('about.installingUpdate') : $t('about.installUpdate') }}
+                                </button>
+                                <a v-else-if="hasUpdate" href="#"
+                                    @click.prevent="openExternal('https://github.com/junyou1998/regex-batch-renamer/releases')"
+                                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2 cursor-pointer">
+                                    <RefreshCw class="h-4 w-4" /> {{ $t('about.downloadUpdate') }}
+                                </a>
                             </div>
 
                             <hr class="border-slate-200 dark:border-slate-800">

@@ -115,6 +115,12 @@
         "changelogError": "Failed to load changelog",
         "viewOnGithub": "View on GitHub",
         "newVersionAvailable": "New version available",
+        "installUpdate": "Install Update",
+        "installingUpdate": "Installing...",
+        "downloadUpdate": "Download",
+        "updateCheckFailed": "Failed to check for updates",
+        "updateInstallStarted": "Update installation started. Restart the app after the installer finishes.",
+        "updateInstallFailed": "Failed to install update",
         "close": "Close"
     },
     "help": {
