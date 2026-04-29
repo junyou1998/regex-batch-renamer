@@ -56,11 +56,12 @@ jobs:
 
             - name: Build Tauri beta artifacts
               env:
+                  APP_RELEASE_CHANNEL: beta
                   TAURI_BUNDLES: ${{ matrix.bundles }}
                   TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
                   TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
                   TAURI_UPDATER_PUBKEY: ${{ secrets.TAURI_UPDATER_PUBKEY }}
-                  BETA_UPDATER_ENDPOINT: ${{ secrets.BETA_UPDATER_ENDPOINT }}
+                  TAURI_UPDATER_ENDPOINT: ${{ secrets.BETA_UPDATER_ENDPOINT }}
               run: pnpm run tauri:build:release
 
             - name: Collect macOS beta assets

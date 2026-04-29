@@ -3,7 +3,7 @@ import { ref, watch } from 'vue'
 import { marked } from 'marked'
 import { useToastStore } from '../stores/toastStore'
 import { useI18n } from 'vue-i18n'
-import { getLatestRelease } from '../services/updateService'
+import { getLatestRelease, isNewerVersion, normalizeReleaseVersion } from '../services/updateService'
 import { desktop } from '../services/desktop'
 import type { DesktopRuntimeInfo } from '../services/desktop'
 import { ArrowLeft, Download, LoaderCircle, RefreshCw, ScrollText, X } from 'lucide-vue-next'
@@ -77,7 +77,7 @@ async function checkForUpdates() {
             const update = await desktop.checkForAppUpdate()
             if (update?.available && update.version) {
                 hasUpdate.value = true
-                latestVersion.value = update.version.replace(/^v/, '')
+                latestVersion.value = normalizeReleaseVersion(update.version)
             }
             return
         }
@@ -85,8 +85,8 @@ async function checkForUpdates() {
         const release = await getLatestRelease({ channel: runtimeInfo.value?.channel })
         if (!release || !currentVersion.value) return
 
-        const tagName = release.tagName.replace(/^v/, '').replace(/^beta-v/, '')
-        if (tagName !== currentVersion.value) {
+        const tagName = normalizeReleaseVersion(release.tagName)
+        if (isNewerVersion(currentVersion.value, tagName)) {
             hasUpdate.value = true
             latestVersion.value = tagName
         }

@@ -14,9 +14,7 @@ import { useToastStore } from './stores/toastStore'
 import { useThemeStore } from './stores/themeStore'
 import { ChevronsLeft, ChevronsRight, CircleAlert, Info, LoaderCircle, Settings, X } from 'lucide-vue-next'
 
-// @ts-ignore
-import { version as currentVersion } from '../package.json'
-import { getLatestRelease } from './services/updateService'
+import { getLatestRelease, isNewerVersion, normalizeReleaseVersion } from './services/updateService'
 import { generateRenamePreview } from './services/renameEngine'
 import { replaceBasename } from './utils/path'
 import { desktop, type DesktopRuntimeInfo } from './services/desktop'
@@ -53,40 +51,34 @@ const updateAvailable = ref(false)
 const latestVersion = ref('')
 const releaseUrl = ref('')
 
-function isNewerVersion(oldVer: string, newVer: string) {
-  const oldParts = oldVer.split('.').map(Number)
-  const newParts = newVer.split('.').map(Number)
-  for (let i = 0; i < 3; i++) {
-    const a = oldParts[i] || 0
-    const b = newParts[i] || 0
-    if (a < b) return true
-    if (a > b) return false
-  }
-  return false
-}
-
 async function checkForUpdates() {
   try {
+    updateAvailable.value = false
+
+    if (runtimeInfo.value?.runtime === 'tauri' && desktop.checkForAppUpdate) {
+      const appUpdate = await desktop.checkForAppUpdate()
+      if (appUpdate?.available) {
+        const release = await getLatestRelease({
+          channel: runtimeInfo.value?.channel,
+        })
+        updateAvailable.value = true
+        latestVersion.value = normalizeReleaseVersion(appUpdate.version ?? release?.tagName ?? '')
+        releaseUrl.value = release?.htmlUrl ?? ''
+      }
+      return
+    }
+
     const release = await getLatestRelease({
       channel: runtimeInfo.value?.channel,
     })
     if (!release) return
 
-    if (runtimeInfo.value?.runtime === 'tauri' && runtimeInfo.value.channel === 'beta' && desktop.checkForAppUpdate) {
-      const appUpdate = await desktop.checkForAppUpdate()
-      if (appUpdate?.available) {
-        updateAvailable.value = true
-        latestVersion.value = appUpdate.version ?? release.tagName
-        releaseUrl.value = release.htmlUrl
-      }
-      return
-    }
+    const remoteVersion = normalizeReleaseVersion(release.tagName)
+    const installedVersion = runtimeInfo.value?.version ?? ''
 
-    const remoteVersion = release.tagName.replace(/^beta-v|^v/, '')
-
-    if (isNewerVersion(currentVersion, remoteVersion)) {
+    if (installedVersion && isNewerVersion(installedVersion, remoteVersion)) {
       updateAvailable.value = true
-      latestVersion.value = release.tagName
+      latestVersion.value = remoteVersion
       releaseUrl.value = release.htmlUrl
     }
   } catch (e) {
@@ -95,7 +87,7 @@ async function checkForUpdates() {
 }
 
 async function openReleasePage() {
-  if (runtimeInfo.value?.runtime === 'tauri' && runtimeInfo.value.channel === 'beta' && desktop.installAppUpdate) {
+  if (runtimeInfo.value?.runtime === 'tauri' && desktop.installAppUpdate) {
     try {
       isInstallingUpdate.value = true
       await desktop.installAppUpdate()

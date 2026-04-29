@@ -27,15 +27,11 @@ A powerful and intuitive cross-platform batch file renaming tool (Windows / macO
 
 ### macOS Users Note
 
-Since this app is not signed with an Apple Developer Certificate (as I am an independent developer), you might encounter an **"App is damaged and can't be opened"** error when launching it for the first time on macOS. This is due to macOS security features, not because the app is actually damaged.
-
-To resolve this, please open the Terminal and run the following command:
+Unsigned macOS builds may still trigger Gatekeeper warnings depending on how the app was downloaded and unpacked. If your system blocks the app because of quarantine metadata, you can clear it manually:
 
 ```bash
-sudo xattr -r -d com.apple.quarantine /Applications/Regex\ Batch\ Renamer.app
+xattr -r -d com.apple.quarantine /Applications/Regex\ Batch\ Renamer.app
 ```
-
-Enter your password when prompted, and you should be able to open the app normally.
 
 ### Windows / Linux
 
@@ -71,35 +67,35 @@ _For more tutorials, click the "?" button in the software interface._
 
 This project is built using modern web technologies:
 
-- **Desktop Runtime**: [Electron](https://www.electronjs.org/) for the current stable line, [Tauri](https://tauri.app/) for the beta migration line
+- **Desktop Runtime**: [Tauri](https://tauri.app/) for the stable desktop application, with the previous [Electron](https://www.electronjs.org/) line retained temporarily during retirement
 - **Frontend**: [Vue 3](https://vuejs.org/) (Composition API)
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 - **Build Tool**: [Vite](https://vitejs.dev/)
 - **State Management**: [Pinia](https://pinia.vuejs.org/)
 
-## 🧪 Beta Migration Track
+## 🧪 Release Channels
 
-The stable application line remains on Electron in `main`.
+The stable desktop release line now runs on Tauri in `main`.
 
-The Tauri migration is isolated to the `beta` branch with a separate delivery path:
+The beta channel remains available with a separate delivery path:
 
-- `main` + `v*` tags: stable Electron releases
+- `main` + `v*` tags: stable Tauri releases
 - `beta` branch pushes: Tauri beta validation CI only
 - `beta-v*` tags: Tauri GitHub draft pre-releases for manual review
 
 Useful commands:
 
 ```bash
-pnpm run electron:dev
-pnpm run electron:build
 pnpm run tauri:dev
 pnpm run tauri:build
+pnpm run electron:dev
+pnpm run electron:build
 ```
 
-If `TAURI_UPDATER_PUBKEY` and `BETA_UPDATER_ENDPOINT` are provided, `pnpm run tauri:build:release` generates a release config with updater metadata. Without those values, the beta build still completes, but updater artifacts are not enabled.
+If `TAURI_UPDATER_PUBKEY` and a channel-specific updater endpoint are provided, `pnpm run tauri:build:release` generates a release config with updater metadata. Without those values, the build still completes, but app-integrated updating is not enabled.
 
-Beta releases are now created as draft prereleases so the maintainer can review assets before publishing them. The Tauri beta app can use the updater plugin for in-app updates only after the reviewed release is published and the configured updater endpoint serves valid metadata.
+Stable releases are published directly. Beta releases are created as draft prereleases so the maintainer can review assets before publishing them. The Tauri app checks for updates on launch and prefers in-app installation whenever the updater endpoint serves valid metadata for the active channel.
 
 The planned Electron removal gates and deletion order are documented in [docs/electron-retirement-plan.md](docs/electron-retirement-plan.md).
 

@@ -1,6 +1,6 @@
 use serde::Serialize;
 use std::fs;
-use tauri::{Manager, WebviewWindow};
+use tauri::WebviewWindow;
 
 #[derive(serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -32,13 +32,25 @@ fn platform_name() -> String {
     }
 }
 
+fn release_channel() -> String {
+    option_env!("APP_RELEASE_CHANNEL")
+        .unwrap_or("stable")
+        .to_string()
+}
+
+fn runtime_version() -> String {
+    option_env!("APP_VERSION")
+        .unwrap_or(env!("CARGO_PKG_VERSION"))
+        .to_string()
+}
+
 #[tauri::command]
 fn runtime_info() -> RuntimeInfo {
     RuntimeInfo {
         platform: platform_name(),
         runtime: "tauri".to_string(),
-        channel: "beta".to_string(),
-        version: env!("CARGO_PKG_VERSION").to_string(),
+        channel: release_channel(),
+        version: runtime_version(),
     }
 }
 
@@ -113,12 +125,6 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
-        .setup(|app| {
-            if let Some(window) = app.get_webview_window("main") {
-                let _ = window.set_title("Regex Batch Renamer Beta");
-            }
-            Ok(())
-        })
         .invoke_handler(tauri::generate_handler![
             runtime_info,
             rename_files,

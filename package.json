@@ -7,18 +7,19 @@
         "email": "junyou1998@gmail.com"
     },
     "private": true,
-    "version": "0.4.2",
+    "version": "0.5.0",
     "type": "module",
     "scripts": {
-        "dev": "vite --config vite.config.mts",
-        "build": "vue-tsc && vite build --config vite.config.mts && electron-builder",
-        "preview": "vite preview --config vite.config.mts",
+        "dev": "pnpm tauri:dev",
+        "build": "pnpm tauri:build",
+        "preview": "vite preview --config vite.config.tauri.mts",
         "electron:dev": "vite --config vite.config.mts",
         "electron:build": "vue-tsc && vite build --config vite.config.mts && electron-builder",
         "tauri:dev": "pnpm tauri dev",
         "tauri:build": "vue-tsc && node scripts/run-tauri-build.mjs",
         "tauri:build:release": "node scripts/run-tauri-release-build.mjs",
-        "beta:ci": "vue-tsc && vite build --config vite.config.tauri.mts"
+        "tauri:ci": "vue-tsc && vite build --config vite.config.tauri.mts",
+        "beta:ci": "pnpm run tauri:ci"
     },
     "dependencies": {
         "@tauri-apps/api": "^2.8.0",

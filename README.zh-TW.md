@@ -27,15 +27,11 @@
 
 ### macOS 使用者注意事項
 
-由於本軟體未經 Apple 開發者簽章（因為我是一般獨立開發者），在 macOS 上安裝後首次開啟可能會出現 **「應用程式已損毀，無法打開」** 的錯誤訊息。這是 macOS 的安全機制所致，並非軟體真的損壞。
-
-請開啟終端機 (Terminal)，並執行以下指令來修復：
+未簽章的 macOS build 仍有可能因下載與解壓流程不同而觸發 Gatekeeper 警告。若系統因 quarantine metadata 阻擋應用程式，可手動清除：
 
 ```bash
-sudo xattr -r -d com.apple.quarantine /Applications/Regex\ Batch\ Renamer.app
+xattr -r -d com.apple.quarantine /Applications/Regex\ Batch\ Renamer.app
 ```
-
-執行後輸入密碼即可正常開啟。
 
 ### Windows / Linux
 
@@ -71,35 +67,35 @@ _更多教學請點擊軟體介面中的「？」按鈕查看。_
 
 本專案使用以下現代化網頁技術構建：
 
-- **桌面 Runtime**：[Electron](https://www.electronjs.org/) 作為目前穩定線，[Tauri](https://tauri.app/) 作為 beta 遷移線
+- **桌面 Runtime**：[Tauri](https://tauri.app/) 作為目前穩定桌面應用，先前的 [Electron](https://www.electronjs.org/) 線暫時保留於退場過渡期
 - **前端框架**：[Vue 3](https://vuejs.org/) (Composition API)
 - **語言**：[TypeScript](https://www.typescriptlang.org/)
 - **樣式**：[Tailwind CSS](https://tailwindcss.com/)
 - **建置工具**：[Vite](https://vitejs.dev/)
 - **狀態管理**：[Pinia](https://pinia.vuejs.org/)
 
-## 🧪 Beta 遷移線
+## 🧪 發佈渠道
 
-穩定版目前仍維持在 `main` 分支上的 Electron 架構。
+穩定版現在已切換為 `main` 分支上的 Tauri 發佈線。
 
-Tauri 重構會隔離在 `beta` 分支，並使用獨立發佈流程：
+Beta 渠道仍然保留，並使用獨立流程：
 
-- `main` + `v*` tag：Electron 穩定版 release
+- `main` + `v*` tag：Tauri 穩定版 release
 - `beta` 分支 push：只跑 Tauri beta 驗證 CI
 - `beta-v*` tag：建立供人工審核的 Tauri GitHub draft pre-release
 
 常用指令：
 
 ```bash
-pnpm run electron:dev
-pnpm run electron:build
 pnpm run tauri:dev
 pnpm run tauri:build
+pnpm run electron:dev
+pnpm run electron:build
 ```
 
-若有提供 `TAURI_UPDATER_PUBKEY` 與 `BETA_UPDATER_ENDPOINT`，`pnpm run tauri:build:release` 會產生包含 updater 設定的 release config；若沒有提供，beta 版本仍可建置，但不會啟用 updater artifact。
+若有提供 `TAURI_UPDATER_PUBKEY` 與對應 channel 的 updater endpoint，`pnpm run tauri:build:release` 會產生包含 updater 設定的 release config；若沒有提供，建置仍可完成，但不會啟用 app 內更新。
 
-Beta release 現在會先建立成 draft prerelease，讓維護者人工檢查資產後再正式發佈。只有在 draft 被發佈且 updater endpoint 提供合法 metadata 之後，Tauri beta app 的 app 內更新才會實際生效。
+Stable release 會直接正式發佈。Beta release 仍會先建立成 draft prerelease，讓維護者人工檢查資產後再正式發佈。只要 active channel 的 updater endpoint 提供合法 metadata，Tauri app 就會在啟動時自動檢查更新並優先使用 app 內安裝。
 
 Electron 退場的門檻與刪除順序已記錄在 [docs/electron-retirement-plan.md](docs/electron-retirement-plan.md)。
 
