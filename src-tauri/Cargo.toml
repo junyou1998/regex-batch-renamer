@@ -1,6 +1,6 @@
 [package]
 name = "regex-batch-renamer-beta"
-version = "0.4.2-beta.0"
+version = "0.4.2-beta.1"
 description = "Tauri beta shell for Regex Batch Renamer"
 authors = ["junyou"]
 edition = "2021"

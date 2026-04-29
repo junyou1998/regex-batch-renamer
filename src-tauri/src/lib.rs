@@ -21,6 +21,7 @@ struct RuntimeInfo {
     platform: String,
     runtime: String,
     channel: String,
+    version: String,
 }
 
 fn platform_name() -> String {
@@ -37,6 +38,7 @@ fn runtime_info() -> RuntimeInfo {
         platform: platform_name(),
         runtime: "tauri".to_string(),
         channel: "beta".to_string(),
+        version: env!("CARGO_PKG_VERSION").to_string(),
     }
 }
 
