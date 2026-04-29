@@ -6,7 +6,7 @@ on:
             - "beta-v*"
 
 jobs:
-    release:
+    build:
         runs-on: ${{ matrix.os }}
         permissions:
             contents: write
@@ -61,10 +61,64 @@ jobs:
                   BETA_UPDATER_ENDPOINT: ${{ secrets.BETA_UPDATER_ENDPOINT }}
               run: pnpm run tauri:build:release
 
+            - name: Collect macOS beta assets
+              if: matrix.os == 'macos-latest'
+              run: |
+                  mkdir -p release-assets
+                  APP_PATH=$(find src-tauri/target/release/bundle/macos -maxdepth 1 -name "*.app" -type d | head -n 1)
+                  if [ -n "$APP_PATH" ]; then
+                    ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "release-assets/$(basename "$APP_PATH").zip"
+                  fi
+                  find src-tauri/target/release/bundle -type f \( -name "*.tar.gz" -o -name "*.sig" -o -name "latest*.json" -o -name "latest*.yml" \) -exec cp {} release-assets/ \;
+                  test -n "$(find release-assets -type f -maxdepth 1 | head -n 1)"
+
+            - name: Collect Linux beta assets
+              if: matrix.os == 'ubuntu-latest'
+              run: |
+                  mkdir -p release-assets
+                  find src-tauri/target/release/bundle -type f \( -name "*.AppImage" -o -name "*.deb" -o -name "*.tar.gz" -o -name "*.sig" -o -name "latest*.json" -o -name "latest*.yml" \) -exec cp {} release-assets/ \;
+                  test -n "$(find release-assets -type f -maxdepth 1 | head -n 1)"
+
+            - name: Collect Windows beta assets
+              if: matrix.os == 'windows-latest'
+              shell: pwsh
+              run: |
+                  New-Item -ItemType Directory -Force -Path release-assets | Out-Null
+                  $patterns = @("*.exe", "*.msi", "*.zip", "*.sig", "latest*.json", "latest*.yml")
+                  foreach ($pattern in $patterns) {
+                    Get-ChildItem -Path "src-tauri/target/release/bundle" -Recurse -File -Filter $pattern | ForEach-Object {
+                      Copy-Item $_.FullName -Destination "release-assets"
+                    }
+                  }
+                  if (-not (Get-ChildItem -Path "release-assets" -File | Select-Object -First 1)) {
+                    throw "No Windows release assets were collected."
+                  }
+
+            - name: Upload beta release assets
+              uses: actions/upload-artifact@v4
+              with:
+                  name: beta-assets-${{ matrix.os }}
+                  path: release-assets/*
+                  if-no-files-found: error
+
+    publish:
+        needs: build
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+
+        steps:
+            - name: Download collected beta assets
+              uses: actions/download-artifact@v4
+              with:
+                  pattern: beta-assets-*
+                  path: release-assets
+                  merge-multiple: true
+
             - name: Publish beta pre-release
               uses: softprops/action-gh-release@v2
               with:
                   prerelease: true
                   generate_release_notes: true
                   files: |
-                      src-tauri/target/release/bundle/**/*
+                      release-assets/*

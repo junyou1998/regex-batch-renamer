@@ -23,8 +23,9 @@ const releaseConfig = JSON.parse(releaseRaw)
 
 const updaterPubkey = process.env.TAURI_UPDATER_PUBKEY ?? ''
 const updaterEndpoint = process.env.BETA_UPDATER_ENDPOINT ?? ''
+const updaterSigningKey = process.env.TAURI_SIGNING_PRIVATE_KEY ?? ''
 
-if (!updaterPubkey || !updaterEndpoint) {
+if (!updaterPubkey || !updaterEndpoint || !updaterSigningKey) {
   await fs.writeFile(outputPath, JSON.stringify(baseConfig, null, 2))
   console.log('Generated base Tauri config without updater overrides')
   process.exit(0)
