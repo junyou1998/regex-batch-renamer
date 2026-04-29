@@ -71,7 +71,7 @@ _For more tutorials, click the "?" button in the software interface._
 
 This project is built using modern web technologies:
 
-- **Core**: [Electron](https://www.electronjs.org/)
+- **Desktop Runtime**: [Electron](https://www.electronjs.org/) for the current stable line, [Tauri](https://tauri.app/) for the beta migration line
 - **Frontend**: [Vue 3](https://vuejs.org/) (Composition API)
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/)
@@ -86,7 +86,7 @@ The Tauri migration is isolated to the `beta` branch with a separate delivery pa
 
 - `main` + `v*` tags: stable Electron releases
 - `beta` branch pushes: Tauri beta validation CI only
-- `beta-v*` tags: Tauri GitHub pre-releases
+- `beta-v*` tags: Tauri GitHub draft pre-releases for manual review
 
 Useful commands:
 
@@ -99,7 +99,9 @@ pnpm run tauri:build
 
 If `TAURI_UPDATER_PUBKEY` and `BETA_UPDATER_ENDPOINT` are provided, `pnpm run tauri:build:release` generates a release config with updater metadata. Without those values, the beta build still completes, but updater artifacts are not enabled.
 
-Beta packaging intentionally avoids forcing every possible bundle type on every platform. In particular, macOS beta builds use the `.app` bundle and updater archive path instead of requiring `.dmg` generation for every local or CI build.
+Beta releases are now created as draft prereleases so the maintainer can review assets before publishing them. The Tauri beta app can use the updater plugin for in-app updates only after the reviewed release is published and the configured updater endpoint serves valid metadata.
+
+The planned Electron removal gates and deletion order are documented in [docs/electron-retirement-plan.md](docs/electron-retirement-plan.md).
 
 ## ☕ Support Development
 

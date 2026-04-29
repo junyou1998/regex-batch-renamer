@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Regex Batch Renamer Beta",
-  "version": "0.4.2-beta.0",
+  "version": "0.4.2-beta.1",
   "identifier": "com.junyou.regexbatchrenamer.beta",
   "build": {
     "beforeDevCommand": "pnpm vite --config vite.config.tauri.mts",

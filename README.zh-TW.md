@@ -71,7 +71,7 @@ _更多教學請點擊軟體介面中的「？」按鈕查看。_
 
 本專案使用以下現代化網頁技術構建：
 
-- **核心框架**：[Electron](https://www.electronjs.org/)
+- **桌面 Runtime**：[Electron](https://www.electronjs.org/) 作為目前穩定線，[Tauri](https://tauri.app/) 作為 beta 遷移線
 - **前端框架**：[Vue 3](https://vuejs.org/) (Composition API)
 - **語言**：[TypeScript](https://www.typescriptlang.org/)
 - **樣式**：[Tailwind CSS](https://tailwindcss.com/)
@@ -86,7 +86,7 @@ Tauri 重構會隔離在 `beta` 分支，並使用獨立發佈流程：
 
 - `main` + `v*` tag：Electron 穩定版 release
 - `beta` 分支 push：只跑 Tauri beta 驗證 CI
-- `beta-v*` tag：發佈 Tauri GitHub pre-release
+- `beta-v*` tag：建立供人工審核的 Tauri GitHub draft pre-release
 
 常用指令：
 
@@ -99,7 +99,9 @@ pnpm run tauri:build
 
 若有提供 `TAURI_UPDATER_PUBKEY` 與 `BETA_UPDATER_ENDPOINT`，`pnpm run tauri:build:release` 會產生包含 updater 設定的 release config；若沒有提供，beta 版本仍可建置，但不會啟用 updater artifact。
 
-Beta 打包流程不會強制每個平台都產出所有封裝格式。以 macOS 為例，beta 版目前以 `.app` 與 updater archive 為主，不把 `.dmg` 視為每次本地或 CI 建置都必須成功的前提。
+Beta release 現在會先建立成 draft prerelease，讓維護者人工檢查資產後再正式發佈。只有在 draft 被發佈且 updater endpoint 提供合法 metadata 之後，Tauri beta app 的 app 內更新才會實際生效。
+
+Electron 退場的門檻與刪除順序已記錄在 [docs/electron-retirement-plan.md](docs/electron-retirement-plan.md)。
 
 ## ☕ 贊助開發
 
