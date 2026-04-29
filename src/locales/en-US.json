@@ -46,7 +46,8 @@
     "dropZone": {
         "text": "Drag & Drop Files Here or",
         "action": "Click to Select",
-        "supports": "Supports multiple files and folders"
+        "supports": "Supports multiple files and folders",
+        "openFailed": "Failed to open file picker"
     },
     "operations": {
         "title": "Operations",
@@ -58,6 +59,7 @@
         "moveDown": "Move Down",
         "remove": "Remove",
         "toggleEnable": "Enable/Disable Rule",
+        "reorder": "Drag to reorder",
         "patternLabel": "Find",
         "useRegex": "Use Regex",
         "placeholderPatternRegex": "Enter Regex pattern...",
@@ -92,6 +94,9 @@
         "copied": "Copied: {text}",
         "copyFailed": "Copy failed"
     },
+    "errors": {
+        "selectDirectoryFailed": "Failed to open folder picker"
+    },
     "theme": {
         "light": "Light Mode",
         "dark": "Dark Mode",
@@ -103,7 +108,7 @@
         "description": "A simple, powerful, and open-source cross-platform batch renaming tool that supports Windows, macOS, and Linux.",
         "developer": "Developer Info",
         "bio": "Hi! I'm Junyou. This project was created to make tedious file renaming tasks easier. If you find this tool helpful, consider buying me a coffee to support continued development and maintenance!",
-        "thanks": "Thank you for your support and encouragement ❤️",
+        "thanks": "Thank you for your support and encouragement",
         "version": "Version",
         "changelog": "Changelog",
         "changelogLoading": "Loading changelog...",

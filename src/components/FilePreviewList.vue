@@ -2,10 +2,11 @@
 import { useFileStore } from '../stores/fileStore'
 import { useToastStore } from '../stores/toastStore'
 import { generateDiffHtml } from '../utils/diff'
-import { ref, watch, nextTick, onBeforeUnmount, type Ref } from 'vue'
+import { computed, ref, watch, nextTick, onBeforeUnmount, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useVirtualList } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
+import { Check, CircleX, Clock, GripVertical, X } from 'lucide-vue-next'
 
 const fileStore = useFileStore()
 const toastStore = useToastStore()
@@ -95,6 +96,9 @@ async function copyToClipboard(text: string) {
 
 const draggedFileId = ref<string | null>(null)
 const dragOverFileId = ref<string | null>(null)
+const dragOverPosition = ref<'before' | 'after' | null>(null)
+const dragPreview = ref({ visible: false, x: 0, y: 0 })
+const draggedFile = computed(() => fileStore.files.find(file => file.id === draggedFileId.value))
 
 const AUTO_SCROLL_EDGE_THRESHOLD = 32
 const AUTO_SCROLL_STEP = 16
@@ -148,44 +152,94 @@ function handleAutoScroll(clientY: number) {
   stopAutoScroll()
 }
 
-function onDragStart(event: DragEvent, fileId: string) {
-  draggedFileId.value = fileId
-  if (event.dataTransfer) {
-    event.dataTransfer.effectAllowed = 'move'
-    event.dataTransfer.dropEffect = 'move'
-  }
-}
+function getDropTarget(clientX: number, clientY: number) {
+  const container = virtualContainerRef.value
+  if (!container) return null
 
-function onDragEnter(fileId: string) {
-  if (draggedFileId.value !== null && draggedFileId.value !== fileId) {
-    dragOverFileId.value = fileId
-  }
-}
+  const hit = document.elementFromPoint(clientX, clientY)
+  const row = hit instanceof HTMLElement
+    ? hit.closest<HTMLElement>('[data-file-id]')
+    : null
 
-function onDragOver(event: DragEvent, fileId: string) {
-  event.preventDefault()
-  onDragEnter(fileId)
-  handleAutoScroll(event.clientY)
-}
-
-function onDragEnd() {
-  draggedFileId.value = null
-  dragOverFileId.value = null
-  stopAutoScroll()
-}
-
-function onDrop(fileId: string) {
-  if (draggedFileId.value !== null && draggedFileId.value !== fileId) {
-    const fromIndex = getFileIndexById(draggedFileId.value)
-    const toIndex = getFileIndexById(fileId)
-    if (fromIndex !== -1 && toIndex !== -1) {
-      fileStore.reorderFiles(fromIndex, toIndex)
+  if (row && container.contains(row)) {
+    const id = row.dataset.fileId
+    if (!id || id === draggedFileId.value) return null
+    const rect = row.getBoundingClientRect()
+    return {
+      id,
+      position: clientY < rect.top + rect.height / 2 ? 'before' as const : 'after' as const,
     }
   }
-  onDragEnd()
+
+  const visibleRows = Array.from(container.querySelectorAll<HTMLElement>('[data-file-id]'))
+    .filter(rowEl => rowEl.dataset.fileId !== draggedFileId.value)
+
+  const first = visibleRows.at(0)
+  const last = visibleRows.at(-1)
+  if (first && clientY < first.getBoundingClientRect().top) {
+    return { id: first.dataset.fileId || '', position: 'before' as const }
+  }
+  if (last && clientY > last.getBoundingClientRect().bottom) {
+    return { id: last.dataset.fileId || '', position: 'after' as const }
+  }
+
+  return null
+}
+
+function updateDropTarget(clientX: number, clientY: number) {
+  const target = getDropTarget(clientX, clientY)
+  dragOverFileId.value = target?.id || null
+  dragOverPosition.value = target?.position || null
+}
+
+function startFileReorder(event: PointerEvent, fileId: string) {
+  if (event.button !== 0) return
+  event.preventDefault()
+  draggedFileId.value = fileId
+  dragPreview.value = { visible: true, x: event.clientX, y: event.clientY }
+  updateDropTarget(event.clientX, event.clientY)
+  window.addEventListener('pointermove', onPointerMove)
+  window.addEventListener('pointerup', onPointerUp)
+  window.addEventListener('pointercancel', onPointerCancel)
+}
+
+function onPointerMove(event: PointerEvent) {
+  if (!draggedFileId.value) return
+  event.preventDefault()
+  dragPreview.value = { visible: true, x: event.clientX, y: event.clientY }
+  handleAutoScroll(event.clientY)
+  updateDropTarget(event.clientX, event.clientY)
+}
+
+function onPointerUp() {
+  if (draggedFileId.value && dragOverFileId.value && dragOverPosition.value) {
+    const fromIndex = getFileIndexById(draggedFileId.value)
+    const targetIndex = getFileIndexById(dragOverFileId.value)
+    if (fromIndex !== -1 && targetIndex !== -1) {
+      let insertIndex = targetIndex + (dragOverPosition.value === 'after' ? 1 : 0)
+      if (fromIndex < insertIndex) {
+        insertIndex -= 1
+      }
+      insertIndex = Math.max(0, Math.min(fileStore.files.length - 1, insertIndex))
+      fileStore.reorderFiles(fromIndex, insertIndex)
+    }
+  }
+  onPointerCancel()
+}
+
+function onPointerCancel() {
+  draggedFileId.value = null
+  dragOverFileId.value = null
+  dragOverPosition.value = null
+  dragPreview.value = { visible: false, x: 0, y: 0 }
+  stopAutoScroll()
+  window.removeEventListener('pointermove', onPointerMove)
+  window.removeEventListener('pointerup', onPointerUp)
+  window.removeEventListener('pointercancel', onPointerCancel)
 }
 
 onBeforeUnmount(() => {
+  onPointerCancel()
   stopAutoScroll()
 })
 </script>
@@ -222,26 +276,26 @@ onBeforeUnmount(() => {
     <!-- Virtual List Container -->
     <div v-if="fileStore.files.length > 0" v-bind="containerProps" class="flex-1 overflow-auto custom-scrollbar w-full">
       <div v-bind="wrapperProps" class="w-full">
-        <div v-for="{ data: file, index: virtualIndex } in virtualList" :key="file.id" draggable="true"
-          @dragstart="onDragStart($event, file.id)" @dragenter="onDragEnter(file.id)" @dragover="onDragOver($event, file.id)"
-          @drop.prevent="onDrop(file.id)" @dragend="onDragEnd" :style="{ height: ROW_HEIGHT + 'px' }" :class="[
-            'file-list-row items-center transition-colors group cursor-grab active:cursor-grabbing',
-            dragOverFileId === file.id ? 'border-t-2 border-blue-500' : '',
+        <div v-for="{ data: file, index: virtualIndex } in virtualList" :key="file.id" :data-file-id="file.id"
+          :style="{ height: ROW_HEIGHT + 'px' }" :class="[
+            'file-list-row items-center transition-colors group',
+            dragOverFileId === file.id && dragOverPosition === 'before' ? 'border-t-2 border-blue-500' : '',
+            dragOverFileId === file.id && dragOverPosition === 'after' ? 'border-b-2 border-blue-500' : '',
             virtualIndex % 2 === 0
               ? 'bg-white dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-800/50'
               : 'bg-slate-50 dark:bg-slate-800/30 hover:bg-slate-100 dark:hover:bg-slate-800/50',
-            draggedFileId === file.id ? 'opacity-50 bg-slate-200 dark:bg-slate-700' : ''
+            draggedFileId === file.id ? 'opacity-60 ring-1 ring-blue-400 bg-blue-50 dark:bg-blue-950/30' : ''
           ]">
           <!-- Index Column -->
           <div class="px-4 py-2 text-xs text-slate-500 dark:text-slate-500 text-center font-mono">
             <div class="flex items-center justify-center">
               <span class="group-hover:hidden">{{ virtualIndex + 1 }}</span>
-              <span class="hidden group-hover:block text-slate-400 cursor-grab">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path
-                    d="M7 2a2 2 0 10.001 4.001A2 2 0 007 2zm0 6a2 2 0 10.001 4.001A2 2 0 007 8zm0 6a2 2 0 10.001 4.001A2 2 0 007 14zm6-8a2 2 0 10-.001-4.001A2 2 0 0013 6zm0 2a2 2 0 10.001 4.001A2 2 0 0013 8zm0 6a2 2 0 10.001 4.001A2 2 0 0013 14z" />
-                </svg>
-              </span>
+              <button type="button"
+                class="hidden group-hover:flex text-slate-400 cursor-grab active:cursor-grabbing touch-none"
+                :title="$t('operations.reorder')"
+                @pointerdown.stop="startFileReorder($event, file.id)">
+                <GripVertical class="w-4 h-4" />
+              </button>
             </div>
           </div>
 
@@ -264,16 +318,12 @@ onBeforeUnmount(() => {
 
           <!-- Status Column -->
           <div class="px-4 py-2 text-center">
-            <span v-if="file.status === 'success'" class="text-green-500 text-sm font-bold" title="成功">✓</span>
-            <span v-else-if="file.status === 'error'" class="text-red-500 text-sm font-bold"
-              :title="file.errorMessage">✗</span>
+            <Check v-if="file.status === 'success'" class="inline-block w-4 h-4 text-green-500" title="成功" />
+            <CircleX v-else-if="file.status === 'error'" class="inline-block w-4 h-4 text-red-500"
+              :title="file.errorMessage" />
             <span v-else-if="file.originalName !== file.newName"
               class="inline-flex items-center justify-center w-5 h-5 text-amber-500" title="待處理">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                  clip-rule="evenodd" />
-              </svg>
+              <Clock class="w-4 h-4" />
             </span>
           </div>
 
@@ -282,7 +332,7 @@ onBeforeUnmount(() => {
             <button @click="removeFile(file.id)"
               class="text-slate-500 dark:text-slate-600 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
               :title="$t('preview.remove')">
-              ×
+              <X class="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -298,6 +348,13 @@ onBeforeUnmount(() => {
 
     <!-- Teleported Tooltip -->
     <Teleport to="body">
+      <div v-if="dragPreview.visible && draggedFile"
+        class="fixed z-[100000] pointer-events-none max-w-sm rounded-lg border border-blue-300 dark:border-blue-500 bg-white/95 dark:bg-slate-900/95 px-3 py-2 shadow-xl ring-1 ring-blue-500/20"
+        :style="{ left: `${dragPreview.x + 14}px`, top: `${dragPreview.y + 14}px` }">
+        <div class="text-xs font-semibold text-blue-600 dark:text-blue-300">#{{ getFileIndexById(draggedFile.id) + 1
+          }}</div>
+        <div class="truncate text-sm text-slate-800 dark:text-slate-100">{{ draggedFile.originalName }}</div>
+      </div>
       <div v-show="tooltip.visible" ref="tooltipRef"
         class="fixed z-9999 bg-slate-800 dark:bg-slate-900 text-slate-200 dark:text-slate-200 px-3 py-2 rounded-lg shadow-xl text-xs border border-slate-600 dark:border-slate-700 pointer-events-none whitespace-nowrap"
         :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }">

@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { computed, nextTick, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { useSettingsStore } from '../stores/settingsStore'
 import { useI18n } from 'vue-i18n'
+import type { Locale } from '../services/preferences'
+import { Check, ChevronDown, Minus, Plus, Settings, X } from 'lucide-vue-next'
 
 const props = defineProps<{
     modelValue: boolean
@@ -24,7 +26,13 @@ const availableLocales = [
     { code: 'zh-CN', name: '简体中文' },
     { code: 'en-US', name: 'English' },
     { code: 'ja-JP', name: '日本語' }
-]
+] as const satisfies readonly { code: Locale; name: string }[]
+
+const showLanguageMenu = ref(false)
+
+const selectedLanguage = computed(() => {
+    return availableLocales.find(lang => lang.code === settingsStore.language) ?? availableLocales[0]
+})
 
 const themeOptions = [
     { value: 'auto', labelKey: 'theme.auto' },
@@ -39,9 +47,47 @@ watch(() => settingsStore.language, (newLang) => {
 
 function handleKeydown(e: KeyboardEvent) {
     if (e.key === 'Escape') {
+        if (showLanguageMenu.value) {
+            showLanguageMenu.value = false
+            return
+        }
         isOpen.value = false
     }
 }
+
+function toggleLanguageMenu() {
+    showLanguageMenu.value = !showLanguageMenu.value
+}
+
+function selectLanguage(value: Locale) {
+    settingsStore.setLanguage(value)
+    showLanguageMenu.value = false
+}
+
+function handleDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement
+    if (!target.closest('.language-select')) {
+        showLanguageMenu.value = false
+    }
+}
+
+watch(showLanguageMenu, (open) => {
+    if (open) {
+        document.addEventListener('click', handleDocumentClick)
+    } else {
+        document.removeEventListener('click', handleDocumentClick)
+    }
+})
+
+watch(isOpen, (open) => {
+    if (!open) {
+        showLanguageMenu.value = false
+    }
+})
+
+onBeforeUnmount(() => {
+    document.removeEventListener('click', handleDocumentClick)
+})
 
 function adjustZoom(delta: number) {
     const newValue = settingsStore.zoomLevel + delta
@@ -126,22 +172,12 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                     <div
                         class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
                         <h2 class="text-lg font-semibold text-slate-800 dark:text-white flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-500" viewBox="0 0 20 20"
-                                fill="currentColor">
-                                <path fill-rule="evenodd"
-                                    d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
-                                    clip-rule="evenodd" />
-                            </svg>
+                            <Settings class="w-5 h-5 text-slate-500" />
                             {{ $t('settings.title') }}
                         </h2>
                         <button @click="isOpen = false"
                             class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
-                                fill="currentColor">
-                                <path fill-rule="evenodd"
-                                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                    clip-rule="evenodd" />
-                            </svg>
+                            <X class="h-5 w-5" />
                         </button>
                     </div>
 
@@ -195,12 +231,30 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                                 <label class="block text-sm font-medium text-slate-700 dark:text-slate-200">
                                     {{ $t('settings.language') }}
                                 </label>
-                                <select v-model="settingsStore.language"
-                                    class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50">
-                                    <option v-for="lang in availableLocales" :key="lang.code" :value="lang.code">
-                                        {{ lang.name }}
-                                    </option>
-                                </select>
+                                <div class="language-select relative" @click.stop>
+                                    <button type="button" @click="toggleLanguageMenu"
+                                        class="w-full flex items-center justify-between gap-3 px-3 py-2 text-sm border rounded-lg transition-all cursor-pointer bg-white dark:bg-slate-900 text-slate-900 dark:text-white border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50">
+                                        <span class="truncate">{{ selectedLanguage.name }}</span>
+                                        <ChevronDown
+                                            :class="['w-4 h-4 text-slate-400 transition-transform', showLanguageMenu ? 'rotate-180' : '']" />
+                                    </button>
+
+                                    <Transition name="dropdown">
+                                        <div v-if="showLanguageMenu"
+                                            class="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl ring-1 ring-black/5 dark:ring-white/10">
+                                            <button v-for="lang in availableLocales" :key="lang.code" type="button"
+                                                @click="selectLanguage(lang.code)" :class="[
+                                                    'w-full flex items-center justify-between px-3 py-2.5 text-left text-sm transition-colors cursor-pointer',
+                                                    settingsStore.language === lang.code
+                                                        ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300'
+                                                        : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+                                                ]">
+                                                <span>{{ lang.name }}</span>
+                                                <Check v-if="settingsStore.language === lang.code" class="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </Transition>
+                                </div>
                             </div>
 
                             <!-- Theme -->
@@ -229,24 +283,14 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                                 <div class="flex items-center gap-3">
                                     <button @click="adjustZoom(-10)" :disabled="settingsStore.zoomLevel <= 80"
                                         class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20"
-                                            fill="currentColor">
-                                            <path fill-rule="evenodd"
-                                                d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                                                clip-rule="evenodd" />
-                                        </svg>
+                                        <Minus class="w-4 h-4" />
                                     </button>
                                     <input type="range" v-model.number="settingsStore.zoomLevel" min="80" max="200"
                                         step="10"
                                         class="flex-1 h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500">
                                     <button @click="adjustZoom(10)" :disabled="settingsStore.zoomLevel >= 200"
                                         class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 20 20"
-                                            fill="currentColor">
-                                            <path fill-rule="evenodd"
-                                                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                                                clip-rule="evenodd" />
-                                        </svg>
+                                        <Plus class="w-4 h-4" />
                                     </button>
                                     <span
                                         class="w-14 text-center text-sm font-medium text-slate-700 dark:text-slate-300">
