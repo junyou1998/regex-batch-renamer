@@ -17,7 +17,7 @@
         "electron:build": "vue-tsc && vite build --config vite.config.mts && electron-builder",
         "tauri:dev": "pnpm tauri dev",
         "tauri:build": "vue-tsc && node scripts/run-tauri-build.mjs",
-        "tauri:build:release": "node scripts/prepare-tauri-release-config.mjs /tmp/regex-batch-renamer-tauri.release.conf.json && vue-tsc && node scripts/run-tauri-build.mjs --config /tmp/regex-batch-renamer-tauri.release.conf.json",
+        "tauri:build:release": "node scripts/run-tauri-release-build.mjs",
         "beta:ci": "vue-tsc && vite build --config vite.config.tauri.mts"
     },
     "dependencies": {

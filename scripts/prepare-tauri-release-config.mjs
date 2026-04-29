@@ -7,6 +7,8 @@ if (!outputPath) {
   throw new Error('Expected output path argument')
 }
 
+await fs.mkdir(path.dirname(outputPath), { recursive: true })
+
 const rootDir = process.cwd()
 const basePath = path.join(rootDir, 'src-tauri', 'tauri.conf.json')
 const releasePath = path.join(rootDir, 'src-tauri', 'tauri.release.conf.json')
