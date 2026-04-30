@@ -5,9 +5,11 @@
 ## What Changes
 
 - 補齊 stable release workflow，讓它能產生並發佈 Tauri updater 所需的簽章產物與 stable metadata manifest。
+- 收斂各平台 stable release asset 的命名規則，確保 GitHub Release 上傳檔名與 updater manifest 內的下載 URL 完全一致。
 - 將 stable updater metadata 發佈到 repo 內可穩定存取的固定 endpoint，供正式版 app 啟動時自動檢查。
 - 補強 app 端更新檢查邏輯，在 updater 無結果時仍可回退到 GitHub release 比較並提示使用者。
-- 補上正式版 updater 驗證流程與人工測試說明，讓 `v0.5.1 -> v0.5.2` 可實測。
+- 補上 macOS app 內更新安裝流程，讓正式版可從已安裝的 `.app` 下載、驗證、替換並重新開啟。
+- 補上正式版 updater 驗證流程與人工測試說明，讓 `v0.5.2 -> v0.5.3+` 可實測。
 
 ## Capabilities
 
@@ -25,6 +27,10 @@
   - Modified: .github/workflows/release.yml
   - Modified: src/App.vue
   - Modified: src/components/AboutModal.vue
+  - Modified: src/services/desktop/tauri.ts
+  - Modified: src-tauri/src/lib.rs
+  - Modified: src-tauri/Cargo.toml
+  - Modified: src-tauri/Cargo.lock
   - Modified: README.md
   - Modified: README.zh-TW.md
   - New: scripts/generate-updater-manifest.mjs

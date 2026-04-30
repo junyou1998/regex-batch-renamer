@@ -1,7 +1,7 @@
 import { invoke } from '@tauri-apps/api/core'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { open } from '@tauri-apps/plugin-dialog'
-import { openPath } from '@tauri-apps/plugin-opener'
+import { openUrl } from '@tauri-apps/plugin-opener'
 import { check } from '@tauri-apps/plugin-updater'
 import type {
   AppUpdateInfo,
@@ -65,7 +65,7 @@ export const tauriDesktopBridge: DesktopBridge = {
     return mapResults(results)
   },
   async openExternal(url: string) {
-    await openPath(url)
+    await openUrl(url)
   },
   async setZoomFactor(factor: number) {
     await invoke('set_zoom_factor', { factor })
@@ -115,6 +115,12 @@ export const tauriDesktopBridge: DesktopBridge = {
     }
   },
   async installAppUpdate() {
+    const runtime = await runtimeInfo()
+    if (runtime.platform === 'darwin') {
+      await invoke('install_app_update')
+      return
+    }
+
     const update = await check()
     if (!update) return
     await update.downloadAndInstall()

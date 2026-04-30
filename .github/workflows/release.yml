@@ -85,17 +85,15 @@ jobs:
                   mkdir -p release-assets/macos
                   for file in src-tauri/target/release/bundle/dmg/*.dmg; do
                     [ -e "$file" ] || continue
-                    cp "$file" "release-assets/macos/"
+                    cp "$file" "release-assets/macos/Regex.Batch.Renamer_${GITHUB_REF_NAME#v}_${{ matrix.arch_suffix }}.dmg"
                   done
                   for file in src-tauri/target/release/bundle/macos/*.app.tar.gz; do
                     [ -e "$file" ] || continue
-                    base="$(basename "$file" .app.tar.gz)"
-                    cp "$file" "release-assets/macos/${base}_${{ matrix.arch_suffix }}.app.tar.gz"
+                    cp "$file" "release-assets/macos/Regex.Batch.Renamer_${{ matrix.arch_suffix }}.app.tar.gz"
                   done
                   for file in src-tauri/target/release/bundle/macos/*.app.tar.gz.sig; do
                     [ -e "$file" ] || continue
-                    base="$(basename "$file" .app.tar.gz.sig)"
-                    cp "$file" "release-assets/macos/${base}_${{ matrix.arch_suffix }}.app.tar.gz.sig"
+                    cp "$file" "release-assets/macos/Regex.Batch.Renamer_${{ matrix.arch_suffix }}.app.tar.gz.sig"
                   done
                   test -n "$(find release-assets/macos -type f -maxdepth 1 | head -n 1)"
 
@@ -103,8 +101,26 @@ jobs:
               if: matrix.os == 'ubuntu-latest'
               run: |
                   mkdir -p release-assets/linux
-                  find src-tauri/target/release/bundle/appimage -maxdepth 1 -type f \( -name "*.AppImage" -o -name "*.AppImage.sig" -o -name "*.AppImage.tar.gz" -o -name "*.AppImage.tar.gz.sig" \) -exec cp {} release-assets/linux/ \;
-                  find src-tauri/target/release/bundle/deb -maxdepth 1 -type f -name "*.deb" -exec cp {} release-assets/linux/ \;
+                  for file in src-tauri/target/release/bundle/appimage/*.AppImage; do
+                    [ -e "$file" ] || continue
+                    cp "$file" "release-assets/linux/Regex.Batch.Renamer_${GITHUB_REF_NAME#v}_${{ matrix.arch_suffix }}.AppImage"
+                  done
+                  for file in src-tauri/target/release/bundle/appimage/*.AppImage.sig; do
+                    [ -e "$file" ] || continue
+                    cp "$file" "release-assets/linux/Regex.Batch.Renamer_${GITHUB_REF_NAME#v}_${{ matrix.arch_suffix }}.AppImage.sig"
+                  done
+                  for file in src-tauri/target/release/bundle/appimage/*.AppImage.tar.gz; do
+                    [ -e "$file" ] || continue
+                    cp "$file" "release-assets/linux/Regex.Batch.Renamer_${GITHUB_REF_NAME#v}_${{ matrix.arch_suffix }}.AppImage.tar.gz"
+                  done
+                  for file in src-tauri/target/release/bundle/appimage/*.AppImage.tar.gz.sig; do
+                    [ -e "$file" ] || continue
+                    cp "$file" "release-assets/linux/Regex.Batch.Renamer_${GITHUB_REF_NAME#v}_${{ matrix.arch_suffix }}.AppImage.tar.gz.sig"
+                  done
+                  for file in src-tauri/target/release/bundle/deb/*.deb; do
+                    [ -e "$file" ] || continue
+                    cp "$file" "release-assets/linux/Regex.Batch.Renamer_${GITHUB_REF_NAME#v}_${{ matrix.arch_suffix }}.deb"
+                  done
                   test -n "$(find release-assets/linux -type f -maxdepth 1 | head -n 1)"
 
             - name: Collect Windows stable assets
@@ -112,11 +128,17 @@ jobs:
               shell: pwsh
               run: |
                   New-Item -ItemType Directory -Force -Path release-assets/windows | Out-Null
-                  $patterns = @("*.exe", "*.exe.sig", "*.zip", "*.zip.sig")
-                  foreach ($pattern in $patterns) {
-                    Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" -File -Filter $pattern | ForEach-Object {
-                      Copy-Item $_.FullName -Destination "release-assets/windows"
-                    }
+                  Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" -File -Filter "*.exe" | ForEach-Object {
+                    Copy-Item $_.FullName -Destination "release-assets/windows/Regex.Batch.Renamer_$($env:GITHUB_REF_NAME.TrimStart('v'))_${{ matrix.arch_suffix }}-setup.exe"
+                  }
+                  Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" -File -Filter "*.exe.sig" | ForEach-Object {
+                    Copy-Item $_.FullName -Destination "release-assets/windows/Regex.Batch.Renamer_$($env:GITHUB_REF_NAME.TrimStart('v'))_${{ matrix.arch_suffix }}-setup.exe.sig"
+                  }
+                  Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" -File -Filter "*.zip" | ForEach-Object {
+                    Copy-Item $_.FullName -Destination "release-assets/windows/Regex.Batch.Renamer_$($env:GITHUB_REF_NAME.TrimStart('v'))_${{ matrix.arch_suffix }}.zip"
+                  }
+                  Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" -File -Filter "*.zip.sig" | ForEach-Object {
+                    Copy-Item $_.FullName -Destination "release-assets/windows/Regex.Batch.Renamer_$($env:GITHUB_REF_NAME.TrimStart('v'))_${{ matrix.arch_suffix }}.zip.sig"
                   }
                   if (-not (Get-ChildItem -Path "release-assets/windows" -File | Select-Object -First 1)) {
                     throw "No Windows release assets were collected."
