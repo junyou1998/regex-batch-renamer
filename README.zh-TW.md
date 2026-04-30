@@ -97,6 +97,23 @@ pnpm run electron:build
 
 Stable release 會直接正式發佈。Beta release 仍會先建立成 draft prerelease，讓維護者人工檢查資產後再正式發佈。只要 active channel 的 updater endpoint 提供合法 metadata，Tauri app 就會在啟動時自動檢查更新並優先使用 app 內安裝。
 
+### Stable App 內更新驗證流程
+
+要真正驗證 stable app 內更新，請使用兩個連續的 stable 版本：
+
+1. 先安裝較舊的 stable 版本，例如 `v0.5.1`。
+2. 發佈下一個 stable tag，例如 `v0.5.2`。
+3. 確認新的 release assets 內有 updater 產物，例如 `.sig`、`.app.tar.gz`、`.AppImage.sig` 或 Windows updater 簽章檔。
+4. 打開舊版 app，等待啟動時自動檢查更新。
+5. 確認更新提示或 About 視窗能看到新版號。
+6. 執行 app 內安裝流程，重開後確認 runtime version 已切換到新版。
+
+Stable updater endpoint 預期使用 repo 內固定 manifest：
+
+```text
+https://raw.githubusercontent.com/junyou1998/regex-batch-renamer/main/updater/stable.json
+```
+
 Electron 退場的門檻與刪除順序已記錄在 [docs/electron-retirement-plan.md](docs/electron-retirement-plan.md)。
 
 ## ☕ 贊助開發
