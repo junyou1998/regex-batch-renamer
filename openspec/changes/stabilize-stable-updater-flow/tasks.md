@@ -13,4 +13,10 @@
 
 - [x] 3.1 Implement Release asset naming SHALL be deterministic across uploaded artifacts and manifest URLs in the stable release workflow and updater manifest generator.
 - [x] 3.2 Implement macOS in-app installation and macOS install flow SHALL stage and swap the application bundle after verified updater download in the Tauri desktop bridge and Rust updater command.
-- [ ] 3.3 Implement manual verification updates for `v0.5.2 -> v0.5.3+` and confirm the local in-app update flow against the repository-backed stable manifest.
+- [x] 3.3 Implement manual verification updates for `v0.5.2 -> v0.5.3+` and confirm the local in-app update flow against the repository-backed stable manifest.
+
+## 4. Release Notes Experience
+
+- [x] 4.1 Implement Stable release notes history visibility in `src/services/updateService.ts` and `src/components/AboutModal.vue`, and release notes UI SHALL read GitHub release history directly with per-version links.
+- [x] 4.2 Implement Post-update release note prompt in `src/App.vue` and `src/components/AboutModal.vue`, and post-update notice SHALL be driven by a persisted target version marker before install and auto-open after restart.
+- [x] 4.3 Implement local verification for release history rendering and post-update release note prompt, then update repository guidance if the verification flow changes.

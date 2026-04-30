@@ -13,6 +13,8 @@ export interface ReleaseInfo {
   tagName: string
   htmlUrl: string
   body: string
+  publishedAt: string
+  prerelease: boolean
   assets: ReleaseAsset[]
 }
 
@@ -21,16 +23,28 @@ interface ParsedVersion {
   prerelease: string | null
 }
 
-let cached: { data: ReleaseInfo; fetchedAt: number } | null = null
-let inflight: Promise<ReleaseInfo | null> | null = null
-let betaCached: { data: ReleaseInfo; fetchedAt: number } | null = null
-let betaInflight: Promise<ReleaseInfo | null> | null = null
+interface ReleaseCacheEntry {
+  data: ReleaseInfo[]
+  fetchedAt: number
+}
+
+const releaseCache: Record<ReleaseChannel, ReleaseCacheEntry | null> = {
+  stable: null,
+  beta: null,
+}
+
+const inflight: Record<ReleaseChannel, Promise<ReleaseInfo[]> | null> = {
+  stable: null,
+  beta: null,
+}
 
 function mapRelease(data: any): ReleaseInfo {
   return {
     tagName: data.tag_name ?? '',
     htmlUrl: data.html_url ?? '',
     body: data.body ?? '',
+    publishedAt: data.published_at ?? data.created_at ?? '',
+    prerelease: Boolean(data.prerelease),
     assets: Array.isArray(data.assets)
       ? data.assets.map((asset: any) => ({
         name: asset.name,
@@ -40,12 +54,31 @@ function mapRelease(data: any): ReleaseInfo {
   }
 }
 
+function filterChannelReleases(releases: ReleaseInfo[], channel: ReleaseChannel) {
+  if (channel === 'beta') {
+    return releases
+      .filter((release) => release.prerelease && release.tagName.startsWith('beta-v'))
+  }
+
+  return releases
+    .filter((release) => !release.prerelease && release.tagName.startsWith('v'))
+}
+
+function sortByPublishedAtDesc(releases: ReleaseInfo[]) {
+  return [...releases].sort((a, b) => {
+    const aTime = Date.parse(a.publishedAt || '')
+    const bTime = Date.parse(b.publishedAt || '')
+    return bTime - aTime
+  })
+}
+
 export function normalizeReleaseVersion(tagName: string) {
   return tagName.replace(/^beta-v|^v/, '')
 }
 
-export function getReleasePageUrl() {
-  return RELEASES_PAGE
+export function getReleasePageUrl(tagName?: string) {
+  if (!tagName) return RELEASES_PAGE
+  return `${RELEASES_PAGE}/tag/${tagName}`
 }
 
 function parseVersion(version: string): ParsedVersion | null {
@@ -80,67 +113,46 @@ export function isNewerVersion(currentVersion: string, nextVersion: string) {
   return false
 }
 
-async function fetchStableRelease(): Promise<ReleaseInfo | null> {
-  const res = await fetch(`${RELEASES_API}/latest`)
-  if (!res.ok) return null
+async function fetchReleasesFromApi(): Promise<ReleaseInfo[]> {
+  const res = await fetch(`${RELEASES_API}?per_page=20`)
+  if (!res.ok) return []
 
   const data = await res.json()
-  return mapRelease(data)
+  if (!Array.isArray(data)) return []
+
+  return data.map(mapRelease)
 }
 
-async function fetchBetaRelease(): Promise<ReleaseInfo | null> {
-  const res = await fetch(RELEASES_API)
-  if (!res.ok) return null
+export async function getReleases(options?: { force?: boolean; channel?: ReleaseChannel }): Promise<ReleaseInfo[]> {
+  const channel = options?.channel ?? (import.meta.env.VITE_RELEASE_CHANNEL === 'beta' ? 'beta' : 'stable')
+  const cachedEntry = releaseCache[channel]
 
-  const releases = await res.json()
-  if (!Array.isArray(releases)) return null
+  if (!options?.force) {
+    if (cachedEntry && Date.now() - cachedEntry.fetchedAt < CACHE_TTL_MS) {
+      return cachedEntry.data
+    }
+    if (inflight[channel]) return inflight[channel]!
+  }
 
-  const betaRelease = releases
-    .filter((release: any) => release.prerelease && typeof release.tag_name === 'string' && release.tag_name.startsWith('beta-v'))
-    .sort((a: any, b: any) => {
-      const aTime = Date.parse(a.published_at ?? a.created_at ?? 0)
-      const bTime = Date.parse(b.published_at ?? b.created_at ?? 0)
-      return bTime - aTime
-    })[0]
+  const request = fetchReleasesFromApi()
+    .then((releases) => sortByPublishedAtDesc(filterChannelReleases(releases, channel)))
+    .finally(() => {
+      inflight[channel] = null
+    })
 
-  return betaRelease ? mapRelease(betaRelease) : null
+  inflight[channel] = request
+
+  const data = await request
+  releaseCache[channel] = { data, fetchedAt: Date.now() }
+  return data
 }
 
 export async function getLatestRelease(options?: { force?: boolean; channel?: ReleaseChannel }): Promise<ReleaseInfo | null> {
-  const channel = options?.channel ?? (import.meta.env.VITE_RELEASE_CHANNEL === 'beta' ? 'beta' : 'stable')
+  const releases = await getReleases(options)
+  return releases[0] ?? null
+}
 
-  const channelCache = channel === 'beta' ? betaCached : cached
-  const channelInflight = channel === 'beta' ? betaInflight : inflight
-
-  if (!options?.force) {
-    if (channelCache && Date.now() - channelCache.fetchedAt < CACHE_TTL_MS) {
-      return channelCache.data
-    }
-    if (channelInflight) return channelInflight
-  }
-
-  const request = (channel === 'beta' ? fetchBetaRelease() : fetchStableRelease()).finally(() => {
-    if (channel === 'beta') {
-      betaInflight = null
-    } else {
-      inflight = null
-    }
-  })
-
-  if (channel === 'beta') {
-    betaInflight = request
-  } else {
-    inflight = request
-  }
-
-  const data = await request
-  if (data) {
-    if (channel === 'beta') {
-      betaCached = { data, fetchedAt: Date.now() }
-    } else {
-      cached = { data, fetchedAt: Date.now() }
-    }
-  }
-
-  return data
+export async function getReleaseByTag(tagName: string, options?: { force?: boolean; channel?: ReleaseChannel }): Promise<ReleaseInfo | null> {
+  const releases = await getReleases(options)
+  return releases.find((release) => release.tagName === tagName) ?? null
 }

@@ -11,6 +11,8 @@
 - 讓 release asset 的實際檔名與 updater manifest 內的 URL 映射規則完全一致，不再依賴 bundle 原始檔名猜測。
 - 讓 app 端在 updater 無回應時仍能回退到 GitHub release 比較提示使用者。
 - 讓 macOS 正式版能在已安裝 `.app` 上完成下載、驗證、替換與重啟。
+- 讓更新日誌 UI 直接顯示多個 stable release notes，並支援逐版本導向 GitHub release 頁面。
+- 讓 app 於更新完成後首次重啟時，自動顯示剛安裝版本的 release notes。
 - 提供可操作的人工驗證流程，驗證 `v0.5.2 -> v0.5.3+` 更新閉環。
 
 **Non-Goals:**
@@ -36,9 +38,17 @@ stable updater endpoint 先採用 repo 內 `updater/stable.json`，由 release w
 
 Tauri updater 是正式更新主路徑，但使用者仍需要在 metadata 暫時異常時看見新版提示。因此 app 端在 updater 沒有回傳可用更新時，不直接結束流程，而是再做 GitHub latest release 比較。
 
+### Release notes UI SHALL read GitHub release history directly
+
+更新日誌不再只讀最新 release body，而是直接讀 GitHub Releases API 的歷史資料。前端將 release body 轉成 markdown 清單卡片，顯示 tag、發佈日期、內文與對應 release 頁面連結。這樣 maintainer 在正式 release 後補寫或修正 release notes，不需要重新發版或重建 updater metadata，UI 下次開啟時自然會看到最新內容。
+
 ### macOS install flow SHALL stage and swap the application bundle after verified updater download
 
 macOS 上的 updater download 已可利用 Tauri plugin 完成簽章驗證，但實際替換 `.app` 需要在主程序退出後由外部 helper 進行。因此桌面 bridge 在 macOS 改為呼叫自訂 Rust command：先透過 updater plugin 下載並驗證 `.app.tar.gz`，再解壓到與當前 app 同層的 staging 目錄，最後由短生命週期 shell helper 在主程式退出後完成 bundle 交換與重新開啟。
+
+### Post-update notice SHALL be driven by a persisted target version marker
+
+當使用者點擊 app 內更新時，前端會先把預期安裝的目標版本寫入本地儲存。下次啟動時若 runtime version 已經達到這個目標，App 便自動打開更新日誌 modal，並以該版本的 release note 作為焦點內容。成功展示後再清除標記，避免重複彈出。
 
 ## Risks / Trade-offs
 
@@ -47,3 +57,5 @@ macOS 上的 updater download 已可利用 Tauri plugin 完成簽章驗證，但
 - [macOS app bundle replacement leaves partial state] → 先解壓到同層暫存目錄，退出後才 move/replace，並在失敗時保留舊版 app。
 - [GitHub raw content cache delay] → 使用者端仍保留 GitHub release fallback，避免 metadata 剛更新時完全無提示。
 - [Non-Applications launch location blocks self-update] → macOS 先檢查 app parent directory writable；若不適合自我更新則直接提示使用者改走下載頁。
+- [GitHub release body edited after publish] → 更新日誌在顯示時即時讀取 Releases API，因此補寫 release notes 只影響 UI 內容，不影響 updater 安裝鏈。
+- [Repeated post-update popup] → 只在目標版本標記與目前版本相符的第一次啟動顯示，顯示後立即清除。

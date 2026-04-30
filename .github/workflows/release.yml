@@ -183,12 +183,22 @@ jobs:
                     --tag "$TAG_NAME" \
                     --version "${TAG_NAME#v}"
 
+            - name: Prepare stable release notes
+              env:
+                  REPO: ${{ github.repository }}
+                  TAG_NAME: ${{ github.ref_name }}
+              run: |
+                  node scripts/prepare-release-notes.mjs \
+                    --tag "$TAG_NAME" \
+                    --repo "$REPO" \
+                    --output .tmp/release-notes.md
+
             - name: Publish stable release
               uses: softprops/action-gh-release@v2
               with:
                   prerelease: false
                   draft: false
-                  generate_release_notes: true
+                  body_path: .tmp/release-notes.md
                   files: |
                       release-assets/**/*
 

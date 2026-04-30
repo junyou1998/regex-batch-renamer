@@ -9,6 +9,8 @@
 - 將 stable updater metadata 發佈到 repo 內可穩定存取的固定 endpoint，供正式版 app 啟動時自動檢查。
 - 補強 app 端更新檢查邏輯，在 updater 無結果時仍可回退到 GitHub release 比較並提示使用者。
 - 補上 macOS app 內更新安裝流程，讓正式版可從已安裝的 `.app` 下載、驗證、替換並重新開啟。
+- 將更新日誌改為顯示歷史 stable release notes 清單，並可直接導向各版本的 GitHub release 頁面。
+- 在 app 內更新成功並重新啟動後，自動彈出本次版本的 release notes。
 - 補上正式版 updater 驗證流程與人工測試說明，讓 `v0.5.2 -> v0.5.3+` 可實測。
 
 ## Capabilities
@@ -27,6 +29,11 @@
   - Modified: .github/workflows/release.yml
   - Modified: src/App.vue
   - Modified: src/components/AboutModal.vue
+  - Modified: src/services/updateService.ts
+  - Modified: src/locales/en-US.json
+  - Modified: src/locales/zh-TW.json
+  - Modified: src/locales/zh-CN.json
+  - Modified: src/locales/ja-JP.json
   - Modified: src/services/desktop/tauri.ts
   - Modified: src-tauri/src/lib.rs
   - Modified: src-tauri/Cargo.toml

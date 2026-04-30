@@ -1,23 +1,33 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { marked } from 'marked'
 import { useToastStore } from '../stores/toastStore'
 import { useI18n } from 'vue-i18n'
-import { getLatestRelease, getReleasePageUrl, isNewerVersion, normalizeReleaseVersion } from '../services/updateService'
+import {
+    getLatestRelease,
+    getReleasePageUrl,
+    getReleases,
+    isNewerVersion,
+    normalizeReleaseVersion,
+    type ReleaseInfo,
+} from '../services/updateService'
 import { desktop } from '../services/desktop'
 import type { DesktopRuntimeInfo } from '../services/desktop'
-import { ArrowLeft, Download, LoaderCircle, RefreshCw, ScrollText, X } from 'lucide-vue-next'
+import { ArrowLeft, CalendarDays, Download, ExternalLink, LoaderCircle, RefreshCw, ScrollText, X } from 'lucide-vue-next'
 
 const props = defineProps<{
     modelValue: boolean
+    initialView?: 'about' | 'changelog'
+    initialReleaseTag?: string | null
+    postUpdateVersion?: string | null
 }>()
 
 defineEmits<{
     (e: 'update:modelValue', value: boolean): void
 }>()
 
-const showChangelog = ref(false)
-const changelogContent = ref('')
+const showChangelog = ref(props.initialView === 'changelog')
+const releases = ref<ReleaseInfo[]>([])
 const isLoading = ref(false)
 const error = ref('')
 
@@ -32,6 +42,17 @@ const { t } = useI18n()
 
 function getResolvedReleaseUrl() {
     return getReleasePageUrl()
+}
+
+const focusedReleaseTag = ref(props.initialReleaseTag ?? null)
+const focusTagNormalized = computed(() => normalizeReleaseVersion(focusedReleaseTag.value ?? ''))
+const highlightedRelease = computed(() => {
+    if (!focusedReleaseTag.value) return null
+    return releases.value.find((release) => release.tagName === focusedReleaseTag.value) ?? null
+})
+
+function renderMarkdown(markdown: string) {
+    return marked.parse(markdown || '', { breaks: true, gfm: true }) as string
 }
 
 function getInAppUpdateBlockedReason() {
@@ -68,14 +89,26 @@ async function handleChangelogClick(event: MouseEvent) {
 
 watch(() => props.modelValue, (newVal) => {
     if (newVal) {
-        showChangelog.value = false
+        showChangelog.value = props.initialView === 'changelog'
+        focusedReleaseTag.value = props.initialReleaseTag ?? null
         void initializeAboutState()
     }
+})
+
+watch(() => props.initialView, (value) => {
+    showChangelog.value = value === 'changelog'
+})
+
+watch(() => props.initialReleaseTag, (value) => {
+    focusedReleaseTag.value = value ?? null
 })
 
 async function initializeAboutState() {
     await loadRuntimeInfo()
     await checkForUpdates()
+    if (showChangelog.value) {
+        await fetchChangelog()
+    }
 }
 
 async function loadRuntimeInfo() {
@@ -118,15 +151,14 @@ async function checkForUpdates() {
 }
 
 async function fetchChangelog() {
-    if (changelogContent.value) return
-
     isLoading.value = true
     error.value = ''
     try {
-        const release = await getLatestRelease({ channel: runtimeInfo.value?.channel })
-        if (!release) throw new Error('Failed to fetch')
-
-        changelogContent.value = await marked.parse(release.body, { breaks: true, gfm: true })
+        const history = await getReleases({ channel: runtimeInfo.value?.channel })
+        releases.value = history
+        if (!focusedReleaseTag.value && history.length > 0) {
+            focusedReleaseTag.value = history[0].tagName
+        }
     } catch (e) {
         error.value = 'Failed to load changelog'
         console.error(e)
@@ -137,9 +169,24 @@ async function fetchChangelog() {
 
 function toggleChangelog() {
     showChangelog.value = !showChangelog.value
-    if (showChangelog.value && !changelogContent.value) {
+    if (showChangelog.value && releases.value.length === 0) {
         fetchChangelog()
     }
+}
+
+function openReleaseTag(tagName: string) {
+    openExternal(getReleasePageUrl(tagName))
+}
+
+function formatReleaseDate(value: string) {
+    if (!value) return ''
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) return value
+    return new Intl.DateTimeFormat(undefined, {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    }).format(date)
 }
 
 function openExternal(url: string) {
@@ -157,13 +204,25 @@ async function installUpdate() {
 
     isInstallingUpdate.value = true
     try {
+        if (latestVersion.value) {
+            localStorage.setItem('regex-batch-renamer:pending-updated-version', latestVersion.value)
+        }
         await desktop.installAppUpdate()
         toastStore.addToast(t('about.updateInstallStarted'), 'success')
     } catch (e) {
+        localStorage.removeItem('regex-batch-renamer:pending-updated-version')
         console.error('Failed to install update', e)
         openReleaseFallback(t('about.updateInstallFailedFallback'))
     } finally {
         isInstallingUpdate.value = false
+    }
+}
+
+async function openChangelogForTag(tagName: string) {
+    focusedReleaseTag.value = tagName
+    showChangelog.value = true
+    if (releases.value.length === 0) {
+        await fetchChangelog()
     }
 }
 </script>
@@ -209,24 +268,57 @@ async function installUpdate() {
                             <div v-else-if="error" class="text-center text-red-500 py-8">
                                 {{ $t('about.changelogError') }}
                             </div>
-                            <!-- Markdown Content -->
-                            <!-- 
-                                - prose-sm: Removed to allow larger headers
-                                - break-words: Force wrapping for long words
-                                - prose-pre:whitespace-pre-wrap: Force wrapping for code blocks to prevent horizontal scroll
-                                - prose-a:text-blue-500: improved link visibility
-                                - prose-img:rounded-lg: better image styling
-                             -->
-                            <div v-else
-                                class="changelog-content prose prose-slate dark:prose-invert max-w-none wrap-break-word"
-                                v-html="changelogContent" @click="handleChangelogClick">
+                            <div v-else-if="releases.length === 0"
+                                class="text-center text-slate-500 dark:text-slate-400 py-8">
+                                {{ $t('about.changelogEmpty') }}
                             </div>
+                            <div v-else class="space-y-4">
+                                <div v-if="postUpdateVersion && highlightedRelease"
+                                    class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-900/80 dark:bg-emerald-950/40 dark:text-emerald-300">
+                                    {{ $t('about.postUpdateTitle', { version: focusTagNormalized }) }}
+                                </div>
 
-                            <div class="text-center pt-4">
-                                <a href="#"
-                                    @click.prevent="openExternal('https://github.com/junyou1998/regex-batch-renamer/releases')"
-                                    class="text-blue-500 hover:underline text-sm cursor-pointer">{{
-                                        $t('about.viewOnGithub') }}</a>
+                                <article v-for="release in releases" :key="release.tagName"
+                                    class="rounded-2xl border p-4 transition-colors"
+                                    :class="release.tagName === focusedReleaseTag
+                                        ? 'border-blue-300 bg-blue-50/80 dark:border-blue-700 dark:bg-blue-950/30'
+                                        : 'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900/50'">
+                                    <div class="flex flex-wrap items-start justify-between gap-3">
+                                        <div class="space-y-2">
+                                            <div class="flex items-center gap-2">
+                                                <span
+                                                    class="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                                                    {{ release.tagName }}
+                                                </span>
+                                                <span
+                                                    class="inline-flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                                                    <CalendarDays class="h-3.5 w-3.5" />
+                                                    {{ formatReleaseDate(release.publishedAt) }}
+                                                </span>
+                                            </div>
+                                            <button @click="openChangelogForTag(release.tagName)"
+                                                class="text-left text-sm font-semibold text-slate-800 hover:text-blue-600 dark:text-slate-100 dark:hover:text-blue-400 cursor-pointer">
+                                                v{{ normalizeReleaseVersion(release.tagName) }}
+                                            </button>
+                                        </div>
+                                        <button @click="openReleaseTag(release.tagName)"
+                                            class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer">
+                                            <ExternalLink class="h-3.5 w-3.5" />
+                                            {{ $t('about.viewVersionRelease') }}
+                                        </button>
+                                    </div>
+
+                                    <div class="mt-4 changelog-content prose prose-slate dark:prose-invert max-w-none wrap-break-word"
+                                        v-html="renderMarkdown(release.body)" @click="handleChangelogClick">
+                                    </div>
+                                </article>
+
+                                <div class="text-center pt-2">
+                                    <a href="#"
+                                        @click.prevent="openExternal('https://github.com/junyou1998/regex-batch-renamer/releases')"
+                                        class="text-blue-500 hover:underline text-sm cursor-pointer">{{
+                                            $t('about.viewOnGithub') }}</a>
+                                </div>
                             </div>
                         </div>
 
