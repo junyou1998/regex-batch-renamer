@@ -1,0 +1,23 @@
+{
+  "version": "0.5.2",
+  "notes": "Stable update 0.5.2",
+  "pub_date": "2026-04-30T02:54:45.645Z",
+  "platforms": {
+    "darwin-aarch64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUY0ZXSFZBL3ZnVFRDS25lbnlwb3RZQk9CUFlac1pyb0ZXZWZnVDJaUXhLVUZheStWNXpDdWZOSEkvbWNXays4NzZ2ejlZdFd3SWUzZ0ZzeGJMQ3JZZDZzK0drbjRtTmdVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc3NTE3Mzk4CWZpbGU6UmVnZXggQmF0Y2ggUmVuYW1lci5hcHAudGFyLmd6Cmp6NkVML0NEV2tVdGZoTHZrd25pbi9SMzQ5dGNOaFYwbWVISkVkbWkrOFpmWThzUjM1Nkk3RndzNXZBVlJaUEVwMVdpK1J3cDdLZG1TRktkOHRmUUJBPT0K",
+      "url": "https://github.com/junyou1998/regex-batch-renamer/releases/download/v0.5.2/Regex%20Batch%20Renamer_aarch64.app.tar.gz"
+    },
+    "darwin-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUY0ZXSFZBL3ZnVFZMSU5KNUovOVZRd0p5bTdPdWNBckRxWXdnU01wak1LYTBuNUpzUUxJSVRWV1pqTUc3K1JMQ0syclEyNzk5eWpjam15Wkh0MStBVEQzdFQ5UTJka2dBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc3NTE3NTUyCWZpbGU6UmVnZXggQmF0Y2ggUmVuYW1lci5hcHAudGFyLmd6CjdLRDZCYlc4a3hzdkJBQS83dWFOSU1aWklNbFN3STZBcEdFbTB5VTZrQnZHSG1pOEs4NVhRTVFYSitCRjlzcmFzbC9GNVNNbVJqUmlhREU4RDNwQkJnPT0K",
+      "url": "https://github.com/junyou1998/regex-batch-renamer/releases/download/v0.5.2/Regex%20Batch%20Renamer_x64.app.tar.gz"
+    },
+    "windows-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUY0ZXSFZBL3ZnVFJONFljclA3VjdnT0VFU2pNNTBmeXdnM2hGVVVCYm9XUkJtcy9WcDREdGl2N3BUR1h2aFBDNUlTUWdtM2NEcjIzY2dOaGgzU3VwOFp1anZvVit6NXdZPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc3NTE3NjU5CWZpbGU6UmVnZXggQmF0Y2ggUmVuYW1lcl8wLjUuMl94NjQtc2V0dXAuZXhlCmtpVTY1ODBEQ21INGdyemx3NHh5aDJoY2lEQjZGa1JUUGx0NDYrUmtBQlRlTExrYlF6aDExcXpoNXV6Q1N2WWkwSXpraXI0cHE4MEUrYnp0WE9uckN3PT0K",
+      "url": "https://github.com/junyou1998/regex-batch-renamer/releases/download/v0.5.2/Regex%20Batch%20Renamer_0.5.2_x64-setup.exe"
+    },
+    "linux-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUY0ZXSFZBL3ZnVFNUYUlZektLUzdoOW83T05zd01GdzJSS1g0dXJITE95RDNiVWVLTzRINnJ0TTZlakUrTUxtRVMzYnh1MWpYa0tLY09ySDFuV2tyODBHK3RkKzN5SHcwPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc3NTE3NTc4CWZpbGU6UmVnZXggQmF0Y2ggUmVuYW1lcl8wLjUuMl9hbWQ2NC5BcHBJbWFnZQpPeVBYNCtVN0tRalI3N1d1VWRMODRORVc5RUlpcFZYaldnd05SWEhQTHhaZmw0azRxdGFFUVJmV1hiY2RYN2RGNEMxYmlDK2pKTFY0UndkVkIwYkxDQT09Cg==",
+      "url": "https://github.com/junyou1998/regex-batch-renamer/releases/download/v0.5.2/Regex%20Batch%20Renamer_0.5.2_amd64.AppImage"
+    }
+  }
+}
