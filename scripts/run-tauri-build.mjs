@@ -31,6 +31,7 @@ const tauriArgs = [
 const child = spawn('pnpm', tauriArgs, {
   stdio: 'inherit',
   env: process.env,
+  shell: process.platform === 'win32',
 })
 
 child.on('exit', (code, signal) => {

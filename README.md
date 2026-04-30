@@ -27,15 +27,11 @@ A powerful and intuitive cross-platform batch file renaming tool (Windows / macO
 
 ### macOS Users Note
 
-Since this app is not signed with an Apple Developer Certificate (as I am an independent developer), you might encounter an **"App is damaged and can't be opened"** error when launching it for the first time on macOS. This is due to macOS security features, not because the app is actually damaged.
-
-To resolve this, please open the Terminal and run the following command:
+Unsigned macOS builds may still trigger Gatekeeper warnings depending on how the app was downloaded and unpacked. If your system blocks the app because of quarantine metadata, you can clear it manually:
 
 ```bash
-sudo xattr -r -d com.apple.quarantine /Applications/Regex\ Batch\ Renamer.app
+xattr -r -d com.apple.quarantine /Applications/Regex\ Batch\ Renamer.app
 ```
-
-Enter your password when prompted, and you should be able to open the app normally.
 
 ### Windows / Linux
 
@@ -71,35 +67,55 @@ _For more tutorials, click the "?" button in the software interface._
 
 This project is built using modern web technologies:
 
-- **Core**: [Electron](https://www.electronjs.org/)
+- **Desktop Runtime**: [Tauri](https://tauri.app/) for the stable desktop application, with the previous [Electron](https://www.electronjs.org/) line retained temporarily during retirement
 - **Frontend**: [Vue 3](https://vuejs.org/) (Composition API)
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 - **Build Tool**: [Vite](https://vitejs.dev/)
 - **State Management**: [Pinia](https://pinia.vuejs.org/)
 
-## 🧪 Beta Migration Track
+## 🧪 Release Channels
 
-The stable application line remains on Electron in `main`.
+The stable desktop release line now runs on Tauri in `main`.
 
-The Tauri migration is isolated to the `beta` branch with a separate delivery path:
+The beta channel remains available with a separate delivery path:
 
-- `main` + `v*` tags: stable Electron releases
+- `main` + `v*` tags: stable Tauri releases
 - `beta` branch pushes: Tauri beta validation CI only
-- `beta-v*` tags: Tauri GitHub pre-releases
+- `beta-v*` tags: Tauri GitHub draft pre-releases for manual review
 
 Useful commands:
 
 ```bash
-pnpm run electron:dev
-pnpm run electron:build
 pnpm run tauri:dev
 pnpm run tauri:build
+pnpm run electron:dev
+pnpm run electron:build
 ```
 
-If `TAURI_UPDATER_PUBKEY` and `BETA_UPDATER_ENDPOINT` are provided, `pnpm run tauri:build:release` generates a release config with updater metadata. Without those values, the beta build still completes, but updater artifacts are not enabled.
+If `TAURI_UPDATER_PUBKEY` and a channel-specific updater endpoint are provided, `pnpm run tauri:build:release` generates a release config with updater metadata. Without those values, the build still completes, but app-integrated updating is not enabled.
 
-Beta packaging intentionally avoids forcing every possible bundle type on every platform. In particular, macOS beta builds use the `.app` bundle and updater archive path instead of requiring `.dmg` generation for every local or CI build.
+Stable releases are published directly. Beta releases are created as draft prereleases so the maintainer can review assets before publishing them. The Tauri app checks for updates on launch and prefers in-app installation whenever the updater endpoint serves valid metadata for the active channel.
+
+### Stable In-App Update Verification
+
+For a real stable updater test, verify with two consecutive stable versions:
+
+1. Install the older stable app, for example `v0.5.0`.
+2. Publish the next stable tag, for example `v0.5.1`.
+3. Confirm the new release includes updater artifacts such as `.sig`, `.app.tar.gz`, `.AppImage.sig`, or Windows updater signatures.
+4. On macOS, move the installed app into `/Applications` before testing the in-app install flow.
+5. Open the older installed app and wait for the startup update check.
+6. Confirm the update banner or About dialog reports the newer stable version.
+7. Run the in-app install flow, relaunch the app, and confirm the runtime version changed to the new stable version.
+
+The stable updater endpoint is intended to point at the repository-backed manifest:
+
+```text
+https://raw.githubusercontent.com/junyou1998/regex-batch-renamer/main/updater/stable.json
+```
+
+The planned Electron removal gates and deletion order are documented in [docs/electron-retirement-plan.md](docs/electron-retirement-plan.md).
 
 ## ☕ Support Development
 

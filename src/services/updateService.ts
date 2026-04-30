@@ -1,5 +1,6 @@
 const CACHE_TTL_MS = 5 * 60 * 1000
 const RELEASES_API = 'https://api.github.com/repos/junyou1998/regex-batch-renamer/releases'
+const RELEASES_PAGE = 'https://github.com/junyou1998/regex-batch-renamer/releases'
 
 type ReleaseChannel = 'stable' | 'beta'
 
@@ -13,6 +14,11 @@ export interface ReleaseInfo {
   htmlUrl: string
   body: string
   assets: ReleaseAsset[]
+}
+
+interface ParsedVersion {
+  core: number[]
+  prerelease: string | null
 }
 
 let cached: { data: ReleaseInfo; fetchedAt: number } | null = null
@@ -32,6 +38,46 @@ function mapRelease(data: any): ReleaseInfo {
       }))
       : [],
   }
+}
+
+export function normalizeReleaseVersion(tagName: string) {
+  return tagName.replace(/^beta-v|^v/, '')
+}
+
+export function getReleasePageUrl() {
+  return RELEASES_PAGE
+}
+
+function parseVersion(version: string): ParsedVersion | null {
+  const match = version.trim().match(/^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?$/)
+  if (!match) return null
+
+  return {
+    core: [Number(match[1]), Number(match[2]), Number(match[3])],
+    prerelease: match[4] ?? null,
+  }
+}
+
+export function isNewerVersion(currentVersion: string, nextVersion: string) {
+  const current = parseVersion(currentVersion)
+  const next = parseVersion(nextVersion)
+
+  if (!current || !next) {
+    return currentVersion !== nextVersion
+  }
+
+  for (let i = 0; i < 3; i += 1) {
+    if (current.core[i] < next.core[i]) return true
+    if (current.core[i] > next.core[i]) return false
+  }
+
+  if (current.prerelease && !next.prerelease) return true
+  if (!current.prerelease && next.prerelease) return false
+  if (current.prerelease && next.prerelease) {
+    return current.prerelease !== next.prerelease
+  }
+
+  return false
 }
 
 async function fetchStableRelease(): Promise<ReleaseInfo | null> {

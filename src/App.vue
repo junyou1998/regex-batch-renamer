@@ -14,9 +14,7 @@ import { useToastStore } from './stores/toastStore'
 import { useThemeStore } from './stores/themeStore'
 import { ChevronsLeft, ChevronsRight, CircleAlert, Info, LoaderCircle, Settings, X } from 'lucide-vue-next'
 
-// @ts-ignore
-import { version as currentVersion } from '../package.json'
-import { getLatestRelease } from './services/updateService'
+import { getLatestRelease, getReleasePageUrl, isNewerVersion, normalizeReleaseVersion } from './services/updateService'
 import { generateRenamePreview } from './services/renameEngine'
 import { replaceBasename } from './utils/path'
 import { desktop, type DesktopRuntimeInfo } from './services/desktop'
@@ -53,41 +51,56 @@ const updateAvailable = ref(false)
 const latestVersion = ref('')
 const releaseUrl = ref('')
 
-function isNewerVersion(oldVer: string, newVer: string) {
-  const oldParts = oldVer.split('.').map(Number)
-  const newParts = newVer.split('.').map(Number)
-  for (let i = 0; i < 3; i++) {
-    const a = oldParts[i] || 0
-    const b = newParts[i] || 0
-    if (a < b) return true
-    if (a > b) return false
+function getResolvedReleaseUrl() {
+  return releaseUrl.value || getReleasePageUrl()
+}
+
+function getInAppUpdateBlockedReason() {
+  if (runtimeInfo.value?.runtime !== 'tauri' || runtimeInfo.value.platform !== 'darwin') return null
+  if (runtimeInfo.value.appBundleParentWritable === false) {
+    return t('about.updateInstallBlockedMac')
   }
-  return false
+  return null
+}
+
+function fallbackToReleaseDownload(message: string) {
+  const url = getResolvedReleaseUrl()
+  toastStore.addToast(message, 'error', 6000, {
+    label: t('about.downloadUpdate'),
+    onClick: () => openExternal(url),
+  })
+  openExternal(url)
 }
 
 async function checkForUpdates() {
   try {
+    updateAvailable.value = false
+
+    if (runtimeInfo.value?.runtime === 'tauri' && desktop.checkForAppUpdate) {
+      const appUpdate = await desktop.checkForAppUpdate()
+      if (appUpdate?.available) {
+        const release = await getLatestRelease({
+          channel: runtimeInfo.value?.channel,
+        })
+        updateAvailable.value = true
+        latestVersion.value = normalizeReleaseVersion(appUpdate.version ?? release?.tagName ?? '')
+        releaseUrl.value = release?.htmlUrl ?? getReleasePageUrl()
+        return
+      }
+    }
+
     const release = await getLatestRelease({
       channel: runtimeInfo.value?.channel,
     })
     if (!release) return
 
-    if (runtimeInfo.value?.runtime === 'tauri' && runtimeInfo.value.channel === 'beta' && desktop.checkForAppUpdate) {
-      const appUpdate = await desktop.checkForAppUpdate()
-      if (appUpdate?.available) {
-        updateAvailable.value = true
-        latestVersion.value = appUpdate.version ?? release.tagName
-        releaseUrl.value = release.htmlUrl
-      }
-      return
-    }
+    const remoteVersion = normalizeReleaseVersion(release.tagName)
+    const installedVersion = runtimeInfo.value?.version ?? ''
 
-    const remoteVersion = release.tagName.replace(/^beta-v|^v/, '')
-
-    if (isNewerVersion(currentVersion, remoteVersion)) {
+    if (installedVersion && isNewerVersion(installedVersion, remoteVersion)) {
       updateAvailable.value = true
-      latestVersion.value = release.tagName
-      releaseUrl.value = release.htmlUrl
+      latestVersion.value = remoteVersion
+      releaseUrl.value = release.htmlUrl || getReleasePageUrl()
     }
   } catch (e) {
     console.error('Update check failed:', e)
@@ -95,21 +108,26 @@ async function checkForUpdates() {
 }
 
 async function openReleasePage() {
-  if (runtimeInfo.value?.runtime === 'tauri' && runtimeInfo.value.channel === 'beta' && desktop.installAppUpdate) {
+  const blockedReason = getInAppUpdateBlockedReason()
+  if (blockedReason) {
+    fallbackToReleaseDownload(blockedReason)
+    return
+  }
+
+  if (runtimeInfo.value?.runtime === 'tauri' && desktop.installAppUpdate) {
     try {
       isInstallingUpdate.value = true
       await desktop.installAppUpdate()
       return
     } catch (e) {
       console.error('Tauri update install failed:', e)
+      fallbackToReleaseDownload(t('about.updateInstallFailedFallback'))
     } finally {
       isInstallingUpdate.value = false
     }
   }
 
-  if (releaseUrl.value) {
-    openExternal(releaseUrl.value)
-  }
+  openExternal(getResolvedReleaseUrl())
 }
 
 function openExternal(url: string) {
