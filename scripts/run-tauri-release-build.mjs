@@ -5,12 +5,29 @@ import path from 'node:path'
 const rootDir = process.cwd()
 const releaseConfigPath = path.join(os.tmpdir(), 'regex-batch-renamer-tauri.release.conf.json')
 
+function detectReleaseVersion() {
+  const explicitVersion = (process.env.APP_VERSION ?? '').trim()
+  if (explicitVersion) return explicitVersion
+
+  const refName = process.env.GITHUB_REF_NAME ?? ''
+  if (refName.startsWith('beta-v')) return refName.slice('beta-v'.length)
+  if (refName.startsWith('v')) return refName.slice(1)
+
+  return ''
+}
+
+const releaseVersion = detectReleaseVersion()
+const childEnv = {
+  ...process.env,
+  ...(releaseVersion ? { APP_VERSION: releaseVersion } : {}),
+}
+
 function run(command, args) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
       cwd: rootDir,
       stdio: 'inherit',
-      env: process.env,
+      env: childEnv,
       shell: process.platform === 'win32',
     })
 
