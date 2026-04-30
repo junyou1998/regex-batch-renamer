@@ -23,6 +23,9 @@ export interface DesktopRuntimeInfo {
   platform: string
   runtime: RuntimeKind
   channel: ReleaseChannel
+  version: string
+  appBundlePath?: string
+  appBundleParentWritable?: boolean
 }
 
 export interface AppUpdateInfo {

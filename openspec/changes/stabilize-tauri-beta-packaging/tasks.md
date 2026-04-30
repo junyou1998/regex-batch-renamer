@@ -1,0 +1,4 @@
+- [x] Remove fixed `bundle.targets = all` from the Tauri config and drive bundle selection from scripts.
+- [x] Add a reusable build script that chooses default bundle targets by platform and accepts CI overrides.
+- [x] Update package scripts and beta release workflow to pass explicit platform bundle targets that avoid the failing DMG path.
+- [x] Update documentation to explain why beta packaging does not depend on DMG generation.

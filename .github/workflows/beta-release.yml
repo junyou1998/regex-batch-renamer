@@ -6,7 +6,7 @@ on:
             - "beta-v*"
 
 jobs:
-    release:
+    build:
         runs-on: ${{ matrix.os }}
         permissions:
             contents: write
@@ -15,8 +15,10 @@ jobs:
             fail-fast: false
             matrix:
                 include:
-                    - os: macos-latest
-                      bundles: app
+                    - os: macos-15
+                      bundles: dmg
+                    - os: macos-15-intel
+                      bundles: dmg
                     - os: ubuntu-latest
                       bundles: appimage,deb
                     - os: windows-latest
@@ -29,7 +31,7 @@ jobs:
             - name: Install pnpm
               uses: pnpm/action-setup@v4
               with:
-                  version: 8
+                  version: 10
 
             - name: Install Node.js
               uses: actions/setup-node@v4
@@ -54,25 +56,71 @@ jobs:
 
             - name: Build Tauri beta artifacts
               env:
+                  APP_RELEASE_CHANNEL: beta
                   TAURI_BUNDLES: ${{ matrix.bundles }}
                   TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
                   TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
                   TAURI_UPDATER_PUBKEY: ${{ secrets.TAURI_UPDATER_PUBKEY }}
-                  BETA_UPDATER_ENDPOINT: ${{ secrets.BETA_UPDATER_ENDPOINT }}
-                  APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-                  APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-                  APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-                  APPLE_ID: ${{ secrets.APPLE_ID }}
-                  APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-                  APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-                  CSC_LINK: ${{ secrets.CSC_LINK }}
-                  CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+                  TAURI_UPDATER_ENDPOINT: ${{ secrets.BETA_UPDATER_ENDPOINT }}
               run: pnpm run tauri:build:release
+
+            - name: Collect macOS beta assets
+              if: startsWith(matrix.os, 'macos-')
+              run: |
+                  mkdir -p release-assets
+                  find src-tauri/target/release/bundle/dmg -maxdepth 1 -type f -name "*.dmg" -exec cp {} release-assets/ \;
+                  find src-tauri/target/release/bundle/macos -maxdepth 1 -type f \( -name "*.app.tar.gz" -o -name "*.app.tar.gz.sig" \) -exec cp {} release-assets/ \;
+                  test -n "$(find release-assets -type f -maxdepth 1 | head -n 1)"
+
+            - name: Collect Linux beta assets
+              if: matrix.os == 'ubuntu-latest'
+              run: |
+                  mkdir -p release-assets
+                  find src-tauri/target/release/bundle/appimage -maxdepth 1 -type f \( -name "*.AppImage" -o -name "*.AppImage.sig" -o -name "*.AppImage.tar.gz" -o -name "*.AppImage.tar.gz.sig" \) -exec cp {} release-assets/ \;
+                  find src-tauri/target/release/bundle/deb -maxdepth 1 -type f -name "*.deb" -exec cp {} release-assets/ \;
+                  test -n "$(find release-assets -type f -maxdepth 1 | head -n 1)"
+
+            - name: Collect Windows beta assets
+              if: matrix.os == 'windows-latest'
+              shell: pwsh
+              run: |
+                  New-Item -ItemType Directory -Force -Path release-assets | Out-Null
+                  $patterns = @("*.exe", "*.exe.sig", "*.zip", "*.zip.sig")
+                  foreach ($pattern in $patterns) {
+                    Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" -File -Filter $pattern | ForEach-Object {
+                      Copy-Item $_.FullName -Destination "release-assets"
+                    }
+                  }
+                  if (-not (Get-ChildItem -Path "release-assets" -File | Select-Object -First 1)) {
+                    throw "No Windows release assets were collected."
+                  }
+
+            - name: Upload beta release assets
+              uses: actions/upload-artifact@v4
+              with:
+                  name: beta-assets-${{ matrix.os }}
+                  path: release-assets/*
+                  if-no-files-found: error
+
+    publish:
+        needs: build
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+
+        steps:
+            - name: Download collected beta assets
+              uses: actions/download-artifact@v4
+              with:
+                  pattern: beta-assets-*
+                  path: release-assets
+                  merge-multiple: true
 
             - name: Publish beta pre-release
               uses: softprops/action-gh-release@v2
               with:
+                  draft: true
                   prerelease: true
                   generate_release_notes: true
                   files: |
-                      src-tauri/target/release/bundle/**/*
+                      release-assets/*

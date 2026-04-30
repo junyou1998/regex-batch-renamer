@@ -1,0 +1,8 @@
+- [x] Add a shared desktop bridge module and shared desktop operation types so renderer code no longer depends on `window.ipcRenderer` directly.
+- [x] Refactor renderer components, stores, and services to use the shared desktop bridge for file picking, directory picking, renaming, copy-to, external links, platform checks, zoom, and dirty-state integration.
+- [x] Create the Tauri application shell and implement Rust commands/plugins that preserve the current file operations and desktop integration behaviors.
+- [x] Wire Tauri window close protection and zoom/update event handling so the renderer keeps the current pending-changes and desktop control flow.
+- [x] Update release/version handling so beta Tauri builds query a beta-only release and updater channel instead of the stable Electron latest release endpoint.
+- [x] Split package scripts and project configuration so Tauri beta build/dev commands are isolated from the existing Electron stable commands.
+- [x] Add GitHub Actions workflows for beta branch validation and `beta-v*` pre-release publishing without changing the current `v*` Electron release workflow.
+- [x] Document the dual-track development and release model for `main`/Electron stable versus `beta`/Tauri beta.
