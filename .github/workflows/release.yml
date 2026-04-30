@@ -17,12 +17,16 @@ jobs:
                 include:
                     - os: macos-15
                       bundles: dmg
+                      arch_suffix: aarch64
                     - os: macos-15-intel
                       bundles: dmg
+                      arch_suffix: x64
                     - os: ubuntu-latest
                       bundles: appimage,deb
+                      arch_suffix: amd64
                     - os: windows-latest
                       bundles: nsis
+                      arch_suffix: x64
 
         steps:
             - name: Check out Git repository
@@ -79,8 +83,21 @@ jobs:
               if: startsWith(matrix.os, 'macos-')
               run: |
                   mkdir -p release-assets/macos
-                  find src-tauri/target/release/bundle/dmg -maxdepth 1 -type f -name "*.dmg" -exec cp {} release-assets/macos/ \;
-                  find src-tauri/target/release/bundle/macos -maxdepth 1 -type f \( -name "*.app.tar.gz" -o -name "*.app.tar.gz.sig" \) -exec cp {} release-assets/macos/ \;
+                  for file in src-tauri/target/release/bundle/dmg/*.dmg; do
+                    [ -e "$file" ] || continue
+                    base="$(basename "$file" .dmg)"
+                    cp "$file" "release-assets/macos/${base}_${{ matrix.arch_suffix }}.dmg"
+                  done
+                  for file in src-tauri/target/release/bundle/macos/*.app.tar.gz; do
+                    [ -e "$file" ] || continue
+                    base="$(basename "$file" .app.tar.gz)"
+                    cp "$file" "release-assets/macos/${base}_${{ matrix.arch_suffix }}.app.tar.gz"
+                  done
+                  for file in src-tauri/target/release/bundle/macos/*.app.tar.gz.sig; do
+                    [ -e "$file" ] || continue
+                    base="$(basename "$file" .app.tar.gz.sig)"
+                    cp "$file" "release-assets/macos/${base}_${{ matrix.arch_suffix }}.app.tar.gz.sig"
+                  done
                   test -n "$(find release-assets/macos -type f -maxdepth 1 | head -n 1)"
 
             - name: Collect Linux stable assets
