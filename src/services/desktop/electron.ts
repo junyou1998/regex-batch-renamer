@@ -53,6 +53,8 @@ export const electronDesktopBridge: DesktopBridge = {
       runtime: 'electron',
       channel: 'stable',
       version: pkg.version,
+      appBundlePath: undefined,
+      appBundleParentWritable: undefined,
     }
   },
   setPendingChangesHandler(handler: PendingChangesHandler) {

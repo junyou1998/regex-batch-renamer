@@ -1,5 +1,6 @@
 const CACHE_TTL_MS = 5 * 60 * 1000
 const RELEASES_API = 'https://api.github.com/repos/junyou1998/regex-batch-renamer/releases'
+const RELEASES_PAGE = 'https://github.com/junyou1998/regex-batch-renamer/releases'
 
 type ReleaseChannel = 'stable' | 'beta'
 
@@ -41,6 +42,10 @@ function mapRelease(data: any): ReleaseInfo {
 
 export function normalizeReleaseVersion(tagName: string) {
   return tagName.replace(/^beta-v|^v/, '')
+}
+
+export function getReleasePageUrl() {
+  return RELEASES_PAGE
 }
 
 function parseVersion(version: string): ParsedVersion | null {

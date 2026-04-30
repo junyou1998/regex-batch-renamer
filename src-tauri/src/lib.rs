@@ -1,5 +1,6 @@
 use serde::Serialize;
 use std::fs;
+use std::path::PathBuf;
 use tauri::WebviewWindow;
 
 #[derive(serde::Deserialize)]
@@ -22,6 +23,8 @@ struct RuntimeInfo {
     runtime: String,
     channel: String,
     version: String,
+    app_bundle_path: Option<String>,
+    app_bundle_parent_writable: Option<bool>,
 }
 
 fn platform_name() -> String {
@@ -44,13 +47,39 @@ fn runtime_version() -> String {
         .to_string()
 }
 
+fn current_app_bundle_path() -> Option<PathBuf> {
+    if std::env::consts::OS != "macos" {
+        return None;
+    }
+
+    let executable = std::env::current_exe().ok()?;
+    executable
+        .ancestors()
+        .find(|path| path.extension().and_then(|ext| ext.to_str()) == Some("app"))
+        .map(|path| path.to_path_buf())
+}
+
+fn app_bundle_parent_writable(bundle_path: &PathBuf) -> Option<bool> {
+    let parent = bundle_path.parent()?;
+    let metadata = fs::metadata(parent).ok()?;
+    Some(!metadata.permissions().readonly())
+}
+
 #[tauri::command]
 fn runtime_info() -> RuntimeInfo {
+    let app_bundle_path = current_app_bundle_path();
+
     RuntimeInfo {
         platform: platform_name(),
         runtime: "tauri".to_string(),
         channel: release_channel(),
         version: runtime_version(),
+        app_bundle_path: app_bundle_path
+            .as_ref()
+            .map(|path| path.display().to_string()),
+        app_bundle_parent_writable: app_bundle_path
+            .as_ref()
+            .and_then(app_bundle_parent_writable),
     }
 }
 

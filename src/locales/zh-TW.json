@@ -121,6 +121,8 @@
         "updateCheckFailed": "檢查更新失敗",
         "updateInstallStarted": "已開始安裝更新，請依平台提示完成後重新啟動應用程式",
         "updateInstallFailed": "安裝更新失敗",
+        "updateInstallFailedFallback": "安裝更新失敗，已改為開啟下載頁面",
+        "updateInstallBlockedMac": "目前應用程式位置不適合直接自我更新，已改為開啟下載頁面",
         "close": "關閉"
     },
     "help": {

@@ -14,7 +14,7 @@ import { useToastStore } from './stores/toastStore'
 import { useThemeStore } from './stores/themeStore'
 import { ChevronsLeft, ChevronsRight, CircleAlert, Info, LoaderCircle, Settings, X } from 'lucide-vue-next'
 
-import { getLatestRelease, isNewerVersion, normalizeReleaseVersion } from './services/updateService'
+import { getLatestRelease, getReleasePageUrl, isNewerVersion, normalizeReleaseVersion } from './services/updateService'
 import { generateRenamePreview } from './services/renameEngine'
 import { replaceBasename } from './utils/path'
 import { desktop, type DesktopRuntimeInfo } from './services/desktop'
@@ -51,6 +51,27 @@ const updateAvailable = ref(false)
 const latestVersion = ref('')
 const releaseUrl = ref('')
 
+function getResolvedReleaseUrl() {
+  return releaseUrl.value || getReleasePageUrl()
+}
+
+function getInAppUpdateBlockedReason() {
+  if (runtimeInfo.value?.runtime !== 'tauri' || runtimeInfo.value.platform !== 'darwin') return null
+  if (runtimeInfo.value.appBundleParentWritable === false) {
+    return t('about.updateInstallBlockedMac')
+  }
+  return null
+}
+
+function fallbackToReleaseDownload(message: string) {
+  const url = getResolvedReleaseUrl()
+  toastStore.addToast(message, 'error', 6000, {
+    label: t('about.downloadUpdate'),
+    onClick: () => openExternal(url),
+  })
+  openExternal(url)
+}
+
 async function checkForUpdates() {
   try {
     updateAvailable.value = false
@@ -63,7 +84,7 @@ async function checkForUpdates() {
         })
         updateAvailable.value = true
         latestVersion.value = normalizeReleaseVersion(appUpdate.version ?? release?.tagName ?? '')
-        releaseUrl.value = release?.htmlUrl ?? ''
+        releaseUrl.value = release?.htmlUrl ?? getReleasePageUrl()
         return
       }
     }
@@ -79,7 +100,7 @@ async function checkForUpdates() {
     if (installedVersion && isNewerVersion(installedVersion, remoteVersion)) {
       updateAvailable.value = true
       latestVersion.value = remoteVersion
-      releaseUrl.value = release.htmlUrl
+      releaseUrl.value = release.htmlUrl || getReleasePageUrl()
     }
   } catch (e) {
     console.error('Update check failed:', e)
@@ -87,6 +108,12 @@ async function checkForUpdates() {
 }
 
 async function openReleasePage() {
+  const blockedReason = getInAppUpdateBlockedReason()
+  if (blockedReason) {
+    fallbackToReleaseDownload(blockedReason)
+    return
+  }
+
   if (runtimeInfo.value?.runtime === 'tauri' && desktop.installAppUpdate) {
     try {
       isInstallingUpdate.value = true
@@ -94,14 +121,13 @@ async function openReleasePage() {
       return
     } catch (e) {
       console.error('Tauri update install failed:', e)
+      fallbackToReleaseDownload(t('about.updateInstallFailedFallback'))
     } finally {
       isInstallingUpdate.value = false
     }
   }
 
-  if (releaseUrl.value) {
-    openExternal(releaseUrl.value)
-  }
+  openExternal(getResolvedReleaseUrl())
 }
 
 function openExternal(url: string) {

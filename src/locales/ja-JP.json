@@ -121,6 +121,8 @@
         "updateCheckFailed": "更新の確認に失敗しました",
         "updateInstallStarted": "更新のインストールを開始しました。完了後にアプリを再起動してください。",
         "updateInstallFailed": "更新のインストールに失敗しました",
+        "updateInstallFailedFallback": "更新のインストールに失敗したため、ダウンロードページを開きます。",
+        "updateInstallBlockedMac": "現在のアプリ配置では直接の自己更新ができないため、ダウンロードページを開きます。",
         "close": "閉じる"
     },
     "help": {

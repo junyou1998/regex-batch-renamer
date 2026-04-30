@@ -3,7 +3,7 @@ import { ref, watch } from 'vue'
 import { marked } from 'marked'
 import { useToastStore } from '../stores/toastStore'
 import { useI18n } from 'vue-i18n'
-import { getLatestRelease, isNewerVersion, normalizeReleaseVersion } from '../services/updateService'
+import { getLatestRelease, getReleasePageUrl, isNewerVersion, normalizeReleaseVersion } from '../services/updateService'
 import { desktop } from '../services/desktop'
 import type { DesktopRuntimeInfo } from '../services/desktop'
 import { ArrowLeft, Download, LoaderCircle, RefreshCw, ScrollText, X } from 'lucide-vue-next'
@@ -29,6 +29,27 @@ const isInstallingUpdate = ref(false)
 
 const toastStore = useToastStore()
 const { t } = useI18n()
+
+function getResolvedReleaseUrl() {
+    return getReleasePageUrl()
+}
+
+function getInAppUpdateBlockedReason() {
+    if (runtimeInfo.value?.runtime !== 'tauri' || runtimeInfo.value.platform !== 'darwin') return null
+    if (runtimeInfo.value.appBundleParentWritable === false) {
+        return t('about.updateInstallBlockedMac')
+    }
+    return null
+}
+
+function openReleaseFallback(message: string) {
+    const url = getResolvedReleaseUrl()
+    toastStore.addToast(message, 'error', 6000, {
+        label: t('about.downloadUpdate'),
+        onClick: () => openExternal(url),
+    })
+    openExternal(url)
+}
 
 async function handleChangelogClick(event: MouseEvent) {
     const target = event.target as HTMLElement
@@ -128,13 +149,19 @@ function openExternal(url: string) {
 async function installUpdate() {
     if (!desktop.installAppUpdate) return
 
+    const blockedReason = getInAppUpdateBlockedReason()
+    if (blockedReason) {
+        openReleaseFallback(blockedReason)
+        return
+    }
+
     isInstallingUpdate.value = true
     try {
         await desktop.installAppUpdate()
         toastStore.addToast(t('about.updateInstallStarted'), 'success')
     } catch (e) {
         console.error('Failed to install update', e)
-        toastStore.addToast(t('about.updateInstallFailed'), 'error')
+        openReleaseFallback(t('about.updateInstallFailedFallback'))
     } finally {
         isInstallingUpdate.value = false
     }
