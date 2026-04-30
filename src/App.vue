@@ -64,8 +64,8 @@ async function checkForUpdates() {
         updateAvailable.value = true
         latestVersion.value = normalizeReleaseVersion(appUpdate.version ?? release?.tagName ?? '')
         releaseUrl.value = release?.htmlUrl ?? ''
+        return
       }
-      return
     }
 
     const release = await getLatestRelease({

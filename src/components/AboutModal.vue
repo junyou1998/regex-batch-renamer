@@ -78,8 +78,8 @@ async function checkForUpdates() {
             if (update?.available && update.version) {
                 hasUpdate.value = true
                 latestVersion.value = normalizeReleaseVersion(update.version)
+                return
             }
-            return
         }
 
         const release = await getLatestRelease({ channel: runtimeInfo.value?.channel })
