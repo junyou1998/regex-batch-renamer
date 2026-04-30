@@ -16,10 +16,10 @@ jobs:
             matrix:
                 include:
                     - os: macos-15
-                      bundles: dmg
+                      bundles: app,dmg
                       arch_suffix: aarch64
                     - os: macos-15-intel
-                      bundles: dmg
+                      bundles: app,dmg
                       arch_suffix: x64
                     - os: ubuntu-latest
                       bundles: appimage,deb
@@ -85,8 +85,7 @@ jobs:
                   mkdir -p release-assets/macos
                   for file in src-tauri/target/release/bundle/dmg/*.dmg; do
                     [ -e "$file" ] || continue
-                    base="$(basename "$file" .dmg)"
-                    cp "$file" "release-assets/macos/${base}_${{ matrix.arch_suffix }}.dmg"
+                    cp "$file" "release-assets/macos/"
                   done
                   for file in src-tauri/target/release/bundle/macos/*.app.tar.gz; do
                     [ -e "$file" ] || continue
