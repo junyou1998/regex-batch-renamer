@@ -108,6 +108,7 @@ For a real stable updater test, verify with two consecutive stable versions:
 5. Open the older installed app and wait for the startup update check.
 6. Confirm the update banner or About dialog reports the newer stable version.
 7. Run the in-app install flow, relaunch the app, and confirm the runtime version changed to the new stable version.
+8. After the relaunch, the About dialog changelog view should show GitHub release history directly and automatically focus the version that was just installed; each version card should also link to its GitHub release page.
 
 The stable updater endpoint is intended to point at the repository-backed manifest:
 

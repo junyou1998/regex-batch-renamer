@@ -31,6 +31,9 @@ const isSidebarCollapsed = ref(false)
 const isMac = ref(false)
 const runtimeInfo = ref<DesktopRuntimeInfo | null>(null)
 const showAbout = ref(false)
+const aboutInitialView = ref<'about' | 'changelog'>('about')
+const aboutInitialReleaseTag = ref<string | null>(null)
+const postUpdateVersion = ref<string | null>(null)
 const showSettings = ref(false)
 const isFileDragActive = ref(false)
 let unlistenFileDrop: null | (() => void) = null
@@ -50,6 +53,7 @@ const conflictMessage = ref('')
 const updateAvailable = ref(false)
 const latestVersion = ref('')
 const releaseUrl = ref('')
+const PENDING_UPDATED_VERSION_KEY = 'regex-batch-renamer:pending-updated-version'
 
 function getResolvedReleaseUrl() {
   return releaseUrl.value || getReleasePageUrl()
@@ -107,6 +111,34 @@ async function checkForUpdates() {
   }
 }
 
+async function maybeShowPostUpdateNotes() {
+  const url = new URL(window.location.href)
+  const devInjectedVersion = import.meta.env.DEV ? url.searchParams.get('updatedVersion') : null
+  const pendingVersion = devInjectedVersion || localStorage.getItem(PENDING_UPDATED_VERSION_KEY)
+  if (!pendingVersion) return
+
+  const installedVersion = runtimeInfo.value?.version ?? ''
+  if (!devInjectedVersion && (!installedVersion || installedVersion !== pendingVersion)) return
+
+  postUpdateVersion.value = pendingVersion
+  aboutInitialView.value = 'changelog'
+  aboutInitialReleaseTag.value = `v${pendingVersion}`
+  showAbout.value = true
+  if (devInjectedVersion) {
+    url.searchParams.delete('updatedVersion')
+    window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`)
+  } else {
+    localStorage.removeItem(PENDING_UPDATED_VERSION_KEY)
+  }
+}
+
+function openAboutModal() {
+  aboutInitialView.value = 'about'
+  aboutInitialReleaseTag.value = null
+  postUpdateVersion.value = null
+  showAbout.value = true
+}
+
 async function openReleasePage() {
   const blockedReason = getInAppUpdateBlockedReason()
   if (blockedReason) {
@@ -117,9 +149,13 @@ async function openReleasePage() {
   if (runtimeInfo.value?.runtime === 'tauri' && desktop.installAppUpdate) {
     try {
       isInstallingUpdate.value = true
+      if (latestVersion.value) {
+        localStorage.setItem(PENDING_UPDATED_VERSION_KEY, latestVersion.value)
+      }
       await desktop.installAppUpdate()
       return
     } catch (e) {
+      localStorage.removeItem(PENDING_UPDATED_VERSION_KEY)
       console.error('Tauri update install failed:', e)
       fallbackToReleaseDownload(t('about.updateInstallFailedFallback'))
     } finally {
@@ -144,6 +180,7 @@ onMounted(async () => {
   runtimeInfo.value = await desktop.getRuntimeInfo()
   isMac.value = runtimeInfo.value.platform === 'darwin'
 
+  await maybeShowPostUpdateNotes()
   checkForUpdates()
   settingsStore.initZoom()
   window.addEventListener('keydown', handleGlobalKeydown)
@@ -448,7 +485,7 @@ async function handleCopyTo() {
             <p class="text-xs text-slate-500 dark:text-slate-500 mt-1">{{ $t('app.subtitle') }}</p>
           </div>
           <div class="flex items-center gap-1">
-            <button @click="showAbout = true" :title="$t('app.about')"
+            <button @click="openAboutModal" :title="$t('app.about')"
               class="p-1.5 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer">
               <Info class="w-5 h-5" />
             </button>
@@ -521,7 +558,12 @@ async function handleCopyTo() {
       </div>
     </main>
     <ToastNotification />
-    <AboutModal v-model="showAbout" />
+  <AboutModal
+    v-model="showAbout"
+    :initial-view="aboutInitialView"
+    :initial-release-tag="aboutInitialReleaseTag"
+    :post-update-version="postUpdateVersion"
+  />
     <SettingsModal v-model="showSettings" />
   </div>
 </template>
