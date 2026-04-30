@@ -72,17 +72,6 @@ fn app_bundle_parent_writable(bundle_path: &PathBuf) -> Option<bool> {
 }
 
 #[cfg(target_os = "macos")]
-fn append_updater_log(message: &str) {
-    if let Ok(mut file) = fs::OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open("/tmp/regex-batch-renamer-updater.log")
-    {
-        let _ = writeln!(file, "{message}");
-    }
-}
-
-#[cfg(target_os = "macos")]
 fn extract_update_to_staging(bytes: &[u8], parent_dir: &std::path::Path) -> Result<tempfile::TempDir, String> {
     let staging_dir = tempfile::Builder::new()
         .prefix("regex-batch-renamer-update-")
@@ -163,48 +152,31 @@ fn spawn_macos_update_helper(
 async fn install_app_update(app: tauri::AppHandle) -> Result<(), String> {
     #[cfg(target_os = "macos")]
     {
-        append_updater_log("install_app_update: start");
         let updater = app.updater().map_err(|error| error.to_string())?;
-        append_updater_log("install_app_update: updater ready");
         let update = updater
             .check()
             .await
             .map_err(|error| error.to_string())?
             .ok_or("No update available")?;
-        append_updater_log(&format!("install_app_update: found version {}", update.version));
 
         let bytes = update
             .download(|_, _| {}, || {})
             .await
             .map_err(|error| error.to_string())?;
-        append_updater_log(&format!(
-            "install_app_update: downloaded {} bytes",
-            bytes.len()
-        ));
 
-        let app_bundle_path =
-            current_app_bundle_path().ok_or("Failed to determine current app bundle path")?;
-        append_updater_log(&format!(
-            "install_app_update: bundle path {}",
-            app_bundle_path.display()
-        ));
+        let app_bundle_path = current_app_bundle_path()
+            .ok_or("Failed to determine current app bundle path")?;
         let parent_dir = app_bundle_path
             .parent()
             .ok_or("Failed to determine app parent directory")?;
         let staging_dir = extract_update_to_staging(&bytes, parent_dir)?;
-        append_updater_log(&format!(
-            "install_app_update: staged at {}",
-            staging_dir.path().display()
-        ));
         let staged_path = staging_dir.keep();
 
         spawn_macos_update_helper(&app_bundle_path, &staged_path)?;
-        append_updater_log("install_app_update: helper spawned");
 
         let app_handle = app.clone();
         tauri::async_runtime::spawn(async move {
             std::thread::sleep(std::time::Duration::from_millis(300));
-            append_updater_log("install_app_update: exiting app");
             app_handle.exit(0);
         });
 

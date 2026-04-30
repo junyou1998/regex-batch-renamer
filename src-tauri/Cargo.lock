@@ -3176,7 +3176,7 @@ dependencies = [
 
 [[package]]
 name = "regex-batch-renamer-beta"
-version = "0.5.3"
+version = "0.5.4"
 dependencies = [
  "flate2",
  "serde",

@@ -11,6 +11,6 @@
 
 ## 3. Asset Mapping And In-App Install
 
-- [ ] 3.1 Implement Release asset naming SHALL be deterministic across uploaded artifacts and manifest URLs in the stable release workflow and updater manifest generator.
-- [ ] 3.2 Implement macOS install flow SHALL stage and swap the application bundle after verified updater download in the Tauri desktop bridge and Rust updater command.
+- [x] 3.1 Implement Release asset naming SHALL be deterministic across uploaded artifacts and manifest URLs in the stable release workflow and updater manifest generator.
+- [x] 3.2 Implement macOS in-app installation and macOS install flow SHALL stage and swap the application bundle after verified updater download in the Tauri desktop bridge and Rust updater command.
 - [ ] 3.3 Implement manual verification updates for `v0.5.2 -> v0.5.3+` and confirm the local in-app update flow against the repository-backed stable manifest.

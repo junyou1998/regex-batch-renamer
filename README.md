@@ -101,12 +101,13 @@ Stable releases are published directly. Beta releases are created as draft prere
 
 For a real stable updater test, verify with two consecutive stable versions:
 
-1. Install the older stable app, for example `v0.5.1`.
-2. Publish the next stable tag, for example `v0.5.2`.
+1. Install the older stable app, for example `v0.5.3`.
+2. Publish the next stable tag, for example `v0.5.4`.
 3. Confirm the new release includes updater artifacts such as `.sig`, `.app.tar.gz`, `.AppImage.sig`, or Windows updater signatures.
-4. Open the older installed app and wait for the startup update check.
-5. Confirm the update banner or About dialog reports the newer stable version.
-6. Run the in-app install flow, relaunch the app, and confirm the runtime version changed to the new stable version.
+4. On macOS, move the installed app into `/Applications` before testing the in-app install flow.
+5. Open the older installed app and wait for the startup update check.
+6. Confirm the update banner or About dialog reports the newer stable version.
+7. Run the in-app install flow, relaunch the app, and confirm the runtime version changed to the new stable version.
 
 The stable updater endpoint is intended to point at the repository-backed manifest:
 

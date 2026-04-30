@@ -101,12 +101,13 @@ Stable release 會直接正式發佈。Beta release 仍會先建立成 draft pre
 
 要真正驗證 stable app 內更新，請使用兩個連續的 stable 版本：
 
-1. 先安裝較舊的 stable 版本，例如 `v0.5.1`。
-2. 發佈下一個 stable tag，例如 `v0.5.2`。
+1. 先安裝較舊的 stable 版本，例如 `v0.5.3`。
+2. 發佈下一個 stable tag，例如 `v0.5.4`。
 3. 確認新的 release assets 內有 updater 產物，例如 `.sig`、`.app.tar.gz`、`.AppImage.sig` 或 Windows updater 簽章檔。
-4. 打開舊版 app，等待啟動時自動檢查更新。
-5. 確認更新提示或 About 視窗能看到新版號。
-6. 執行 app 內安裝流程，重開後確認 runtime version 已切換到新版。
+4. 在 macOS 上，請先把已安裝 app 放到 `/Applications` 再測試 app 內安裝。
+5. 打開舊版 app，等待啟動時自動檢查更新。
+6. 確認更新提示或 About 視窗能看到新版號。
+7. 執行 app 內安裝流程，重開後確認 runtime version 已切換到新版。
 
 Stable updater endpoint 預期使用 repo 內固定 manifest：
 
