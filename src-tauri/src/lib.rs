@@ -2,7 +2,9 @@ use flate2::read::GzDecoder;
 use serde::Serialize;
 use std::fs;
 use std::io::Cursor;
+#[cfg(target_os = "macos")]
 use std::io::Write;
+#[cfg(target_os = "macos")]
 use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
 use std::process::Command;
