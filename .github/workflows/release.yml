@@ -1,4 +1,4 @@
-name: Build/Release
+name: Stable Release
 
 on:
     push:
@@ -6,37 +6,36 @@ on:
             - "v*"
 
 jobs:
-    cleanup:
-        runs-on: ubuntu-latest
-        permissions:
-            contents: write
-        steps:
-            - name: Cleanup existing release
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: |
-                  gh release delete ${{ github.ref_name }} -y --cleanup-tag || true
-
-    release:
-        needs: cleanup
+    build:
         runs-on: ${{ matrix.os }}
-
         permissions:
             contents: write
 
         strategy:
             fail-fast: false
             matrix:
-                os: [macos-latest, ubuntu-latest, windows-latest]
+                include:
+                    - os: macos-15
+                      bundles: app,dmg
+                      arch_suffix: aarch64
+                    - os: macos-15-intel
+                      bundles: app,dmg
+                      arch_suffix: x64
+                    - os: ubuntu-latest
+                      bundles: appimage,deb
+                      arch_suffix: amd64
+                    - os: windows-latest
+                      bundles: nsis
+                      arch_suffix: x64
 
         steps:
             - name: Check out Git repository
               uses: actions/checkout@v4
 
             - name: Install pnpm
-              uses: pnpm/action-setup@v2
+              uses: pnpm/action-setup@v4
               with:
-                  version: 8
+                  version: 10
 
             - name: Install Node.js
               uses: actions/setup-node@v4
@@ -44,10 +43,165 @@ jobs:
                   node-version: 20
                   cache: "pnpm"
 
-            - name: Install Dependencies
-              run: pnpm install
+            - name: Install Rust toolchain
+              uses: dtolnay/rust-toolchain@stable
 
-            - name: Build and Release
+            - name: Install Linux system dependencies
+              if: matrix.os == 'ubuntu-latest'
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y libwebkit2gtk-4.1-dev \
+                    libappindicator3-dev \
+                    librsvg2-dev \
+                    patchelf
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Verify stable updater configuration
+              shell: bash
               env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: pnpm run build
+                  TAURI_UPDATER_PUBKEY: ${{ secrets.TAURI_UPDATER_PUBKEY }}
+                  TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+                  STABLE_UPDATER_ENDPOINT: ${{ secrets.STABLE_UPDATER_ENDPOINT }}
+              run: |
+                  test -n "$TAURI_UPDATER_PUBKEY" || (echo "Missing TAURI_UPDATER_PUBKEY" && exit 1)
+                  test -n "$TAURI_SIGNING_PRIVATE_KEY" || (echo "Missing TAURI_SIGNING_PRIVATE_KEY" && exit 1)
+                  test -n "$STABLE_UPDATER_ENDPOINT" || (echo "Missing STABLE_UPDATER_ENDPOINT" && exit 1)
+
+            - name: Build Tauri stable artifacts
+              env:
+                  APP_RELEASE_CHANNEL: stable
+                  TAURI_BUNDLES: ${{ matrix.bundles }}
+                  TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+                  TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+                  TAURI_UPDATER_PUBKEY: ${{ secrets.TAURI_UPDATER_PUBKEY }}
+                  TAURI_UPDATER_ENDPOINT: ${{ secrets.STABLE_UPDATER_ENDPOINT }}
+              run: pnpm run tauri:build:release
+
+            - name: Collect macOS stable assets
+              if: startsWith(matrix.os, 'macos-')
+              run: |
+                  mkdir -p release-assets/macos
+                  for file in src-tauri/target/release/bundle/dmg/*.dmg; do
+                    [ -e "$file" ] || continue
+                    cp "$file" "release-assets/macos/Regex.Batch.Renamer_${GITHUB_REF_NAME#v}_${{ matrix.arch_suffix }}.dmg"
+                  done
+                  for file in src-tauri/target/release/bundle/macos/*.app.tar.gz; do
+                    [ -e "$file" ] || continue
+                    cp "$file" "release-assets/macos/Regex.Batch.Renamer_${{ matrix.arch_suffix }}.app.tar.gz"
+                  done
+                  for file in src-tauri/target/release/bundle/macos/*.app.tar.gz.sig; do
+                    [ -e "$file" ] || continue
+                    cp "$file" "release-assets/macos/Regex.Batch.Renamer_${{ matrix.arch_suffix }}.app.tar.gz.sig"
+                  done
+                  test -n "$(find release-assets/macos -type f -maxdepth 1 | head -n 1)"
+
+            - name: Collect Linux stable assets
+              if: matrix.os == 'ubuntu-latest'
+              run: |
+                  mkdir -p release-assets/linux
+                  for file in src-tauri/target/release/bundle/appimage/*.AppImage; do
+                    [ -e "$file" ] || continue
+                    cp "$file" "release-assets/linux/Regex.Batch.Renamer_${GITHUB_REF_NAME#v}_${{ matrix.arch_suffix }}.AppImage"
+                  done
+                  for file in src-tauri/target/release/bundle/appimage/*.AppImage.sig; do
+                    [ -e "$file" ] || continue
+                    cp "$file" "release-assets/linux/Regex.Batch.Renamer_${GITHUB_REF_NAME#v}_${{ matrix.arch_suffix }}.AppImage.sig"
+                  done
+                  for file in src-tauri/target/release/bundle/appimage/*.AppImage.tar.gz; do
+                    [ -e "$file" ] || continue
+                    cp "$file" "release-assets/linux/Regex.Batch.Renamer_${GITHUB_REF_NAME#v}_${{ matrix.arch_suffix }}.AppImage.tar.gz"
+                  done
+                  for file in src-tauri/target/release/bundle/appimage/*.AppImage.tar.gz.sig; do
+                    [ -e "$file" ] || continue
+                    cp "$file" "release-assets/linux/Regex.Batch.Renamer_${GITHUB_REF_NAME#v}_${{ matrix.arch_suffix }}.AppImage.tar.gz.sig"
+                  done
+                  for file in src-tauri/target/release/bundle/deb/*.deb; do
+                    [ -e "$file" ] || continue
+                    cp "$file" "release-assets/linux/Regex.Batch.Renamer_${GITHUB_REF_NAME#v}_${{ matrix.arch_suffix }}.deb"
+                  done
+                  test -n "$(find release-assets/linux -type f -maxdepth 1 | head -n 1)"
+
+            - name: Collect Windows stable assets
+              if: matrix.os == 'windows-latest'
+              shell: pwsh
+              run: |
+                  New-Item -ItemType Directory -Force -Path release-assets/windows | Out-Null
+                  Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" -File -Filter "*.exe" | ForEach-Object {
+                    Copy-Item $_.FullName -Destination "release-assets/windows/Regex.Batch.Renamer_$($env:GITHUB_REF_NAME.TrimStart('v'))_${{ matrix.arch_suffix }}-setup.exe"
+                  }
+                  Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" -File -Filter "*.exe.sig" | ForEach-Object {
+                    Copy-Item $_.FullName -Destination "release-assets/windows/Regex.Batch.Renamer_$($env:GITHUB_REF_NAME.TrimStart('v'))_${{ matrix.arch_suffix }}-setup.exe.sig"
+                  }
+                  Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" -File -Filter "*.zip" | ForEach-Object {
+                    Copy-Item $_.FullName -Destination "release-assets/windows/Regex.Batch.Renamer_$($env:GITHUB_REF_NAME.TrimStart('v'))_${{ matrix.arch_suffix }}.zip"
+                  }
+                  Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" -File -Filter "*.zip.sig" | ForEach-Object {
+                    Copy-Item $_.FullName -Destination "release-assets/windows/Regex.Batch.Renamer_$($env:GITHUB_REF_NAME.TrimStart('v'))_${{ matrix.arch_suffix }}.zip.sig"
+                  }
+                  if (-not (Get-ChildItem -Path "release-assets/windows" -File | Select-Object -First 1)) {
+                    throw "No Windows release assets were collected."
+                  }
+
+            - name: Upload stable release assets
+              uses: actions/upload-artifact@v4
+              with:
+                  name: stable-assets-${{ matrix.os }}
+                  path: release-assets/**
+                  if-no-files-found: error
+
+    publish:
+        needs: build
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+
+        steps:
+            - name: Check out Git repository
+              uses: actions/checkout@v4
+              with:
+                  ref: main
+
+            - name: Download collected stable assets
+              uses: actions/download-artifact@v4
+              with:
+                  pattern: stable-assets-*
+                  path: release-assets
+                  merge-multiple: true
+
+            - name: Generate stable updater metadata
+              env:
+                  REPO: ${{ github.repository }}
+                  TAG_NAME: ${{ github.ref_name }}
+              run: |
+                  mkdir -p .tmp
+                  node scripts/generate-updater-manifest.mjs \
+                    --assets-dir release-assets \
+                    --output .tmp/stable.json \
+                    --repo "$REPO" \
+                    --tag "$TAG_NAME" \
+                    --version "${TAG_NAME#v}"
+
+            - name: Publish stable release
+              uses: softprops/action-gh-release@v2
+              with:
+                  prerelease: false
+                  draft: false
+                  generate_release_notes: true
+                  files: |
+                      release-assets/**/*
+
+            - name: Publish stable updater manifest to main
+              env:
+                  TAG_NAME: ${{ github.ref_name }}
+              run: |
+                  git config user.name "github-actions"
+                  git config user.email "github-actions@github.com"
+                  git fetch origin main
+                  git checkout main
+                  mkdir -p updater
+                  cp .tmp/stable.json updater/stable.json
+                  git add updater/stable.json
+                  git commit -m "chore: update stable updater metadata for ${TAG_NAME}" || exit 0
+                  git push origin main

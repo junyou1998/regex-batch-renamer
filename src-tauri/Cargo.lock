@@ -3176,16 +3176,19 @@ dependencies = [
 
 [[package]]
 name = "regex-batch-renamer-beta"
-version = "0.4.2-beta.0"
+version = "0.5.0"
 dependencies = [
+ "flate2",
  "serde",
  "serde_json",
+ "tar",
  "tauri",
  "tauri-build",
  "tauri-plugin-dialog",
  "tauri-plugin-opener",
  "tauri-plugin-os",
  "tauri-plugin-updater",
+ "tempfile",
 ]
 
 [[package]]
