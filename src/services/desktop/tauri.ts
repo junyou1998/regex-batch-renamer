@@ -116,7 +116,7 @@ export const tauriDesktopBridge: DesktopBridge = {
   },
   async installAppUpdate() {
     const runtime = await runtimeInfo()
-    if (runtime.platform === 'darwin') {
+    if (runtime.platform === 'darwin' || runtime.platform === 'win32') {
       await invoke('install_app_update')
       return
     }

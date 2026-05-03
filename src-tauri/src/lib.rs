@@ -8,6 +8,8 @@ use std::io::Write;
 use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
 use std::process::Command;
+#[cfg(target_os = "windows")]
+use tauri::Manager;
 use tauri::WebviewWindow;
 use tauri_plugin_updater::UpdaterExt;
 
@@ -185,7 +187,42 @@ async fn install_app_update(app: tauri::AppHandle) -> Result<(), String> {
         return Ok(());
     }
 
-    #[cfg(not(target_os = "macos"))]
+    #[cfg(target_os = "windows")]
+    {
+        let updater = app.updater().map_err(|error| error.to_string())?;
+        let update = updater
+            .check()
+            .await
+            .map_err(|error| error.to_string())?
+            .ok_or("No update available")?;
+
+        // Download the installer bytes first so the file is on disk before we
+        // tear the UI down.
+        let bytes = update
+            .download(|_, _| {}, || {})
+            .await
+            .map_err(|error| error.to_string())?;
+
+        // Close every webview window so the embedded WebView2 host process
+        // releases its locks on the install directory. Without this step the
+        // NSIS passive installer can't replace the running app's DLLs and
+        // silently stalls behind the dead Tauri window, which the user sees
+        // as a frozen white screen.
+        for (_, window) in app.webview_windows() {
+            let _ = window.close();
+        }
+
+        // Give Windows a brief window to actually tear down the WebView2
+        // child processes before the installer is spawned.
+        std::thread::sleep(std::time::Duration::from_millis(400));
+
+        // `install` spawns the NSIS installer and calls process::exit(0)
+        // internally, so this call does not return on success.
+        update.install(bytes).map_err(|error| error.to_string())?;
+        return Ok(());
+    }
+
+    #[cfg(all(not(target_os = "macos"), not(target_os = "windows")))]
     {
         let updater = app.updater().map_err(|error| error.to_string())?;
         let update = updater
