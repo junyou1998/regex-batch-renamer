@@ -1,12 +1,15 @@
-use flate2::read::GzDecoder;
 use serde::Serialize;
 use std::fs;
+use std::path::PathBuf;
+#[cfg(target_os = "macos")]
+use flate2::read::GzDecoder;
+#[cfg(target_os = "macos")]
 use std::io::Cursor;
 #[cfg(target_os = "macos")]
 use std::io::Write;
 #[cfg(target_os = "macos")]
 use std::os::unix::fs::PermissionsExt;
-use std::path::PathBuf;
+#[cfg(target_os = "macos")]
 use std::process::Command;
 #[cfg(target_os = "windows")]
 use tauri::Manager;
