@@ -9,8 +9,10 @@ use std::io::Cursor;
 use std::io::Write;
 #[cfg(target_os = "macos")]
 use std::os::unix::fs::PermissionsExt;
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", target_os = "windows"))]
 use std::process::Command;
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
 #[cfg(target_os = "windows")]
 use tauri::Manager;
 use tauri::WebviewWindow;
@@ -192,6 +194,13 @@ async fn install_app_update(app: tauri::AppHandle) -> Result<(), String> {
 
     #[cfg(target_os = "windows")]
     {
+        // Process creation flags from the Win32 API. Using DETACHED_PROCESS +
+        // CREATE_NEW_PROCESS_GROUP makes the spawned installer fully
+        // independent from this process so it survives our exit and no shared
+        // console handles are inherited.
+        const DETACHED_PROCESS: u32 = 0x0000_0008;
+        const CREATE_NEW_PROCESS_GROUP: u32 = 0x0000_0200;
+
         let updater = app.updater().map_err(|error| error.to_string())?;
         let update = updater
             .check()
@@ -199,29 +208,72 @@ async fn install_app_update(app: tauri::AppHandle) -> Result<(), String> {
             .map_err(|error| error.to_string())?
             .ok_or("No update available")?;
 
-        // Download the installer bytes first so the file is on disk before we
-        // tear the UI down.
+        // Download the installer bytes via the plugin (handles signature
+        // verification against the manifest's pubkey).
         let bytes = update
             .download(|_, _| {}, || {})
             .await
             .map_err(|error| error.to_string())?;
 
-        // Close every webview window so the embedded WebView2 host process
-        // releases its locks on the install directory. Without this step the
-        // NSIS passive installer can't replace the running app's DLLs and
-        // silently stalls behind the dead Tauri window, which the user sees
-        // as a frozen white screen.
+        // Persist the installer to a stable, well-known directory under the
+        // user's AppData rather than a temp dir. Two benefits:
+        //   1. Some AV products quarantine .exe files written into %TEMP%
+        //      before they get a chance to run.
+        //   2. If the auto-install still fails for any reason (registry
+        //      mismatch, AV interference, …) the user can manually run the
+        //      installer from this path.
+        let installer_dir = std::env::var("LOCALAPPDATA")
+            .map(PathBuf::from)
+            .ok()
+            .unwrap_or_else(std::env::temp_dir)
+            .join("RegexBatchRenamer")
+            .join("updates");
+        fs::create_dir_all(&installer_dir).map_err(|error| error.to_string())?;
+
+        let installer_path = installer_dir.join(format!(
+            "Regex.Batch.Renamer_{}_x64-setup.exe",
+            update.version
+        ));
+        fs::write(&installer_path, &bytes).map_err(|error| error.to_string())?;
+
+        // Close every webview window so WebView2 releases the locks it holds
+        // on the install directory's DLLs. Without this the NSIS installer
+        // can't replace the live app's files and silently stalls.
         for (_, window) in app.webview_windows() {
             let _ = window.close();
         }
+        std::thread::sleep(std::time::Duration::from_millis(500));
 
-        // Give Windows a brief window to actually tear down the WebView2
-        // child processes before the installer is spawned.
-        std::thread::sleep(std::time::Duration::from_millis(400));
+        // Spawn the NSIS installer fully detached. We use Command rather than
+        // the plugin's ShellExecuteW path because:
+        //   - DETACHED_PROCESS guarantees the installer outlives our exit.
+        //   - We can pass the exact NSIS args we want (/UPDATE /P /R) and
+        //     control the working directory.
+        //   - No race between ShellExecuteW handing the request to the shell
+        //     and our subsequent process::exit.
+        let mut command = Command::new(&installer_path);
+        command
+            .args(["/UPDATE", "/P", "/R"])
+            .creation_flags(DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP);
+        if let Some(parent) = installer_path.parent() {
+            command.current_dir(parent);
+        }
+        command
+            .spawn()
+            .map_err(|error| format!("Failed to spawn installer: {error}"))?;
 
-        // `install` spawns the NSIS installer and calls process::exit(0)
-        // internally, so this call does not return on success.
-        update.install(bytes).map_err(|error| error.to_string())?;
+        // Give the installer a moment to fully initialize before we exit.
+        std::thread::sleep(std::time::Duration::from_millis(800));
+
+        // Schedule a graceful Tauri exit (runs cleanup_before_exit, closes
+        // remaining windows). 200 ms gives the spawned NSIS process enough
+        // breathing room to acquire its own handles.
+        let app_handle = app.clone();
+        tauri::async_runtime::spawn(async move {
+            std::thread::sleep(std::time::Duration::from_millis(200));
+            app_handle.exit(0);
+        });
+
         return Ok(());
     }
 
