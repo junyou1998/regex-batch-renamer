@@ -1,23 +1,23 @@
 {
-  "version": "0.5.2",
-  "notes": "Stable update 0.5.2",
-  "pub_date": "2026-05-03T10:41:35.375Z",
+  "version": "0.5.0",
+  "notes": "Stable update 0.5.0",
+  "pub_date": "2026-05-04T07:53:52.141Z",
   "platforms": {
     "darwin-aarch64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUY0ZXSFZBL3ZnVGE3K1Y2S1h2ME1qUHplNzhmdzlWck5tV0x1RDJMWjZHVXpURzB6NDBjTW9qWEc2alJpcVUxTFVSRHJiQ2pxZFFZRExlS1l6d0Z1WFRyUUQ5bENKNndjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc3ODA0NTIwCWZpbGU6UmVnZXggQmF0Y2ggUmVuYW1lci5hcHAudGFyLmd6CnpsMkVmZ2RxeXN5TDc1Uy9jak9lbndJT2tvczU4cVV1L0RxMUR5YmdycmZKY29PVjMybS85M1Vhd28zeHlSYm82YjM0VE5ua0xyWjZReHQ0VmFrb0RRPT0K",
-      "url": "https://github.com/junyou1998/regex-batch-renamer/releases/download/v0.5.2/Regex.Batch.Renamer_aarch64.app.tar.gz"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUY0ZXSFZBL3ZnVGVld255bGxDVTQvV0NRcENkN3RZVEk4RTB6UkFvZHV0bCtpRzRmUktrQUtLL0dTWTBib2ZYVEhxclUzY0lad205TEFpZ2JWdXpGdDFYTjZpYllya0FFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc3ODgwOTU0CWZpbGU6UmVnZXggQmF0Y2ggUmVuYW1lci5hcHAudGFyLmd6CmUxcCsvdzBoTTZrYXJ0MkZjV0VsQldmbXNFMEhBSzkyeUF3ZVByZWUyZWhEa3UrbDc3RWVrZURhYmxMNkkydzVzQzB5R1ZsL3k4UnQ1a0tYcVNPd0RBPT0K",
+      "url": "https://github.com/junyou1998/regex-batch-renamer/releases/download/v0.5.0/Regex.Batch.Renamer_aarch64.app.tar.gz"
     },
     "darwin-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUY0ZXSFZBL3ZnVGFCQ2hUc3Q0cVUzemNnQlNVVjRpV0ZKNUZoM2RCWmpRM3NRQkFkZ0ZqMW1WWWp3MXZ6WFRZbUpjOWtZNm02M0Y5eDk4V0JyeXNxT29XWU1OM2w0VndjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc3ODA0ODU3CWZpbGU6UmVnZXggQmF0Y2ggUmVuYW1lci5hcHAudGFyLmd6CkU4dWtMSmFxWkRSUVpteDBZZWJFWWJlQUgzdXR6SkM3YWh5TEpNbFMrcm9RQUhOeC91SnJjSmttdi9uRHNsTDAyRk05SVVsYUdvcCsxQU5SV0daVUJRPT0K",
-      "url": "https://github.com/junyou1998/regex-batch-renamer/releases/download/v0.5.2/Regex.Batch.Renamer_x64.app.tar.gz"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUY0ZXSFZBL3ZnVFZUOUg0RlJSbEJVREhjcHdaNE16RmtOVURWcEg1Y3NpSm0xMlRXMHBQUGF4cE9KZFd3R3N6VkxpSE1UYzBsbkg0ODZyK0h2aDVVdkFxRWMvU0RlbXdzPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc3ODgxMDU1CWZpbGU6UmVnZXggQmF0Y2ggUmVuYW1lci5hcHAudGFyLmd6CmhnVFdrVlVWanJEVER1NlByNTdkTEVpcGpmTm9hOG8xRnE0Si8rZE1Xd1dWK2dqMFZyVXpmTTlJWUdWc3BRMlk1UXJIY2tXUE81cnZjeGgvRkJ2c0R3PT0K",
+      "url": "https://github.com/junyou1998/regex-batch-renamer/releases/download/v0.5.0/Regex.Batch.Renamer_x64.app.tar.gz"
     },
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUY0ZXSFZBL3ZnVFZJUEVyRkx4ZmtvbE1DMnk1YkVqOEFXNC95UnRnVW52TEpMMVpaWSt5S1UxL0cyUUNzMlpQRFJVakVPeUVVSXJ1NURvUFV6cXY4Q2o4WFJIMXp3OGdNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc3ODA0NzU1CWZpbGU6UmVnZXggQmF0Y2ggUmVuYW1lcl8wLjUuMl94NjQtc2V0dXAuZXhlCmVPcGYya3hmT3VvVHBGbVlGRE5hOWNRT3RYRndpNXBkQVhLNU1DUWo3WXNUM2wwOGM4bXNBQkZ1YnV1RmVLWDUvVFk4SUhoblNQaGxwOWtlV1BTb0RnPT0K",
-      "url": "https://github.com/junyou1998/regex-batch-renamer/releases/download/v0.5.2/Regex.Batch.Renamer_0.5.2_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUY0ZXSFZBL3ZnVFhKNWVNUnYyMWtXQW5Rd3lkOHV6VU94cmwxdm9sbzcvQVVLUGN4MG9COWUzcTVqYysvVE5US2c5NGFjTWZwNFBDWHZuNlh1MmVUdXkvUDlsc3VoSUFNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc3ODgxMjA1CWZpbGU6UmVnZXggQmF0Y2ggUmVuYW1lcl8wLjUuMF94NjQtc2V0dXAuZXhlCnM0L2EvZzF2UUEwWEhyVDVjM2c4ZmY3RjhOaVpUMy96bHFaVlpKSXN3N3BsKzIvMTNnZVJQSlpQOUYraGRtRWpWYXVVVnMvaDdEMm1KRk9XZ3E5Y0R3PT0K",
+      "url": "https://github.com/junyou1998/regex-batch-renamer/releases/download/v0.5.0/Regex.Batch.Renamer_0.5.0_x64-setup.exe"
     },
     "linux-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUY0ZXSFZBL3ZnVGJjbEtwUU92bE1MS09zNmpROGR1eGdqVmt4QkN0VDFjMTl5eHhYR0wwK0lNalZobEVJWDJXZjIvd0NvRCtMbXlySzdSMWFucEJHYitmZ053bjg1bEFjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc3ODA0Njc1CWZpbGU6UmVnZXggQmF0Y2ggUmVuYW1lcl8wLjUuMl9hbWQ2NC5BcHBJbWFnZQpVQXNIQk1JZXBOd21pZGgzQW5zUGU3ODFUZTNUU01TN2dGME8yZ01mZ1hwQ0FVSDZvSVlJMGh1NHpQK3lUTGNMTXp4aGJEa3FjbzgwQm5CSnRORTJBdz09Cg==",
-      "url": "https://github.com/junyou1998/regex-batch-renamer/releases/download/v0.5.2/Regex.Batch.Renamer_0.5.2_amd64.AppImage"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUY0ZXSFZBL3ZnVGZjSDdhV1phYU9iT2JiN1lGQ0VXclRpbktnaE9EalJNU2RONG9zVFR2bkRKOVk4T3BhZGxKRzBXaTM1UzNyQnF5M0UvOVA4TVpkTTV6YzhIbVBxVXcwPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc3ODgxMDk1CWZpbGU6UmVnZXggQmF0Y2ggUmVuYW1lcl8wLjUuMF9hbWQ2NC5BcHBJbWFnZQpGRkhJNElLcFhFL29RdTJGbUpsWVRKL0xGbFc5NDVEa0NUSXY2WnBvc3BRQ2ZZN3F2SzhBamZqWEpWNzFqekJtdmtTeWxrbUcvYVIwclZha2NPTmhBQT09Cg==",
+      "url": "https://github.com/junyou1998/regex-batch-renamer/releases/download/v0.5.0/Regex.Batch.Renamer_0.5.0_amd64.AppImage"
     }
   }
 }
