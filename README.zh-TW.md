@@ -103,7 +103,7 @@ Stable release 會直接正式發佈。Beta release 仍會先建立成 draft pre
 
 1. 先安裝較舊的 stable 版本，例如 `v0.5.0`。
 2. 發佈下一個 stable tag，例如 `v0.5.1`。
-3. 確認新的 release assets 內有 updater 產物，例如 `.sig`、`.app.tar.gz`、`.AppImage.sig` 或 Windows updater 簽章檔。
+3. 確認新的 release assets 內有 updater 產物，例如 `.app.tar.gz`、`.AppImage.sig`，以及 Windows 的 `-setup.exe` 與對應 `.sig`。
 4. 在 macOS 上，請先把已安裝 app 放到 `/Applications` 再測試 app 內安裝。
 5. 打開舊版 app，等待啟動時自動檢查更新。
 6. 確認更新提示或 About 視窗能看到新版號。
