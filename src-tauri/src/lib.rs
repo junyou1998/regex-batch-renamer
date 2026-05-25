@@ -1,15 +1,17 @@
-use serde::Serialize;
-use std::fs;
-use std::path::PathBuf;
 #[cfg(target_os = "macos")]
 use flate2::read::GzDecoder;
+use serde::Serialize;
+use std::fs;
 #[cfg(target_os = "macos")]
 use std::io::Cursor;
 #[cfg(target_os = "macos")]
 use std::io::Write;
 #[cfg(target_os = "macos")]
 use std::os::unix::fs::PermissionsExt;
-#[cfg(target_os = "macos")]
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
+use std::path::PathBuf;
+#[cfg(any(target_os = "macos", target_os = "windows"))]
 use std::process::Command;
 #[cfg(target_os = "windows")]
 use tauri::Manager;
@@ -78,8 +80,67 @@ fn app_bundle_parent_writable(bundle_path: &PathBuf) -> Option<bool> {
     Some(!metadata.permissions().readonly())
 }
 
+#[cfg_attr(not(target_os = "windows"), allow(dead_code))]
+fn is_supported_windows_update_asset(download_url: &str) -> bool {
+    let normalized = download_url.to_ascii_lowercase();
+    normalized.ends_with(".exe")
+}
+
+#[cfg_attr(not(target_os = "windows"), allow(dead_code))]
+fn windows_update_installer_name(download_url: &str, version: &str) -> String {
+    let path = download_url
+        .split('?')
+        .next()
+        .unwrap_or(download_url)
+        .trim_end_matches('/');
+
+    std::path::Path::new(path)
+        .file_name()
+        .and_then(|name| name.to_str())
+        .filter(|name| name.to_ascii_lowercase().ends_with(".exe"))
+        .map(ToOwned::to_owned)
+        .unwrap_or_else(|| format!("Regex.Batch.Renamer_{version}_x64-setup.exe"))
+}
+
+#[cfg_attr(not(target_os = "windows"), allow(dead_code))]
+fn windows_update_script(installer_path: &std::path::Path, pid: u32) -> String {
+    format!(
+        "@echo off\r\nsetlocal enableextensions\r\nset \"PID={pid}\"\r\nset \"INSTALLER={installer}\"\r\n:wait_for_parent\r\ntasklist /FI \"PID eq %PID%\" 2>NUL | find \"%PID%\" >NUL\r\nif not errorlevel 1 (\r\n  timeout /t 1 /nobreak >NUL\r\n  goto wait_for_parent\r\n)\r\ntimeout /t 1 /nobreak >NUL\r\n\"%INSTALLER%\" /P /R /UPDATE /ARGS\r\ndel /f /q \"%~f0\" >NUL 2>&1\r\n",
+        pid = pid,
+        installer = installer_path.display(),
+    )
+}
+
+#[cfg(target_os = "windows")]
+fn spawn_windows_update_helper(installer_path: &std::path::Path, pid: u32) -> Result<(), String> {
+    const DETACHED_PROCESS: u32 = 0x0000_0008;
+    const CREATE_NEW_PROCESS_GROUP: u32 = 0x0000_0200;
+    const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+
+    let helper_path = installer_path
+        .parent()
+        .ok_or("Failed to determine Windows updater helper directory")?
+        .join(format!("regex-batch-renamer-update-{pid}.cmd"));
+
+    fs::write(&helper_path, windows_update_script(installer_path, pid))
+        .map_err(|error| error.to_string())?;
+
+    let helper_arg = helper_path.display().to_string();
+
+    Command::new("cmd")
+        .args(["/C", helper_arg.as_str()])
+        .creation_flags(DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP | CREATE_NO_WINDOW)
+        .spawn()
+        .map_err(|error| format!("Failed to launch Windows updater helper: {error}"))?;
+
+    Ok(())
+}
+
 #[cfg(target_os = "macos")]
-fn extract_update_to_staging(bytes: &[u8], parent_dir: &std::path::Path) -> Result<tempfile::TempDir, String> {
+fn extract_update_to_staging(
+    bytes: &[u8],
+    parent_dir: &std::path::Path,
+) -> Result<tempfile::TempDir, String> {
     let staging_dir = tempfile::Builder::new()
         .prefix("regex-batch-renamer-update-")
         .tempdir_in(parent_dir)
@@ -105,7 +166,9 @@ fn extract_update_to_staging(bytes: &[u8], parent_dir: &std::path::Path) -> Resu
         if let Some(parent) = extraction_path.parent() {
             fs::create_dir_all(parent).map_err(|error| error.to_string())?;
         }
-        entry.unpack(&extraction_path).map_err(|error| error.to_string())?;
+        entry
+            .unpack(&extraction_path)
+            .map_err(|error| error.to_string())?;
     }
 
     Ok(staging_dir)
@@ -143,7 +206,10 @@ fn spawn_macos_update_helper(
     let mut file = fs::File::create(&script_path).map_err(|error| error.to_string())?;
     file.write_all(script.as_bytes())
         .map_err(|error| error.to_string())?;
-    let mut permissions = file.metadata().map_err(|error| error.to_string())?.permissions();
+    let mut permissions = file
+        .metadata()
+        .map_err(|error| error.to_string())?
+        .permissions();
     permissions.set_mode(0o755);
     fs::set_permissions(&script_path, permissions).map_err(|error| error.to_string())?;
 
@@ -171,8 +237,8 @@ async fn install_app_update(app: tauri::AppHandle) -> Result<(), String> {
             .await
             .map_err(|error| error.to_string())?;
 
-        let app_bundle_path = current_app_bundle_path()
-            .ok_or("Failed to determine current app bundle path")?;
+        let app_bundle_path =
+            current_app_bundle_path().ok_or("Failed to determine current app bundle path")?;
         let parent_dir = app_bundle_path
             .parent()
             .ok_or("Failed to determine app parent directory")?;
@@ -199,35 +265,37 @@ async fn install_app_update(app: tauri::AppHandle) -> Result<(), String> {
             .map_err(|error| error.to_string())?
             .ok_or("No update available")?;
 
+        let download_url = update.download_url.as_str().to_string();
+        if !is_supported_windows_update_asset(&download_url) {
+            return Err(format!("Unsupported Windows updater asset: {download_url}"));
+        }
+
         let bytes = update
             .download(|_, _| {}, || {})
             .await
             .map_err(|error| error.to_string())?;
 
-        // Close webview windows so the WebView2 host (msedgewebview2.exe)
-        // starts shutting down. Those child processes are what hold open
-        // handles to WebView2Loader.dll inside our install dir; they
-        // outlive window close by roughly a second.
+        let installer_dir = std::env::var("LOCALAPPDATA")
+            .map(PathBuf::from)
+            .ok()
+            .unwrap_or_else(std::env::temp_dir)
+            .join("RegexBatchRenamer")
+            .join("updates");
+        fs::create_dir_all(&installer_dir).map_err(|error| error.to_string())?;
+
+        let installer_path = installer_dir.join(windows_update_installer_name(
+            &download_url,
+            &update.version,
+        ));
+        fs::write(&installer_path, &bytes).map_err(|error| error.to_string())?;
+
         for (_, window) in app.webview_windows() {
             let _ = window.close();
         }
-        std::thread::sleep(std::time::Duration::from_millis(1500));
+        spawn_windows_update_helper(&installer_path, std::process::id())?;
 
-        // Hand off to the plugin's install path. It:
-        //   1. Writes the installer to a tempfile.
-        //   2. Calls ShellExecuteW with the verb "open", which is the
-        //      Windows-shell fire-and-forget primitive — survives our
-        //      exit cleanly and triggers UAC elevation if the manifest
-        //      asks for it. (Command::spawn / CreateProcess does neither.)
-        //   3. Passes the correct NSIS args derived from `installMode`
-        //      ("/PASSIVE /UPDATE /ARGS " for our config), which the
-        //      Tauri NSIS template actually recognizes.
-        //   4. Calls std::process::exit(0) immediately — atomically
-        //      releasing every DLL handle our process held in the install
-        //      directory, so NSIS can overwrite them.
-        // This call does not return on success.
-        update.install(bytes).map_err(|error| error.to_string())?;
-        return Ok(());
+        app.cleanup_before_exit();
+        std::process::exit(0);
     }
 
     #[cfg(all(not(target_os = "macos"), not(target_os = "windows")))]
@@ -243,6 +311,49 @@ async fn install_app_update(app: tauri::AppHandle) -> Result<(), String> {
             .await
             .map_err(|error| error.to_string())?;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        is_supported_windows_update_asset, windows_update_installer_name, windows_update_script,
+    };
+
+    #[test]
+    fn accepts_windows_nsis_setup_exe_assets() {
+        assert!(is_supported_windows_update_asset(
+            "https://example.com/Regex.Batch.Renamer_0.5.1_x64-setup.exe"
+        ));
+    }
+
+    #[test]
+    fn rejects_non_windows_update_assets() {
+        assert!(!is_supported_windows_update_asset(
+            "https://example.com/Regex.Batch.Renamer_x64.app.tar.gz"
+        ));
+    }
+
+    #[test]
+    fn derives_windows_installer_name_from_download_url() {
+        assert_eq!(
+            windows_update_installer_name(
+                "https://example.com/Regex.Batch.Renamer_0.5.1_x64-setup.exe?download=1",
+                "0.5.1"
+            ),
+            "Regex.Batch.Renamer_0.5.1_x64-setup.exe"
+        );
+    }
+
+    #[test]
+    fn windows_update_script_waits_for_parent_before_launching_installer() {
+        let script = windows_update_script(
+            std::path::Path::new("C:\\Users\\tester\\AppData\\Local\\RegexBatchRenamer\\updates\\Regex.Batch.Renamer_0.5.1_x64-setup.exe"),
+            4242,
+        );
+
+        assert!(script.contains("tasklist /FI \"PID eq %PID%\""));
+        assert!(script.contains("\"%INSTALLER%\" /P /R /UPDATE /ARGS"));
     }
 }
 

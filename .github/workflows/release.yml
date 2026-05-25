@@ -146,11 +146,11 @@ jobs:
                   Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" -File -Filter "*.exe.sig" | ForEach-Object {
                     Copy-Item $_.FullName -Destination "release-assets/windows/Regex.Batch.Renamer_$($env:GITHUB_REF_NAME.TrimStart('v'))_${{ matrix.arch_suffix }}-setup.exe.sig"
                   }
-                  Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" -File -Filter "*.zip" | ForEach-Object {
-                    Copy-Item $_.FullName -Destination "release-assets/windows/Regex.Batch.Renamer_$($env:GITHUB_REF_NAME.TrimStart('v'))_${{ matrix.arch_suffix }}.zip"
+                  if (-not (Get-ChildItem -Path "release-assets/windows" -File -Filter "*-setup.exe" | Select-Object -First 1)) {
+                    throw "Windows NSIS installer was not collected."
                   }
-                  Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" -File -Filter "*.zip.sig" | ForEach-Object {
-                    Copy-Item $_.FullName -Destination "release-assets/windows/Regex.Batch.Renamer_$($env:GITHUB_REF_NAME.TrimStart('v'))_${{ matrix.arch_suffix }}.zip.sig"
+                  if (-not (Get-ChildItem -Path "release-assets/windows" -File -Filter "*-setup.exe.sig" | Select-Object -First 1)) {
+                    throw "Windows NSIS installer signature was not collected."
                   }
                   if (-not (Get-ChildItem -Path "release-assets/windows" -File | Select-Object -First 1)) {
                     throw "No Windows release assets were collected."
