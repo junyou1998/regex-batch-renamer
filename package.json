@@ -7,7 +7,7 @@
         "email": "junyou1998@gmail.com"
     },
     "private": true,
-    "version": "0.5.0",
+    "version": "0.5.1",
     "type": "module",
     "scripts": {
         "dev": "pnpm tauri:dev",
@@ -19,7 +19,10 @@
         "tauri:build": "vue-tsc && node scripts/run-tauri-build.mjs",
         "tauri:build:release": "node scripts/run-tauri-release-build.mjs",
         "tauri:ci": "vue-tsc && vite build --config vite.config.tauri.mts",
-        "beta:ci": "pnpm run tauri:ci"
+        "beta:ci": "pnpm run tauri:ci",
+        "updater:serve": "node scripts/test-local-updater.mjs serve",
+        "updater:stage": "node scripts/test-local-updater.mjs generate-manifest",
+        "updater:clean": "node scripts/test-local-updater.mjs clean"
     },
     "dependencies": {
         "@tauri-apps/api": "^2.8.0",

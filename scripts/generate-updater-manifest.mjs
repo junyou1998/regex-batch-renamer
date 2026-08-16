@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { pathToFileURL } from 'node:url'
 
 function parseArgs(argv) {
   const args = {}
@@ -35,7 +36,22 @@ async function requireFile(dir, matcher, description) {
   return filePath
 }
 
-async function buildManifest({ assetsDir, output, repo, tag, version }) {
+async function resolveWindowsAssets(windowsDir) {
+  const installer = await requireFile(
+    windowsDir,
+    (name) => name.endsWith('-setup.exe') && !name.endsWith('.exe.sig'),
+    'Windows NSIS installer',
+  )
+  const signature = await requireFile(
+    windowsDir,
+    (name) => name.endsWith('-setup.exe.sig'),
+    'Windows NSIS installer signature',
+  )
+
+  return { installer, signature }
+}
+
+export async function buildManifest({ assetsDir, output, repo, tag, version }) {
   const macDir = path.join(assetsDir, 'macos')
   const linuxDir = path.join(assetsDir, 'linux')
   const windowsDir = path.join(assetsDir, 'windows')
@@ -45,15 +61,7 @@ async function buildManifest({ assetsDir, output, repo, tag, version }) {
   const darwinX64 = await requireFile(macDir, (name) => name.endsWith('_x64.app.tar.gz'), 'macOS x64 updater bundle')
   const darwinX64Sig = await requireFile(macDir, (name) => name.endsWith('_x64.app.tar.gz.sig'), 'macOS x64 updater signature')
 
-  const winZip = await findOptionalFile(windowsDir, (name) => name.endsWith('.zip') && !name.endsWith('.zip.sig'))
-  const winZipSig = await findOptionalFile(windowsDir, (name) => name.endsWith('.zip.sig'))
-  const winExe = await findOptionalFile(windowsDir, (name) => name.endsWith('.exe') && !name.endsWith('.exe.sig'))
-  const winExeSig = await findOptionalFile(windowsDir, (name) => name.endsWith('.exe.sig'))
-  const windowsBundle = winZip ?? winExe
-  const windowsSig = winZipSig ?? winExeSig
-  if (!windowsBundle || !windowsSig) {
-    throw new Error(`Missing Windows updater assets in ${windowsDir}`)
-  }
+  const { installer: windowsInstaller, signature: windowsSig } = await resolveWindowsAssets(windowsDir)
 
   const linuxTar = await findOptionalFile(linuxDir, (name) => name.endsWith('.AppImage.tar.gz'))
   const linuxTarSig = await findOptionalFile(linuxDir, (name) => name.endsWith('.AppImage.tar.gz.sig'))
@@ -80,7 +88,7 @@ async function buildManifest({ assetsDir, output, repo, tag, version }) {
       },
       'windows-x86_64': {
         signature: await readSignature(windowsSig),
-        url: releaseDownloadUrl(repo, tag, path.basename(windowsBundle)),
+        url: releaseDownloadUrl(repo, tag, path.basename(windowsInstaller)),
       },
       'linux-x86_64': {
         signature: await readSignature(linuxSig),
@@ -93,18 +101,24 @@ async function buildManifest({ assetsDir, output, repo, tag, version }) {
   await fs.writeFile(output, `${JSON.stringify(manifest, null, 2)}\n`)
 }
 
-const args = parseArgs(process.argv.slice(2))
-
-for (const required of ['assets-dir', 'output', 'repo', 'tag', 'version']) {
-  if (!args[required]) {
-    throw new Error(`Missing --${required}`)
-  }
+function isCliEntry() {
+  return Boolean(process.argv[1]) && import.meta.url === pathToFileURL(process.argv[1]).href
 }
 
-await buildManifest({
-  assetsDir: args['assets-dir'],
-  output: args.output,
-  repo: args.repo,
-  tag: args.tag,
-  version: args.version,
-})
+if (isCliEntry()) {
+  const args = parseArgs(process.argv.slice(2))
+
+  for (const required of ['assets-dir', 'output', 'repo', 'tag', 'version']) {
+    if (!args[required]) {
+      throw new Error(`Missing --${required}`)
+    }
+  }
+
+  await buildManifest({
+    assetsDir: args['assets-dir'],
+    output: args.output,
+    repo: args.repo,
+    tag: args.tag,
+    version: args.version,
+  })
+}

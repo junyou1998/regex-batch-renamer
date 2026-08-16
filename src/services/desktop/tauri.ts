@@ -115,14 +115,6 @@ export const tauriDesktopBridge: DesktopBridge = {
     }
   },
   async installAppUpdate() {
-    const runtime = await runtimeInfo()
-    if (runtime.platform === 'darwin') {
-      await invoke('install_app_update')
-      return
-    }
-
-    const update = await check()
-    if (!update) return
-    await update.downloadAndInstall()
+    await invoke('install_app_update')
   },
 }

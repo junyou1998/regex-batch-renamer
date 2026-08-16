@@ -9,6 +9,9 @@
 /src-tauri/target/
 /src-tauri/gen/
 /src-tauri/.DS_Store
+.test-updater/
+.vscode/
+.claude/
 
 # AI tooling artifacts
 .agent/

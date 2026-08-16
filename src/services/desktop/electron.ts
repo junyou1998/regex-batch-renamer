@@ -13,6 +13,20 @@ declare global {
   }
 }
 
+function getElectronIpc() {
+  if (typeof window === 'undefined') return undefined
+  return window.ipcRenderer
+}
+
+function inferBrowserPlatform() {
+  if (typeof navigator === 'undefined') return 'web'
+  const platform =
+    (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform
+    || navigator.platform
+    || 'web'
+  return platform.toLowerCase().includes('mac') ? 'darwin' : platform
+}
+
 function mapResults(
   results: { path: string; success: boolean; error?: string }[],
 ): FileOperationResult[] {
@@ -28,28 +42,52 @@ function mapResults(
 
 export const electronDesktopBridge: DesktopBridge = {
   async selectFiles() {
-    return window.ipcRenderer.selectFiles()
+    return getElectronIpc()?.selectFiles() ?? []
   },
   async selectDirectory() {
-    return window.ipcRenderer.selectDirectory()
+    return getElectronIpc()?.selectDirectory()
   },
   async renameFiles(files: FileOperationRequest[], options?: { failOnExist?: boolean }) {
-    const results = await window.ipcRenderer.renameFiles(files, options)
+    const ipc = getElectronIpc()
+    if (!ipc) {
+      return files.map((file) => ({
+        path: file.oldPath,
+        success: false,
+        error: 'Desktop runtime unavailable in browser preview',
+        code: 'UNKNOWN' as const,
+      }))
+    }
+    const results = await ipc.renameFiles(files, options)
     return mapResults(results)
   },
   async copyRenameFiles(files: FileOperationRequest[]) {
-    const results = await window.ipcRenderer.copyRenameFiles(files)
+    const ipc = getElectronIpc()
+    if (!ipc) {
+      return files.map((file) => ({
+        path: file.oldPath,
+        success: false,
+        error: 'Desktop runtime unavailable in browser preview',
+        code: 'UNKNOWN' as const,
+      }))
+    }
+    const results = await ipc.copyRenameFiles(files)
     return mapResults(results)
   },
   async openExternal(url: string) {
-    await window.ipcRenderer.invoke('open-external', url)
+    const ipc = getElectronIpc()
+    if (ipc) {
+      await ipc.invoke('open-external', url)
+      return
+    }
+    window.open(url, '_blank', 'noopener,noreferrer')
   },
   setZoomFactor(factor: number) {
-    window.ipcRenderer.setZoomFactor(factor)
+    getElectronIpc()?.setZoomFactor(factor)
   },
   async getRuntimeInfo(): Promise<DesktopRuntimeInfo> {
+    const ipc = getElectronIpc()
     return {
-      platform: window.ipcRenderer.platform,
+      platform: ipc?.platform ?? inferBrowserPlatform(),
       runtime: 'electron',
       channel: 'stable',
       version: pkg.version,

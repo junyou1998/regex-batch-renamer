@@ -1,13 +1,6 @@
-use flate2::read::GzDecoder;
 use serde::Serialize;
 use std::fs;
-use std::io::Cursor;
-#[cfg(target_os = "macos")]
-use std::io::Write;
-#[cfg(target_os = "macos")]
-use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
-use std::process::Command;
 use tauri::WebviewWindow;
 use tauri_plugin_updater::UpdaterExt;
 
@@ -73,131 +66,53 @@ fn app_bundle_parent_writable(bundle_path: &PathBuf) -> Option<bool> {
     Some(!metadata.permissions().readonly())
 }
 
-#[cfg(target_os = "macos")]
-fn extract_update_to_staging(bytes: &[u8], parent_dir: &std::path::Path) -> Result<tempfile::TempDir, String> {
-    let staging_dir = tempfile::Builder::new()
-        .prefix("regex-batch-renamer-update-")
-        .tempdir_in(parent_dir)
-        .map_err(|error| error.to_string())?;
-
-    let decoder = GzDecoder::new(Cursor::new(bytes));
-    let mut archive = tar::Archive::new(decoder);
-
-    for entry in archive.entries().map_err(|error| error.to_string())? {
-        let mut entry = entry.map_err(|error| error.to_string())?;
-        let collected_path: PathBuf = entry
-            .path()
-            .map_err(|error| error.to_string())?
-            .iter()
-            .skip(1)
-            .collect();
-
-        if collected_path.as_os_str().is_empty() {
-            continue;
-        }
-
-        let extraction_path = staging_dir.path().join(&collected_path);
-        if let Some(parent) = extraction_path.parent() {
-            fs::create_dir_all(parent).map_err(|error| error.to_string())?;
-        }
-        entry.unpack(&extraction_path).map_err(|error| error.to_string())?;
-    }
-
-    Ok(staging_dir)
-}
-
-#[cfg(target_os = "macos")]
-fn spawn_macos_update_helper(
-    app_bundle_path: &std::path::Path,
-    staged_path: &std::path::Path,
-) -> Result<(), String> {
-    let parent_dir = app_bundle_path
-        .parent()
-        .ok_or("Failed to determine app parent directory")?;
-    let backup_path = parent_dir.join(format!(
-        ".{}-backup-{}",
-        app_bundle_path
-            .file_name()
-            .and_then(|name| name.to_str())
-            .unwrap_or("Regex Batch Renamer.app"),
-        std::process::id()
-    ));
-    let script_path = parent_dir.join(format!(
-        ".regex-batch-renamer-update-{}.sh",
-        std::process::id()
-    ));
-
-    let script = format!(
-        "#!/bin/sh\nset -eu\nPID='{pid}'\nAPP='{app}'\nSTAGED='{staged}'\nBACKUP='{backup}'\nfor _ in $(seq 1 120); do\n  if ! kill -0 \"$PID\" 2>/dev/null; then\n    break\n  fi\n  sleep 1\n done\nrm -rf \"$BACKUP\"\nif [ -d \"$APP\" ]; then\n  mv \"$APP\" \"$BACKUP\"\nfi\nmv \"$STAGED\" \"$APP\"\ntouch \"$APP\"\nopen -n \"$APP\"\nrm -rf \"$BACKUP\"\nrm -f \"$0\"\n",
-        pid = std::process::id(),
-        app = app_bundle_path.display(),
-        staged = staged_path.display(),
-        backup = backup_path.display()
-    );
-
-    let mut file = fs::File::create(&script_path).map_err(|error| error.to_string())?;
-    file.write_all(script.as_bytes())
-        .map_err(|error| error.to_string())?;
-    let mut permissions = file.metadata().map_err(|error| error.to_string())?.permissions();
-    permissions.set_mode(0o755);
-    fs::set_permissions(&script_path, permissions).map_err(|error| error.to_string())?;
-
-    Command::new("/bin/sh")
-        .arg(&script_path)
-        .spawn()
-        .map_err(|error| error.to_string())?;
-
-    Ok(())
+#[cfg_attr(not(target_os = "windows"), allow(dead_code))]
+fn is_supported_windows_update_asset(download_url: &str) -> bool {
+    let normalized = download_url.to_ascii_lowercase();
+    normalized.ends_with(".exe") || normalized.ends_with(".zip")
 }
 
 #[tauri::command]
 async fn install_app_update(app: tauri::AppHandle) -> Result<(), String> {
-    #[cfg(target_os = "macos")]
+    let updater = app.updater().map_err(|error| error.to_string())?;
+    let update = updater
+        .check()
+        .await
+        .map_err(|error| error.to_string())?
+        .ok_or_else(|| "No update available".to_string())?;
+
+    #[cfg(target_os = "windows")]
     {
-        let updater = app.updater().map_err(|error| error.to_string())?;
-        let update = updater
-            .check()
-            .await
-            .map_err(|error| error.to_string())?
-            .ok_or("No update available")?;
-
-        let bytes = update
-            .download(|_, _| {}, || {})
-            .await
-            .map_err(|error| error.to_string())?;
-
-        let app_bundle_path = current_app_bundle_path()
-            .ok_or("Failed to determine current app bundle path")?;
-        let parent_dir = app_bundle_path
-            .parent()
-            .ok_or("Failed to determine app parent directory")?;
-        let staging_dir = extract_update_to_staging(&bytes, parent_dir)?;
-        let staged_path = staging_dir.keep();
-
-        spawn_macos_update_helper(&app_bundle_path, &staged_path)?;
-
-        let app_handle = app.clone();
-        tauri::async_runtime::spawn(async move {
-            std::thread::sleep(std::time::Duration::from_millis(300));
-            app_handle.exit(0);
-        });
-
-        return Ok(());
+        let download_url = update.download_url.as_str().to_string();
+        if !is_supported_windows_update_asset(&download_url) {
+            return Err(format!("Unsupported Windows updater asset: {download_url}"));
+        }
     }
 
-    #[cfg(not(target_os = "macos"))]
-    {
-        let updater = app.updater().map_err(|error| error.to_string())?;
-        let update = updater
-            .check()
-            .await
-            .map_err(|error| error.to_string())?
-            .ok_or("No update available")?;
-        update
-            .download_and_install(|_, _| {}, || {})
-            .await
-            .map_err(|error| error.to_string())?;
-        Ok(())
+    update
+        .download_and_install(|_, _| {}, || {})
+        .await
+        .map_err(|error| error.to_string())?;
+
+    app.restart();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::is_supported_windows_update_asset;
+
+    #[test]
+    fn accepts_windows_nsis_setup_exe_assets() {
+        assert!(is_supported_windows_update_asset(
+            "https://example.com/Regex.Batch.Renamer_0.5.1_x64-setup.exe"
+        ));
+    }
+
+    #[test]
+    fn rejects_non_windows_update_assets() {
+        assert!(!is_supported_windows_update_asset(
+            "https://example.com/Regex.Batch.Renamer_x64.app.tar.gz"
+        ));
     }
 }
 
