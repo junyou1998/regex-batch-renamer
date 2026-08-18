@@ -54,7 +54,15 @@ jobs:
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
 
+            - name: Cache Tauri Windows bundle tools
+              if: matrix.os == 'windows-latest'
+              uses: actions/cache@v4
+              with:
+                  path: ${{ env.LOCALAPPDATA }}\tauri
+                  key: tauri-windows-tools-nsis-3.11
+
             - name: Build Tauri beta artifacts
+              shell: bash
               env:
                   APP_RELEASE_CHANNEL: beta
                   TAURI_BUNDLES: ${{ matrix.bundles }}
@@ -62,7 +70,11 @@ jobs:
                   TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
                   TAURI_UPDATER_PUBKEY: ${{ secrets.TAURI_UPDATER_PUBKEY }}
                   TAURI_UPDATER_ENDPOINT: ${{ secrets.BETA_UPDATER_ENDPOINT }}
-              run: pnpm run tauri:build:release
+              run: |
+                  for attempt in 1 2 3; do
+                    pnpm run tauri:build:release && break
+                    [ $attempt -lt 3 ] && { echo "Attempt $attempt failed, retrying in 60s..."; sleep 60; } || exit 1
+                  done
 
             - name: Collect macOS beta assets
               if: startsWith(matrix.os, 'macos-')

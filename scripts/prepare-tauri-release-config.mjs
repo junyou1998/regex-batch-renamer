@@ -90,6 +90,7 @@ const merged = {
       ...(releaseConfig.plugins?.updater ?? {}),
       pubkey: updaterPubkey,
       endpoints: [updaterEndpoint],
+      ...(updaterEndpoint.startsWith('http://') ? { dangerousInsecureTransportProtocol: true } : {}),
     },
   },
 }
