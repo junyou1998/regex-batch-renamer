@@ -24,7 +24,7 @@
         "hideSidebar": "サイドバーを隠す",
         "about": "このプロジェクトについて",
         "rename": "リネーム実行",
-        "copyTo": "コピー...",
+        "copyTo": "コピーを作成",
         "processing": "処理中...",
         "updateAvailable": "新しいバージョンがあります",
         "download": "ダウンロード",
@@ -36,7 +36,10 @@
         "targetFileExists": "ターゲットファイルが存在するためスキップしました",
         "undoConflict": "元に戻しましたが、{n} 個のファイルが競合のためスキップされました",
         "renameConflict": "競合により {n} ファイルをスキップしました",
-        "invalidChar": "ファイル名に不正な文字が含まれています"
+        "invalidChar": "ファイル名に不正な文字が含まれています",
+        "pendingCloseTitle": "終了の確認",
+        "pendingCloseMessage": "保留中のリネーム変更があります。ウィンドウを閉じてアプリケーションを終了しますか？",
+        "exit": "終了"
     },
     "badges": {
         "prefix": "プレフィックス",
@@ -65,15 +68,16 @@
         "placeholderPatternRegex": "Regexパターンを入力...",
         "placeholderPatternText": "検索するテキストを入力...",
         "replacementLabel": "置換",
-        "supportSequence": "${n} 連番・開始番号対応",
+        "supportSequence": "$n 連番・開始番号対応",
         "placeholderReplacement": "置換後のテキストを入力...",
         "empty": "ルールが追加されていません",
         "variableHelper": "連番を挿入",
-        "variableWidth": "桁数 (0 はゼロ埋めなし)",
+        "variableWidth": "桁数 (0でゼロ埋めなし)",
         "variableStart": "開始番号",
         "insert": "挿入",
         "quickTemplates": "クイックテンプレート",
         "template": {
+            "replaceAllNumbered": "すべてを連番に置換 ($n:2)",
             "removeSpaces": "スペースを削除",
             "spacesToUnderscore": "スペースをアンダースコアに",
             "addPrefix": "プレフィックスを追加...",
@@ -85,6 +89,11 @@
     "preview": {
         "title": "プレビュー ({n} ファイル)",
         "clear": "リストをクリア",
+        "addFiles": "ファイルを追加",
+        "addFolder": "フォルダを追加",
+        "dropHint": "ここにファイルまたはフォルダをドラッグ＆ドロップ、または下のボタンから選択",
+        "dropSubHint": "複数選択やフォルダ全体のドラッグに対応、いつでも追加可能",
+        "dragActiveTitle": "ドロップしてファイルを追加",
         "original": "元のファイル名",
         "new": "新しいファイル名 (プレビュー)",
         "status": "ステータス",
@@ -172,7 +181,7 @@
             }
         },
         "numbering": {
-            "title": "連番機能 (${n})",
+            "title": "連番機能 ($n)",
             "description": "「置換後の文字列」フィールドで {code} を使用して、増加する数値を挿入できます。",
             "table": {
                 "syntax": "構文",

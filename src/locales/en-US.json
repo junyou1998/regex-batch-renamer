@@ -24,7 +24,7 @@
         "hideSidebar": "Hide Sidebar",
         "about": "About",
         "rename": "Rename Files",
-        "copyTo": "Copy To...",
+        "copyTo": "Create Copy",
         "processing": "Processing...",
         "updateAvailable": "New Version Available",
         "download": "Download",
@@ -34,9 +34,12 @@
         "undo": "Undo",
         "undoSuccess": "Undo operation successful",
         "targetFileExists": "Target file exists, skipped",
-        "undoConflict": "Undo completed with {n} conflicts",
-        "renameConflict": "Skipped {n} files due to conflicts",
-        "invalidChar": "Filename contains invalid characters"
+        "undoConflict": "Undo completed, but {n} files were skipped due to conflicts",
+        "renameConflict": "Skipped {n} conflicting files",
+        "invalidChar": "Filename contains invalid characters",
+        "pendingCloseTitle": "Confirm Exit",
+        "pendingCloseMessage": "You have pending rename changes. Are you sure you want to close the window and quit the application?",
+        "exit": "Quit"
     },
     "badges": {
         "prefix": "Prefix",
@@ -65,7 +68,7 @@
         "placeholderPatternRegex": "Enter Regex pattern...",
         "placeholderPatternText": "Enter text to find...",
         "replacementLabel": "Replace with",
-        "supportSequence": "Supports ${n} sequence with start",
+        "supportSequence": "Supports $n sequence with start",
         "variableHelper": "Insert Sequence Number",
         "variableWidth": "Width (0 for none)",
         "variableStart": "Start From",
@@ -74,6 +77,7 @@
         "empty": "No rules added yet",
         "quickTemplates": "Quick Templates",
         "template": {
+            "replaceAllNumbered": "Replace All with Sequence ($n:2)",
             "removeSpaces": "Remove Spaces",
             "spacesToUnderscore": "Spaces to Underscore",
             "addPrefix": "Add Prefix...",
@@ -85,6 +89,11 @@
     "preview": {
         "title": "Preview Changes ({n} files)",
         "clear": "Clear List",
+        "addFiles": "Add Files",
+        "addFolder": "Add Folder",
+        "dropHint": "Drag & drop files or folders here, or use the buttons below",
+        "dropSubHint": "Supports batch multi-select and whole folder drops anytime",
+        "dragActiveTitle": "Drop files to add them",
         "original": "Original Name",
         "new": "New Name (Preview)",
         "status": "Status",
@@ -172,7 +181,7 @@
             }
         },
         "numbering": {
-            "title": "Sequential Numbering (${n})",
+            "title": "Sequential Numbering ($n)",
             "description": "You can use {code} in the \"Replace with\" field to insert incrementing numbers.",
             "table": {
                 "syntax": "Syntax",

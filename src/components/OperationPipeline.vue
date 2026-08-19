@@ -63,17 +63,7 @@ function getOperationIndexById(id: string) {
 }
 
 function getOperationScrollContainer() {
-  let node = operationsList.value?.parentElement ?? null
-
-  while (node) {
-    const style = window.getComputedStyle(node)
-    const canScroll = /(auto|scroll)/.test(`${style.overflowY}${style.overflow}`)
-    if (canScroll && node.scrollHeight > node.clientHeight) {
-      return node
-    }
-    node = node.parentElement
-  }
-
+  if (operationsList.value) return operationsList.value
   return null
 }
 
@@ -361,9 +351,33 @@ const prefixSuffixValue = ref('')
 const showPresetManager = ref(false)
 const showSavePresetModal = ref(false)
 const savePresetName = ref('')
-const templateTriggerRef = ref<HTMLElement | null>(null)
-const dropdownStyle = ref<Record<string, string>>({})
 const savedTemplates = ref<Preset[]>([])
+const templateContainerRef = ref<HTMLElement | null>(null)
+
+function handleDocumentClick(e: Event) {
+  if (!showTemplateDropdown.value) return
+  const target = e.target as Node | null
+  if (templateContainerRef.value && target && !templateContainerRef.value.contains(target)) {
+    showTemplateDropdown.value = false
+  }
+}
+
+watch(showTemplateDropdown, (isOpen) => {
+  if (isOpen) {
+    nextTick(() => {
+      window.addEventListener('pointerdown', handleDocumentClick, true)
+      window.addEventListener('click', handleDocumentClick, true)
+    })
+  } else {
+    window.removeEventListener('pointerdown', handleDocumentClick, true)
+    window.removeEventListener('click', handleDocumentClick, true)
+  }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('pointerdown', handleDocumentClick, true)
+  window.removeEventListener('click', handleDocumentClick, true)
+})
 
 function refreshSavedTemplates() {
   savedTemplates.value = loadPresets()
@@ -405,49 +419,25 @@ function openManageTemplates() {
   showPresetManager.value = true
 }
 
-function updateDropdownPosition() {
-  if (!templateTriggerRef.value) return
-  const rect = templateTriggerRef.value.getBoundingClientRect()
-  const gap = 4
-  const padding = 12
-  const top = rect.bottom + gap
-  const maxH = Math.max(120, window.innerHeight - top - padding)
-  dropdownStyle.value = {
-    top: `${top}px`,
-    left: `${rect.left}px`,
-    maxHeight: `${maxH}px`,
-  }
-}
-
-function onResizeOrScroll() {
-  if (showTemplateDropdown.value) updateDropdownPosition()
-}
-
 function toggleTemplateDropdown() {
   if (!showTemplateDropdown.value) {
     refreshSavedTemplates()
   }
   showTemplateDropdown.value = !showTemplateDropdown.value
-  if (showTemplateDropdown.value) {
-    nextTick(() => updateDropdownPosition())
-  }
 }
 
-watch(showTemplateDropdown, (open) => {
-  if (open) {
-    window.addEventListener('resize', onResizeOrScroll)
-    window.addEventListener('scroll', onResizeOrScroll, true)
-  } else {
-    window.removeEventListener('resize', onResizeOrScroll)
-    window.removeEventListener('scroll', onResizeOrScroll, true)
-  }
-})
-
 function applyTemplate(templateId: string) {
-  // ... existing template logic ...
   showTemplateDropdown.value = false
 
   switch (templateId) {
+    case 'replaceAllNumbered':
+      operationStore.addOperation('regex', {
+        pattern: '^.*',
+        replacement: '${n:2}',
+        useRegex: true
+      })
+      scrollToBottom()
+      break
     case 'removeSpaces':
       operationStore.addOperation('regex', {
         pattern: '\\s+',
@@ -505,68 +495,62 @@ function confirmPrefixSuffix() {
 
   closePrefixSuffixModal()
 }
-
-function handleClickOutside(event: MouseEvent) {
-  const target = event.target as HTMLElement
-  if (!target.closest('.template-dropdown-container') && !target.closest('.template-dropdown-portal')) {
-    showTemplateDropdown.value = false
-  }
-}
-
-onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
-  window.removeEventListener('resize', onResizeOrScroll)
-  window.removeEventListener('scroll', onResizeOrScroll, true)
-})
 </script>
 
 <template>
-  <div class="space-y-4">
+  <div class="flex flex-col h-full min-h-0">
+    <!-- Fixed Pipeline Header with Stacking Context -->
     <div
-      class="flex items-center justify-between flex-wrap gap-2 sticky top-0 z-30 bg-slate-100/95 dark:bg-slate-900/95 backdrop-blur-md py-3 -mx-4 px-4 border-b border-slate-200/50 dark:border-slate-700/50 shadow-sm transition-all">
-      <h2 class="text-lg font-semibold text-slate-800 dark:text-white flex items-center gap-2">
-        <span class="w-1 h-5 bg-blue-500 rounded-full"></span>
+      class="relative z-30 flex items-center justify-between flex-wrap gap-2 px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-100/95 dark:bg-slate-900/95 backdrop-blur-md shrink-0 shadow-2xs">
+      <h2 class="text-base font-semibold text-slate-800 dark:text-white flex items-center gap-2">
+        <span class="w-1 h-4 bg-blue-500 rounded-full"></span>
         {{ $t('operations.title') }}
 
-        <button @click="showHelp = true"
+        <button type="button" @click="showHelp = true"
           class="text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer"
           title="使用說明與 Regex 教學">
-          <HelpCircle class="h-5 w-5" />
+          <HelpCircle class="h-4 w-4" />
         </button>
 
-        <button v-if="canUndo" @click="emit('undo')"
+        <button type="button" v-if="canUndo" @click="emit('undo')"
           class="text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer ml-1"
           :title="$t('app.undo')">
-          <Undo2 class="h-5 w-5" />
+          <Undo2 class="h-4 w-4" />
         </button>
       </h2>
       <div class="flex items-center gap-2">
         <!-- Templates Dropdown (built-in + custom) -->
-        <div class="relative template-dropdown-container">
-          <button ref="templateTriggerRef" @click.stop="toggleTemplateDropdown"
-            class="px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg transition-colors flex items-center gap-1 cursor-pointer">
+        <div ref="templateContainerRef" class="relative template-dropdown-container">
+          <!-- Global Backdrop Teleported to body to cover full viewport -->
+          <Teleport to="body">
+            <div
+              v-if="showTemplateDropdown"
+              class="fixed inset-0 z-40 bg-transparent"
+              @click="showTemplateDropdown = false"
+            />
+          </Teleport>
+
+          <button type="button" @click="toggleTemplateDropdown"
+            class="px-2.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg transition-colors flex items-center gap-1 cursor-pointer">
             <Zap class="h-3.5 w-3.5" />
             {{ $t('operations.quickTemplates') }}
             <ChevronDown class="h-3 w-3 ml-0.5" />
           </button>
-        </div>
 
-        <!-- Teleported Dropdown Menu -->
-        <Teleport to="body">
+          <!-- Local Absolute Dropdown Menu -->
           <Transition name="dropdown">
             <div v-if="showTemplateDropdown"
-              class="template-dropdown-portal fixed w-56 bg-white dark:bg-slate-800 rounded-lg shadow-2xl border border-slate-200 dark:border-slate-700 py-1 z-9999 overflow-y-auto custom-scrollbar"
-              :style="dropdownStyle">
+              class="absolute left-0 top-full mt-1.5 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 py-1.5 z-50 overflow-y-auto max-h-80 custom-scrollbar">
 
               <!-- Built-in Templates Section -->
               <div
                 class="px-3 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 {{ $t('templates.sectionBuiltIn') }}
               </div>
+              <button @click="applyTemplate('replaceAllNumbered')"
+                class="w-full px-4 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer">
+                {{ $t('operations.template.replaceAllNumbered') }}
+              </button>
               <button @click="applyTemplate('removeSpaces')"
                 class="w-full px-4 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer">
                 {{ $t('operations.template.removeSpaces') }}
@@ -618,16 +602,17 @@ onUnmounted(() => {
               </button>
             </div>
           </Transition>
-        </Teleport>
+        </div>
 
         <button @click="addRegexOperation"
-          class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500 rounded-lg transition-colors flex items-center gap-1 shadow-sm cursor-pointer">
+          class="px-2.5 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500 rounded-lg transition-colors flex items-center gap-1 shadow-2xs cursor-pointer">
           <Plus class="h-3.5 w-3.5" /> {{ $t('operations.add') }}
         </button>
       </div>
     </div>
 
-    <div class="space-y-3" ref="operationsList">
+    <!-- Scrollable Operations List Area -->
+    <div class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3 min-h-0" ref="operationsList">
       <div class="space-y-3">
         <div v-for="(op, index) in operationsModel" :key="op.id" :data-operation-id="op.id"
           class="relative bg-slate-200/50 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-300 dark:border-slate-700 rounded-xl p-4 shadow-sm transition-colors hover:border-slate-400 dark:hover:border-slate-600 group"

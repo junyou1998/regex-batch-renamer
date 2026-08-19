@@ -24,7 +24,7 @@
         "hideSidebar": "隐藏侧边栏",
         "about": "关于本项目",
         "rename": "执行重命名",
-        "copyTo": "复制到...",
+        "copyTo": "创建副本",
         "processing": "处理中...",
         "updateAvailable": "发现新版本",
         "download": "下载",
@@ -36,7 +36,10 @@
         "targetFileExists": "目标文件已存在，已跳过",
         "undoConflict": "撤销完成，但有 {n} 个文件因冲突而跳过",
         "renameConflict": "已跳过 {n} 个冲突文件",
-        "invalidChar": "文件名包含非法字符"
+        "invalidChar": "文件名包含非法字符",
+        "pendingCloseTitle": "确认退出",
+        "pendingCloseMessage": "列表中尚有未应用的重命名更改，确定要关闭窗口并退出应用程序吗？",
+        "exit": "退出"
     },
     "badges": {
         "prefix": "前缀",
@@ -65,7 +68,7 @@
         "placeholderPatternRegex": "输入 Regex 模式...",
         "placeholderPatternText": "输入要查找的文本...",
         "replacementLabel": "替换为",
-        "supportSequence": "支持 ${n} 序号与起始值",
+        "supportSequence": "支持 $n 序号与起始值",
         "placeholderReplacement": "输入替换后的文本...",
         "empty": "尚未新增任何规则",
         "variableHelper": "插入序号",
@@ -74,6 +77,7 @@
         "insert": "插入",
         "quickTemplates": "快速模板",
         "template": {
+            "replaceAllNumbered": "全部替换为序号 ($n:2)",
             "removeSpaces": "移除空格",
             "spacesToUnderscore": "空格转下划线",
             "addPrefix": "添加前缀...",
@@ -85,12 +89,17 @@
     "preview": {
         "title": "预览变更 ({n} 文件)",
         "clear": "清空列表",
-        "original": "原文件名",
+        "addFiles": "添加文件",
+        "addFolder": "添加文件夹",
+        "dropHint": "拖放文件或文件夹至此，或点击下方按钮选取",
+        "dropSubHint": "支持批量多选与拖曳整个文件夹，随时可拖入更多文件",
+        "dragActiveTitle": "释放鼠标即可添加文件",
+        "original": "原始文件名",
         "new": "新文件名 (预览)",
         "status": "状态",
         "remove": "移除此文件",
         "clickToCopy": "点击复制: {text}",
-        "empty": "尚未加入任何文件",
+        "empty": "尚未添加任何文件",
         "copied": "已复制: {text}",
         "copyFailed": "复制失败"
     },
@@ -172,7 +181,7 @@
             }
         },
         "numbering": {
-            "title": "流水号功能 (${n})",
+            "title": "流水号功能 ($n)",
             "description": "您可以在「替换为」字段中使用 {code} 来插入递增的数字。",
             "table": {
                 "syntax": "语法",
