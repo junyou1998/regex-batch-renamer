@@ -8,7 +8,10 @@
         "title": "Regex Batch Renamer Beta",
         "width": 1200,
         "height": 800,
-        "dragDropEnabled": true
+        "dragDropEnabled": true,
+        "hiddenTitle": true,
+        "titleBarStyle": "Overlay",
+        "acceptFirstMouse": true
       }
     ]
   }

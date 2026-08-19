@@ -1,12 +1,12 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Regex Batch Renamer",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "identifier": "com.junyou.regexbatchrenamer",
   "build": {
-    "beforeDevCommand": "pnpm vite --config vite.config.tauri.mts",
+    "beforeDevCommand": "pnpm vite",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "pnpm vite build --config vite.config.tauri.mts",
+    "beforeBuildCommand": "pnpm vite build",
     "frontendDist": "../dist"
   },
   "app": {
@@ -16,7 +16,11 @@
         "title": "Regex Batch Renamer",
         "width": 1200,
         "height": 800,
-        "dragDropEnabled": true
+        "dragDropEnabled": true,
+        "hiddenTitle": true,
+        "titleBarStyle": "Overlay",
+        "acceptFirstMouse": true,
+        "devtools": true
       }
     ]
   },
