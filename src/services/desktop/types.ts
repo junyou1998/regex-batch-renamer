@@ -1,5 +1,5 @@
 export type ReleaseChannel = 'stable' | 'beta'
-export type RuntimeKind = 'electron' | 'tauri'
+export type RuntimeKind = 'tauri'
 
 export type DesktopErrorCode =
   | 'FILE_EXISTS'
@@ -33,6 +33,13 @@ export interface AppUpdateInfo {
   version?: string
 }
 
+export interface PendingChangesOptions {
+  title?: string
+  message?: string
+  okLabel?: string
+  cancelLabel?: string
+}
+
 export type PendingChangesHandler = () => boolean | Promise<boolean>
 export type FileDropHandler = (paths: string[]) => void
 export type FileDragStateHandler = (isDragging: boolean) => void
@@ -45,10 +52,13 @@ export interface DesktopBridge {
   openExternal(url: string): Promise<void>
   setZoomFactor(factor: number): Promise<void> | void
   getRuntimeInfo(): Promise<DesktopRuntimeInfo>
-  setPendingChangesHandler(handler: PendingChangesHandler): Promise<void> | void
+  setPendingChangesHandler(handler: PendingChangesHandler, options?: PendingChangesOptions): Promise<void> | void
   clearPendingChangesHandler(): Promise<void> | void
   onFilesDropped?(handler: FileDropHandler): Promise<() => void>
   onFileDragStateChanged?(handler: FileDragStateHandler): Promise<() => void>
   checkForAppUpdate?(): Promise<AppUpdateInfo | null>
   installAppUpdate?(): Promise<void>
+  startDragging?(): Promise<void>
+  toggleMaximize?(): Promise<void>
+  openDevTools?(): Promise<void>
 }

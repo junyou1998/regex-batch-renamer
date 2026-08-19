@@ -1,6 +1,6 @@
 import { invoke } from '@tauri-apps/api/core'
 import { getCurrentWindow } from '@tauri-apps/api/window'
-import { open } from '@tauri-apps/plugin-dialog'
+import { confirm, open } from '@tauri-apps/plugin-dialog'
 import { openUrl } from '@tauri-apps/plugin-opener'
 import { check } from '@tauri-apps/plugin-updater'
 import type {
@@ -12,6 +12,7 @@ import type {
   FileOperationRequest,
   FileOperationResult,
   PendingChangesHandler,
+  PendingChangesOptions,
 } from './types'
 
 let closeUnlisten: null | (() => void) = null
@@ -73,11 +74,37 @@ export const tauriDesktopBridge: DesktopBridge = {
   async getRuntimeInfo() {
     return runtimeInfo()
   },
-  async setPendingChangesHandler(handler: PendingChangesHandler) {
-    void handler
+  async setPendingChangesHandler(handler: PendingChangesHandler, options?: PendingChangesOptions) {
     if (closeUnlisten) {
       closeUnlisten()
       closeUnlisten = null
+    }
+
+    try {
+      closeUnlisten = await getCurrentWindow().onCloseRequested(async (event) => {
+        const hasPending = await handler()
+        if (hasPending) {
+          event.preventDefault()
+          const confirmed = await confirm(
+            options?.message || '清單中尚有未套用的檔名變更，確定要關閉視窗並結束應用程式嗎？',
+            {
+              title: options?.title || '確認退出',
+              kind: 'warning',
+              okLabel: options?.okLabel || '退出',
+              cancelLabel: options?.cancelLabel || '取消',
+            }
+          )
+          if (confirmed) {
+            try {
+              await invoke('exit_app')
+            } catch {
+              await getCurrentWindow().destroy()
+            }
+          }
+        }
+      })
+    } catch (err) {
+      console.warn('Failed to register onCloseRequested handler:', err)
     }
   },
   clearPendingChangesHandler() {
@@ -95,7 +122,11 @@ export const tauriDesktopBridge: DesktopBridge = {
   },
   async onFileDragStateChanged(handler: FileDragStateHandler) {
     return getCurrentWindow().onDragDropEvent((event) => {
-      handler(event.payload.type === 'over')
+      if (event.payload.type === 'enter' || event.payload.type === 'over') {
+        handler(true)
+      } else if (event.payload.type === 'leave' || event.payload.type === 'drop') {
+        handler(false)
+      }
     })
   },
   async checkForAppUpdate(): Promise<AppUpdateInfo | null> {
@@ -116,5 +147,14 @@ export const tauriDesktopBridge: DesktopBridge = {
   },
   async installAppUpdate() {
     await invoke('install_app_update')
+  },
+  async startDragging() {
+    await getCurrentWindow().startDragging()
+  },
+  async toggleMaximize() {
+    await getCurrentWindow().toggleMaximize()
+  },
+  async openDevTools() {
+    await invoke('open_devtools')
   },
 }
