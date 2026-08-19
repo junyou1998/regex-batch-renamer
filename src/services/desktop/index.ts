@@ -1,5 +1,4 @@
 import type { DesktopBridge } from './types'
-import { electronDesktopBridge } from './electron'
 import { tauriDesktopBridge } from './tauri'
 
 export function isTauriRuntime() {
@@ -7,9 +6,7 @@ export function isTauriRuntime() {
   return '__TAURI_INTERNALS__' in window || '__TAURI__' in window
 }
 
-export const desktop: DesktopBridge = isTauriRuntime()
-  ? tauriDesktopBridge
-  : electronDesktopBridge
+export const desktop: DesktopBridge = tauriDesktopBridge
 
 export type {
   AppUpdateInfo,

@@ -7,18 +7,16 @@
         "email": "junyou1998@gmail.com"
     },
     "private": true,
-    "version": "0.5.3",
+    "version": "0.5.4",
     "type": "module",
     "scripts": {
         "dev": "pnpm tauri:dev",
         "build": "pnpm tauri:build",
-        "preview": "vite preview --config vite.config.tauri.mts",
-        "electron:dev": "vite --config vite.config.mts",
-        "electron:build": "vue-tsc && vite build --config vite.config.mts && electron-builder",
+        "preview": "vite preview",
         "tauri:dev": "pnpm tauri dev",
         "tauri:build": "vue-tsc && node scripts/run-tauri-build.mjs",
         "tauri:build:release": "node scripts/run-tauri-release-build.mjs",
-        "tauri:ci": "vue-tsc && vite build --config vite.config.tauri.mts",
+        "tauri:ci": "vue-tsc && vite build",
         "beta:ci": "pnpm run tauri:ci",
         "updater:serve": "node scripts/test-local-updater.mjs serve",
         "updater:stage": "node scripts/test-local-updater.mjs generate-manifest",
@@ -44,64 +42,13 @@
         "@tauri-apps/cli": "^2.9.1",
         "@types/uuid": "^10.0.0",
         "@vitejs/plugin-vue": "^5.0.4",
-        "electron": "^28.3.3",
-        "electron-builder": "^24.13.3",
         "tailwindcss": "^4.1.18",
         "typescript": "^5.2.2",
         "vite": "^5.1.6",
-        "vite-plugin-electron": "^0.28.4",
-        "vite-plugin-electron-renderer": "^0.14.5",
         "vue-tsc": "^2.0.6"
-    },
-    "main": "dist-electron/main.cjs",
-    "build": {
-        "appId": "com.junyou.regexbatchrenamer",
-        "productName": "Regex Batch Renamer",
-        "files": [
-            "dist/**/*",
-            "dist-electron/**/*"
-        ],
-        "directories": {
-            "output": "release",
-            "buildResources": "public"
-        },
-        "mac": {
-            "identity": null,
-            "target": {
-                "target": "default",
-                "arch": [
-                    "x64",
-                    "arm64"
-                ]
-            },
-            "category": "public.app-category.utilities",
-            "icon": "public/icon-mac.png"
-        },
-        "win": {
-            "target": [
-                "nsis",
-                "portable"
-            ],
-            "icon": "public/icon.ico",
-            "verifyUpdateCodeSignature": false,
-            "sign": null
-        },
-        "linux": {
-            "target": [
-                "AppImage",
-                "deb"
-            ],
-            "icon": "public/icon.png",
-            "category": "Utility"
-        },
-        "nsis": {
-            "oneClick": false,
-            "allowToChangeInstallationDirectory": true
-        }
     },
     "pnpm": {
         "onlyBuiltDependencies": [
-            "electron",
             "esbuild"
         ]
     }
