@@ -2,15 +2,98 @@
 import { useFileStore } from '../stores/fileStore'
 import { useToastStore } from '../stores/toastStore'
 import { generateDiffHtml } from '../utils/diff'
-import { computed, ref, watch, nextTick, onBeforeUnmount, type Ref } from 'vue'
+import { computed, ref, watch, nextTick, onMounted, onUnmounted, onBeforeUnmount, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useVirtualList } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
-import { Check, CircleX, Clock, GripVertical, X } from 'lucide-vue-next'
+import { desktop } from '../services/desktop'
+import { Check, CircleX, Clock, FilePlus, FolderPlus, GripVertical, Trash2, X } from 'lucide-vue-next'
 
 const fileStore = useFileStore()
 const toastStore = useToastStore()
 const { t } = useI18n()
+
+defineProps<{
+  isFileDragActive?: boolean
+}>()
+
+const isLocalDragging = ref(false)
+let dragCounter = 0
+
+function onWindowDragEnter(e: DragEvent) {
+  if (e.dataTransfer?.types?.includes('Files')) {
+    dragCounter++
+    isLocalDragging.value = true
+  }
+}
+
+function onWindowDragLeave() {
+  dragCounter--
+  if (dragCounter <= 0) {
+    dragCounter = 0
+    isLocalDragging.value = false
+  }
+}
+
+function onWindowDrop(e: DragEvent) {
+  dragCounter = 0
+  isLocalDragging.value = false
+  const files = e.dataTransfer?.files
+  if (files && files.length > 0) {
+    const paths = Array.from(files)
+      .map(file => (file as any).path)
+      .filter((path): path is string => Boolean(path))
+    if (paths.length > 0) {
+      addFiles(paths)
+    }
+  }
+}
+
+function addFiles(paths: string[]) {
+  fileStore.addFilePaths(paths)
+}
+
+function onDrop(e: DragEvent) {
+  isLocalDragging.value = false
+  dragCounter = 0
+  const files = e.dataTransfer?.files
+  if (files) {
+    const paths = Array.from(files)
+      .map(file => file.path)
+      .filter((path): path is string => Boolean(path))
+    addFiles(paths)
+  }
+}
+
+function onDragOver() {
+  isLocalDragging.value = true
+}
+
+function onDragLeave() {
+  isLocalDragging.value = false
+}
+
+async function openFileDialog() {
+  try {
+    const paths = await desktop.selectFiles()
+    addFiles(paths)
+  } catch (error) {
+    console.error('Failed to select files:', error)
+    toastStore.addToast(t('dropZone.openFailed'), 'error')
+  }
+}
+
+async function openDirectoryDialog() {
+  try {
+    const dir = await desktop.selectDirectory?.()
+    if (dir) {
+      addFiles([dir])
+    }
+  } catch (error) {
+    console.error('Failed to select directory:', error)
+    toastStore.addToast(t('errors.selectDirectoryFailed'), 'error')
+  }
+}
 
 const ROW_HEIGHT = 44
 
@@ -146,10 +229,9 @@ function handleAutoScroll(clientY: number) {
 
   if (clientY >= bottom - AUTO_SCROLL_EDGE_THRESHOLD) {
     startAutoScroll(1)
-    return
+  } else {
+    stopAutoScroll()
   }
-
-  stopAutoScroll()
 }
 
 function getDropTarget(clientX: number, clientY: number) {
@@ -238,6 +320,19 @@ function onPointerCancel() {
   window.removeEventListener('pointercancel', onPointerCancel)
 }
 
+onMounted(() => {
+  window.addEventListener('dragenter', onWindowDragEnter)
+  window.addEventListener('dragleave', onWindowDragLeave)
+  window.addEventListener('dragover', (e) => e.preventDefault())
+  window.addEventListener('drop', onWindowDrop)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('dragenter', onWindowDragEnter)
+  window.removeEventListener('dragleave', onWindowDragLeave)
+  window.removeEventListener('drop', onWindowDrop)
+})
+
 onBeforeUnmount(() => {
   onPointerCancel()
   stopAutoScroll()
@@ -245,22 +340,58 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div
-    class="flex flex-col h-full w-full min-w-0 bg-slate-100 dark:bg-slate-800/50 rounded-xl border border-slate-300 dark:border-slate-700 overflow-hidden shadow-sm">
+  <div @drop.prevent="onDrop" @dragover.prevent="onDragOver" @dragleave.prevent="onDragLeave"
+    class="relative flex flex-col h-full w-full min-w-0 bg-slate-100 dark:bg-slate-800/50 rounded-xl border transition-all duration-200 overflow-hidden shadow-sm"
+    :class="[
+      (isLocalDragging || isFileDragActive) && fileStore.files.length > 0
+        ? 'border-blue-500 ring-2 ring-blue-500/30 shadow-[0_0_24px_rgba(59,130,246,0.16)]'
+        : 'border-slate-300 dark:border-slate-700'
+    ]">
+    <!-- Floating Clean Drag Indicator Pill (No blur mask, no center card) -->
+    <Transition enter-active-class="transition-all duration-200 ease-out"
+      enter-from-class="opacity-0 -translate-y-2 scale-95" enter-to-class="opacity-100 translate-y-0 scale-100"
+      leave-active-class="transition-all duration-150 ease-in" leave-from-class="opacity-100 translate-y-0 scale-100"
+      leave-to-class="opacity-0 -translate-y-2 scale-95">
+      <div v-if="(isLocalDragging || isFileDragActive) && fileStore.files.length > 0"
+        class="absolute top-12 left-1/2 -translate-x-1/2 z-40 pointer-events-none">
+        <div
+          class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-600/95 dark:bg-blue-500/95 text-white shadow-lg shadow-blue-600/30 border border-blue-400/40 text-xs font-semibold backdrop-blur-md select-none">
+          <FolderPlus class="w-4 h-4" />
+          <span>{{ $t('preview.dragActiveTitle') }}</span>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Top Action Bar -->
     <div
-      class="bg-slate-200/50 dark:bg-slate-900/50 px-4 py-3 border-b border-slate-300 dark:border-slate-700 flex justify-between items-center backdrop-blur-sm">
-      <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ $t('preview.title', {
-        n:
-          fileStore.files.length
-      }) }}</h3>
-      <button v-if="fileStore.files.length > 0" @click="fileStore.clearFiles"
-        class="text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 px-2 py-1 rounded hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors cursor-pointer">
-        {{ $t('preview.clear') }}
-      </button>
+      class="bg-slate-200/60 dark:bg-slate-900/60 px-4 py-2.5 border-b border-slate-300 dark:border-slate-700 flex justify-between items-center backdrop-blur-sm shrink-0">
+      <div class="flex items-center gap-2">
+        <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200">
+          {{ $t('preview.title', { n: fileStore.files.length }) }}
+        </h3>
+      </div>
+      <div v-if="fileStore.files.length > 0" class="flex items-center gap-2">
+        <button @click="openFileDialog"
+          class="inline-flex items-center gap-1.5 text-xs font-medium bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 px-2.5 py-1 rounded-md border border-slate-300 dark:border-slate-600 shadow-2xs transition-colors cursor-pointer">
+          <FilePlus class="w-3.5 h-3.5 text-blue-500" />
+          <span>{{ $t('preview.addFiles') }}</span>
+        </button>
+        <button @click="openDirectoryDialog"
+          class="inline-flex items-center gap-1.5 text-xs font-medium bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 px-2.5 py-1 rounded-md border border-slate-300 dark:border-slate-600 shadow-2xs transition-colors cursor-pointer">
+          <FolderPlus class="w-3.5 h-3.5 text-blue-500" />
+          <span>{{ $t('preview.addFolder') }}</span>
+        </button>
+        <button @click="fileStore.clearFiles"
+          class="inline-flex items-center gap-1 text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 px-2.5 py-1 rounded-md hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors cursor-pointer">
+          <Trash2 class="w-3.5 h-3.5" />
+          <span>{{ $t('preview.clear') }}</span>
+        </button>
+      </div>
     </div>
 
-    <!-- Virtual List Header -->
-    <div class="bg-slate-200/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
+    <!-- Virtual List Header (Shown when files exist) -->
+    <div v-if="fileStore.files.length > 0"
+      class="bg-slate-200/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 shrink-0">
       <div class="file-list-row">
         <div class="px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-500 text-center">#</div>
         <div class="px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-500 truncate">{{ $t('preview.original')
@@ -292,8 +423,7 @@ onBeforeUnmount(() => {
               <span class="group-hover:hidden">{{ virtualIndex + 1 }}</span>
               <button type="button"
                 class="hidden group-hover:flex text-slate-400 cursor-grab active:cursor-grabbing touch-none"
-                :title="$t('operations.reorder')"
-                @pointerdown.stop="startFileReorder($event, file.id)">
+                :title="$t('operations.reorder')" @pointerdown.stop="startFileReorder($event, file.id)">
                 <GripVertical class="w-4 h-4" />
               </button>
             </div>
@@ -339,10 +469,78 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <!-- Empty State -->
-    <div v-else class="flex-1 flex items-center justify-center">
-      <div class="px-4 py-12 text-center text-slate-500 dark:text-slate-500 text-sm italic">
-        {{ $t('preview.empty') }}
+    <!-- Empty State / Clean Minimalist DropZone -->
+    <div v-else @drop.prevent="onDrop" @dragover.prevent="onDragOver" @dragleave.prevent="onDragLeave"
+      class="flex-1 flex flex-col items-center justify-center p-8 transition-colors select-none" :class="[
+        isLocalDragging || isFileDragActive
+          ? 'bg-blue-500/10'
+          : ''
+      ]">
+      <div class="flex flex-col items-center max-w-sm text-center">
+        <!-- Gorgeous Vector SVG Folder with Gentle Float & Layer Animation -->
+        <div class="relative w-28 h-28 mb-4 flex items-center justify-center group/folder">
+          <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"
+            class="w-28 h-28 transition-all duration-300 drop-shadow-sm group-hover/folder:scale-105"
+            :class="{ 'scale-110 drop-shadow-md': isLocalDragging || isFileDragActive }">
+            <defs>
+              <linearGradient id="folderBack" x1="8" y1="12" x2="56" y2="52" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#3B82F6" />
+                <stop offset="1" stop-color="#1D4ED8" />
+              </linearGradient>
+              <linearGradient id="folderFront" x1="6" y1="22" x2="58" y2="54" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#60A5FA" />
+                <stop offset="1" stop-color="#2563EB" />
+              </linearGradient>
+              <linearGradient id="folderPaper" x1="16" y1="16" x2="48" y2="44" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#FFFFFF" />
+                <stop offset="1" stop-color="#F1F5F9" />
+              </linearGradient>
+            </defs>
+            <!-- Folder Back & Tab -->
+            <path
+              d="M8 18C8 15.7909 9.79086 14 12 14H24.5C26.0913 14 27.6174 14.6321 28.7426 15.7574L31.5 18.5147C32.0626 19.0774 32.8257 19.3934 33.6213 19.3934H52C54.2091 19.3934 56 21.1843 56 23.3934V46C56 48.2091 54.2091 50 52 50H12C9.79086 50 8 48.2091 8 46V18Z"
+              fill="url(#folderBack)" />
+
+            <!-- Paper Sheet (Pops up gently on hover or drag active) -->
+            <rect x="15" y="16" width="34" height="26" rx="2.5" fill="url(#folderPaper)"
+              class="transition-transform duration-300 origin-bottom"
+              :class="isLocalDragging || isFileDragActive ? '-translate-y-2' : 'group-hover/folder:-translate-y-1.5'" />
+            <line x1="20" y1="22" x2="36" y2="22" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round"
+              class="transition-transform duration-300"
+              :class="isLocalDragging || isFileDragActive ? '-translate-y-2' : 'group-hover/folder:-translate-y-1.5'" />
+            <line x1="20" y1="27" x2="44" y2="27" stroke="#CBD5E1" stroke-width="1.5" stroke-linecap="round"
+              class="transition-transform duration-300"
+              :class="isLocalDragging || isFileDragActive ? '-translate-y-2' : 'group-hover/folder:-translate-y-1.5'" />
+            <line x1="20" y1="32" x2="40" y2="32" stroke="#CBD5E1" stroke-width="1.5" stroke-linecap="round"
+              class="transition-transform duration-300"
+              :class="isLocalDragging || isFileDragActive ? '-translate-y-2' : 'group-hover/folder:-translate-y-1.5'" />
+
+            <!-- Folder Front Cover (Opens on hover / drag active) -->
+            <path
+              d="M6 26C6 23.7909 7.79086 22 10 22H54C56.2091 22 58 23.7909 58 26L55.5 48C55.5 50.2091 53.7091 52 51.5 52H12.5C10.2909 52 8.5 50.2091 8.5 48L6 26Z"
+              fill="url(#folderFront)" class="transition-transform duration-300 origin-bottom"
+              :class="isLocalDragging || isFileDragActive ? 'scale-y-90 translate-y-1' : 'group-hover/folder:scale-y-95'" />
+          </svg>
+        </div>
+        <p class="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+          {{ $t('dropZone.text') }} <span @click="openFileDialog"
+            class="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer font-semibold">{{
+              $t('dropZone.action') }}</span>
+        </p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-5">{{ $t('dropZone.supports') }}</p>
+
+        <div class="flex items-center gap-2.5">
+          <button @click="openFileDialog"
+            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium shadow-xs transition-colors cursor-pointer">
+            <FilePlus class="w-3.5 h-3.5" />
+            <span>{{ $t('preview.addFiles') }}</span>
+          </button>
+          <button @click="openDirectoryDialog"
+            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-medium transition-colors cursor-pointer">
+            <FolderPlus class="w-3.5 h-3.5" />
+            <span>{{ $t('preview.addFolder') }}</span>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -352,7 +550,7 @@ onBeforeUnmount(() => {
         class="fixed z-[100000] pointer-events-none max-w-sm rounded-lg border border-blue-300 dark:border-blue-500 bg-white/95 dark:bg-slate-900/95 px-3 py-2 shadow-xl ring-1 ring-blue-500/20"
         :style="{ left: `${dragPreview.x + 14}px`, top: `${dragPreview.y + 14}px` }">
         <div class="text-xs font-semibold text-blue-600 dark:text-blue-300">#{{ getFileIndexById(draggedFile.id) + 1
-          }}</div>
+        }}</div>
         <div class="truncate text-sm text-slate-800 dark:text-slate-100">{{ draggedFile.originalName }}</div>
       </div>
       <div v-show="tooltip.visible" ref="tooltipRef"
