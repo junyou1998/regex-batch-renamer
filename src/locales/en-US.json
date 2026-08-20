@@ -141,11 +141,18 @@
         "title": "Help & Regex Tutorial",
         "basic": {
             "title": "Basic Workflow",
-            "step1": "Drag & drop files to the top-left area, or click to select files.",
-            "step2": "Add a rule in the \"Operations\" section.",
-            "step3": "Set the \"Find\" and \"Replace with\" content.",
-            "step4": "The list on the right will preview the renaming results in real-time.",
-            "step5": "Once confirmed, click \"Rename Files\" or \"Copy To...\"."
+            "step1": "Drag & drop files into the file area or click to select files.",
+            "step2": "Add rules in the \"Rename Pipeline\" section.",
+            "step3": "Enter \"Find\" and \"Replace with\" patterns.",
+            "step4": "Preview renamed results in real-time on the right table.",
+            "step5": "Click \"Rename Files\" or \"Create Copy\" once confirmed."
+        },
+        "pipeline": {
+            "title": "Rule Order & Pipeline Chaining",
+            "description": "Rules are executed sequentially from top to bottom:",
+            "point1": "The output filename of each rule automatically becomes the input for the next rule.",
+            "point2": "Different rule ordering produces different results. Reorder anytime via drag handles or arrow buttons.",
+            "tip": "Tip: You can temporarily disable any rule by clicking the eye icon without deleting it."
         },
         "regex": {
             "title": "Regex Cheat Sheet",
@@ -161,7 +168,8 @@
                 "star": "Matches 0 or more of the preceding character",
                 "plus": "Matches 1 or more of the preceding character",
                 "caret": "Matches the start of the string",
-                "dollar": "Matches the end of the string"
+                "dollar": "Matches the end of the string",
+                "all": "Match entire content (whole line / filename)"
             },
             "examples": {
                 "title": "Examples",

@@ -603,7 +603,7 @@ function confirmPrefixSuffix() {
     <div class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3 min-h-0" ref="operationsList">
       <div class="space-y-3">
         <div v-for="(op, index) in operationsModel" :key="op.id" :data-operation-id="op.id"
-          class="relative bg-slate-200/50 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-300 dark:border-slate-700 rounded-xl p-4 shadow-sm transition-colors hover:border-slate-400 dark:hover:border-slate-600 group"
+          class="relative bg-slate-200/50 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-300 dark:border-slate-700 rounded-xl p-4 shadow-2xs transition-colors hover:border-slate-400 dark:hover:border-slate-600 group"
           :class="{
             'opacity-50 grayscale': !op.enabled,
             'ring-2 ring-blue-400/50 bg-blue-50 dark:bg-blue-950/30': activeOperationDragId === op.id,
@@ -621,6 +621,11 @@ function confirmPrefixSuffix() {
               <span class="text-xs font-bold text-slate-500 dark:text-slate-500">#{{ index + 1 }}</span>
               <span class="text-sm font-medium text-slate-700 dark:text-slate-200">
                 {{ op.type === 'regex' ? $t('operations.regex') : $t('operations.other') }}
+              </span>
+              <span v-if="op.type === 'regex'"
+                class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md transition-colors"
+                :class="op.params.useRegex ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60' : 'bg-slate-200/80 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 border border-slate-300/60 dark:border-slate-600/60'">
+                {{ op.params.useRegex ? 'Regex' : 'Text' }}
               </span>
             </div>
             <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
