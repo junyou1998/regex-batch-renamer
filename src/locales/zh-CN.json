@@ -77,7 +77,7 @@
         "insert": "插入",
         "quickTemplates": "快速模板",
         "template": {
-            "replaceAllNumbered": "全部替换为序号 ($n:2)",
+            "replaceAllNumbered": "替换全部(默认序号)",
             "removeSpaces": "移除空格",
             "spacesToUnderscore": "空格转下划线",
             "addPrefix": "添加前缀...",

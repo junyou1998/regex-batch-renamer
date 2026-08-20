@@ -77,7 +77,7 @@
         "empty": "尚未新增任何規則",
         "quickTemplates": "快速範本",
         "template": {
-            "replaceAllNumbered": "全部替換為序號 ($n:2)",
+            "replaceAllNumbered": "取代全部(預設序號)",
             "removeSpaces": "移除空格",
             "spacesToUnderscore": "空格轉底線",
             "addPrefix": "加入前綴...",

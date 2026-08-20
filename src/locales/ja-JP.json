@@ -77,7 +77,7 @@
         "insert": "挿入",
         "quickTemplates": "クイックテンプレート",
         "template": {
-            "replaceAllNumbered": "すべてを連番に置換 ($n:2)",
+            "replaceAllNumbered": "すべて置換 (デフォルト連番)",
             "removeSpaces": "スペースを削除",
             "spacesToUnderscore": "スペースをアンダースコアに",
             "addPrefix": "プレフィックスを追加...",

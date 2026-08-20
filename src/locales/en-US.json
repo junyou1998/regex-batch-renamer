@@ -77,7 +77,7 @@
         "empty": "No rules added yet",
         "quickTemplates": "Quick Templates",
         "template": {
-            "replaceAllNumbered": "Replace All with Sequence ($n:2)",
+            "replaceAllNumbered": "Replace All (Default Sequence)",
             "removeSpaces": "Remove Spaces",
             "spacesToUnderscore": "Spaces to Underscore",
             "addPrefix": "Add Prefix...",
