@@ -14,7 +14,7 @@ const LEGACY_LOCALE_KEY = 'locale'
 const LEGACY_THEME_KEY = 'theme-mode'
 
 export const defaultSettings: Settings = {
-  defaultUseRegex: true,
+  defaultUseRegex: false,
   processFilenameOnly: true,
   language: 'zh-TW',
   themeMode: 'auto',

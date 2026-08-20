@@ -354,7 +354,7 @@ const savePresetName = ref('')
 const savedTemplates = ref<Preset[]>([])
 const templateContainerRef = ref<HTMLElement | null>(null)
 
-function handleDocumentClick(e: Event) {
+function handleDocumentClick(e: MouseEvent | PointerEvent) {
   if (!showTemplateDropdown.value) return
   const target = e.target as Node | null
   if (templateContainerRef.value && target && !templateContainerRef.value.contains(target)) {
@@ -365,18 +365,15 @@ function handleDocumentClick(e: Event) {
 watch(showTemplateDropdown, (isOpen) => {
   if (isOpen) {
     nextTick(() => {
-      window.addEventListener('pointerdown', handleDocumentClick, true)
-      window.addEventListener('click', handleDocumentClick, true)
+      window.addEventListener('pointerdown', handleDocumentClick)
     })
   } else {
-    window.removeEventListener('pointerdown', handleDocumentClick, true)
-    window.removeEventListener('click', handleDocumentClick, true)
+    window.removeEventListener('pointerdown', handleDocumentClick)
   }
 })
 
 onUnmounted(() => {
-  window.removeEventListener('pointerdown', handleDocumentClick, true)
-  window.removeEventListener('click', handleDocumentClick, true)
+  window.removeEventListener('pointerdown', handleDocumentClick)
 })
 
 function refreshSavedTemplates() {
@@ -521,15 +518,6 @@ function confirmPrefixSuffix() {
       <div class="flex items-center gap-2">
         <!-- Templates Dropdown (built-in + custom) -->
         <div ref="templateContainerRef" class="relative template-dropdown-container">
-          <!-- Global Backdrop Teleported to body to cover full viewport -->
-          <Teleport to="body">
-            <div
-              v-if="showTemplateDropdown"
-              class="fixed inset-0 z-40 bg-transparent"
-              @click="showTemplateDropdown = false"
-            />
-          </Teleport>
-
           <button type="button" @click="toggleTemplateDropdown"
             class="px-2.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg transition-colors flex items-center gap-1 cursor-pointer">
             <Zap class="h-3.5 w-3.5" />
