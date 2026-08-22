@@ -24,7 +24,7 @@
         "hideSidebar": "隱藏左側面板",
         "about": "關於本專案",
         "rename": "執行重命名",
-        "copyTo": "複製到...",
+        "copyTo": "建立副本",
         "processing": "處理中...",
         "updateAvailable": "發現新版本",
         "download": "下載",
@@ -36,7 +36,10 @@
         "targetFileExists": "目標檔案已存在，已略過",
         "undoConflict": "復原完成，但有 {n} 個檔案因衝突而略過",
         "renameConflict": "已略過 {n} 個衝突檔案",
-        "invalidChar": "檔名包含非法字元"
+        "invalidChar": "檔名包含非法字元",
+        "pendingCloseTitle": "確認退出",
+        "pendingCloseMessage": "清單中尚有未套用的檔名變更，確定要關閉視窗並結束應用程式嗎？",
+        "exit": "退出"
     },
     "badges": {
         "prefix": "前綴",
@@ -65,7 +68,7 @@
         "placeholderPatternRegex": "輸入 Regex 樣式...",
         "placeholderPatternText": "輸入要尋找的文字...",
         "replacementLabel": "取代為",
-        "supportSequence": "支援 ${n} 序號與起始值",
+        "supportSequence": "支援 $n 序號與起始值",
         "variableHelper": "插入序號",
         "variableWidth": "位數 (0 為不補零)",
         "variableStart": "起始值",
@@ -74,6 +77,7 @@
         "empty": "尚未新增任何規則",
         "quickTemplates": "快速範本",
         "template": {
+            "replaceAllNumbered": "全部替換為序號 ($n:2)",
             "removeSpaces": "移除空格",
             "spacesToUnderscore": "空格轉底線",
             "addPrefix": "加入前綴...",
@@ -85,6 +89,11 @@
     "preview": {
         "title": "預覽變更 ({n} 檔案)",
         "clear": "清空列表",
+        "addFiles": "加入檔案",
+        "addFolder": "加入資料夾",
+        "dropHint": "拖放檔案或資料夾至此，或點擊下方按鈕選取",
+        "dropSubHint": "支援批次多選與拖曳整個資料夾，隨時可拖入更多檔案",
+        "dragActiveTitle": "放開滑鼠即可加入檔案",
         "original": "原始檔名",
         "new": "新檔名 (預覽)",
         "status": "狀態",
@@ -172,7 +181,7 @@
             }
         },
         "numbering": {
-            "title": "流水號功能 (${n})",
+            "title": "流水號功能 ($n)",
             "description": "您可以在「取代為」欄位中使用 {code} 來插入遞增的數字。",
             "table": {
                 "syntax": "語法",
