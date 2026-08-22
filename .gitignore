@@ -1,5 +1,4 @@
 /dist
-/dist-electron
 /node_modules
 .DS_Store
 /release
@@ -13,7 +12,7 @@
 .vscode/
 .claude/
 
-# AI tooling artifacts
+# AI tooling artifacts & internal docs
 .agent/
 .agents/
 .spectra/
@@ -21,3 +20,4 @@
 AGENTS.md
 openspec/
 openspec/.vector-search.db*
+docs/
