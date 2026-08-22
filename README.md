@@ -6,7 +6,7 @@
 
 <img src="public/icon.png" align="left" width="128" style="margin-right: 24px; margin-bottom: 12px;" alt="App Icon" />
 
-A powerful and intuitive cross-platform batch file renaming tool (Windows / macOS / Linux). Supports Regular Expressions (Regex), plain text replacement, and sequential numbering, making tedious file renaming tasks easy and simple.
+A powerful, ultra-lightweight, and intuitive cross-platform batch file renaming tool (macOS / Windows / Linux). Built on **Tauri v2 + Vue 3 + Tailwind CSS v4 + Rust**, supporting Regular Expressions (Regex), plain text replacement, customizable quick templates, and sequential numbering to make tedious renaming tasks seamless and enjoyable.
 
 <br clear="left"/>
 <br />
@@ -15,108 +15,85 @@ A powerful and intuitive cross-platform batch file renaming tool (Windows / macO
 
 ## ✨ Key Features
 
-- **Intuitive Operation**: Supports Drag & Drop and real-time preview of renaming results.
-- **Dual Modes**:
-    - **Regex Mode**: Supports full Regular Expression syntax, suitable for advanced users.
-    - **Plain Text Mode**: Automatically handles escape characters, intuitively replacing special symbols like `[]`, `()`.
-- **Sequential Numbering**: Easily insert incrementing numbers using `${n}` syntax, with support for zero-padding (e.g., `${n:03}`).
-- **Modern Interface**: Designed with a premium look and feel, fully supporting macOS Light/Dark modes (follows system settings).
-- **Safe & Reliable**: Full preview before execution, and supports "Copy To..." to preserve original files.
+- **Intuitive Workflow**: Drag & Drop file importing with live highlighted preview of renaming outcomes.
+- **Dual Renaming Modes**:
+    - **Regex Mode**: Full Regular Expression support for advanced batch operations.
+    - **Plain Text Mode**: Automatically handles special characters, intuitively replacing symbols like `[]`, `()`, and whitespaces.
+- **Flexible Sequence Numbering**: Use `$n` or `${n}` syntax to insert incrementing numbers with custom starting index and zero-padding (e.g., `${n:2}` or `001`).
+- **Quick & Custom Templates**: Built-in common templates (remove spaces, convert to underscores, replace all with sequence), plus the ability to save custom rule pipelines as presets.
+- **Safety & Protection**:
+    - Real-time conflict detection before execution.
+    - "Copy To..." option to preserve original files.
+    - **Window Close Protection**: Intercepts close requests when unsaved/pending changes exist, preventing accidental data loss.
+- **Modern Polished Interface**: Native immersive titlebar with collapsible sidebar, supporting Dark and Light themes across macOS, Windows, and Linux.
 
 ## 📥 Installation
 
+Download the latest release from [GitHub Releases](https://github.com/junyou1998/regex-batch-renamer/releases):
+
+- **macOS**: Apple Silicon (`.dmg`) and Intel installers.
+- **Windows**: 64-bit installer (`.exe`).
+- **Linux**: AppImage and `.deb` packages.
+
 ### macOS Users Note
 
-Unsigned macOS builds may still trigger Gatekeeper warnings depending on how the app was downloaded and unpacked. If your system blocks the app because of quarantine metadata, you can clear it manually:
+If an unsigned macOS build triggers a Gatekeeper warning, clear the quarantine attribute via terminal:
 
 ```bash
-xattr -r -d com.apple.quarantine /Applications/Regex\ Batch\ Renamer.app
+xattr -r -d com.apple.quarantine "/Applications/Regex Batch Renamer.app"
 ```
-
-### Windows / Linux
-
-Simply download and run the installer for your platform.
 
 ## 🚀 Quick Start
 
-1. **Add Files**: Drag files to the top-left area or click the button to select files.
-2. **Add Rule**: Click "+ Add Rule" in the "Operations" section on the left.
-3. **Set Conditions**:
-    - Enter content for "Find" and "Replace with".
-    - Check/Uncheck "Use Regex" to switch modes.
-4. **Preview Results**: The list on the right will show a real-time preview of the renamed files, with changes highlighted.
-5. **Execute**: Once confirmed, click "Rename Files" to modify directly, or "Copy To..." to copy renamed files to a new location.
+1. **Import Files**: Drag & drop files into the app window or click "Add Files / Add Folder".
+2. **Add Rules**: Click "+ Add Rule" or choose from "⚡ Quick Templates" in the left pipeline.
+3. **Configure Settings**:
+    - Enter "Find" and "Replace with" patterns.
+    - Toggle "Use Regex" mode as needed.
+4. **Preview Changes**: View live changes highlighted in the table on the right.
+5. **Execute**: Click "Rename Files" to apply changes in-place, or "Copy To..." to duplicate renamed files into a new folder.
 
-## 📖 Advanced Tutorial
+## 📖 Useful Tips
 
-### Sequential Numbering (${n})
+### Sequence Numbering ($n)
 
-Use `${n}` in the "Replace with" field to insert sequence numbers:
-
+Use sequence variables in the "Replace with" field:
 - `${n}`: 1, 2, 3...
-- `${n:03}`: 001, 002, 003...
+- `${n:2}` or `${n:03}`: 01, 02, 03... / 001, 002, 003...
 
 ### Common Regex Examples
 
-- **Remove Whitespace**: Find `\s+`, Replace with `(Empty)`
-- **Standardize Date**: Find `(\d{4})(\d{2})(\d{2})`, Replace with `$1-$2-$3` (Converts 20231125 to 2023-11-25)
+- **Remove Whitespace**: Find `\s+`, Replace with `(Leave Empty)`
+- **Standardize Date**: Find `(\d{4})(\d{2})(\d{2})`, Replace with `$1-$2-$3` (20231125 → 2023-11-25)
+- **Remove Parentheses & Content**: Find `\s*\([^)]*\)`, Replace with `(Leave Empty)`
 
-_For more tutorials, click the "?" button in the software interface._
+## 🛠️ Tech Stack & Development
 
-## 🛠️ Technologies Used
+Built with a high-performance modern tech stack:
 
-This project is built using modern web technologies:
-
-- **Desktop Runtime**: [Tauri](https://tauri.app/) for the stable desktop application, with the previous [Electron](https://www.electronjs.org/) line retained temporarily during retirement
-- **Frontend**: [Vue 3](https://vuejs.org/) (Composition API)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Desktop Framework**: [Tauri v2](https://v2.tauri.app/) (Lightweight & secure Rust backend)
+- **Frontend Framework**: [Vue 3](https://vuejs.org/) (Composition API + `<script setup>`)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **Programming Languages**: [TypeScript](https://www.typescriptlang.org/) + [Rust](https://www.rust-lang.org/)
 - **Build Tool**: [Vite](https://vitejs.dev/)
 - **State Management**: [Pinia](https://pinia.vuejs.org/)
+- **Internationalization**: [Vue I18n](https://vue-i18n.intlify.dev/)
 
-## 🧪 Release Channels
-
-The stable desktop release line now runs on Tauri in `main`.
-
-The beta channel remains available with a separate delivery path:
-
-- `main` + `v*` tags: stable Tauri releases
-- `beta` branch pushes: Tauri beta validation CI only
-- `beta-v*` tags: Tauri GitHub draft pre-releases for manual review
-
-Useful commands:
+### Local Development Commands
 
 ```bash
-pnpm run tauri:dev
-pnpm run tauri:build
-pnpm run electron:dev
-pnpm run electron:build
+# Install dependencies (pnpm preferred)
+pnpm install
+
+# Start development mode with Vite hot-reloading & Rust backend
+pnpm run dev
+
+# Type-check and verify frontend build
+pnpm run tauri:ci
+
+# Build production desktop release
+pnpm run build
 ```
-
-If `TAURI_UPDATER_PUBKEY` and a channel-specific updater endpoint are provided, `pnpm run tauri:build:release` generates a release config with updater metadata. Without those values, the build still completes, but app-integrated updating is not enabled.
-
-Stable releases are published directly. Beta releases are created as draft prereleases so the maintainer can review assets before publishing them. The Tauri app checks for updates on launch and prefers in-app installation whenever the updater endpoint serves valid metadata for the active channel.
-
-### Stable In-App Update Verification
-
-For a real stable updater test, verify with two consecutive stable versions:
-
-1. Install the older stable app, for example `v0.5.0`.
-2. Publish the next stable tag, for example `v0.5.1`.
-3. Confirm the new release includes updater artifacts such as `.app.tar.gz`, `.AppImage.sig`, and on Windows the `-setup.exe` asset plus its matching `.sig`.
-4. On macOS, move the installed app into `/Applications` before testing the in-app install flow.
-5. Open the older installed app and wait for the startup update check.
-6. Confirm the update banner or About dialog reports the newer stable version.
-7. Run the in-app install flow, relaunch the app, and confirm the runtime version changed to the new stable version.
-8. After the relaunch, the About dialog changelog view should show GitHub release history directly and automatically focus the version that was just installed; each version card should also link to its GitHub release page.
-
-The stable updater endpoint is intended to point at the repository-backed manifest:
-
-```text
-https://raw.githubusercontent.com/junyou1998/regex-batch-renamer/main/updater/stable.json
-```
-
-The planned Electron removal gates and deletion order are documented in [docs/electron-retirement-plan.md](docs/electron-retirement-plan.md).
 
 ## ☕ Support Development
 
@@ -126,4 +103,4 @@ If you find this tool helpful, consider buying me a coffee to support continued 
 
 ## 📄 License
 
-MIT License
+[MIT License](LICENSE)

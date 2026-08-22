@@ -1,6 +1,10 @@
 import type { PendingChangesHandler } from './services/desktop/types'
 
 declare global {
+  interface File {
+    readonly path?: string
+  }
+
   interface Window {
     __TAURI__?: unknown
     __TAURI_INTERNALS__?: unknown

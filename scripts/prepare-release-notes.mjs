@@ -42,16 +42,7 @@ async function main() {
     throw new Error('Usage: node scripts/prepare-release-notes.mjs --tag <tag> --repo <owner/repo> --output <file>')
   }
 
-  const manualPath = path.join('release-notes', `${tag}.md`)
   await mkdir(path.dirname(output), { recursive: true })
-
-  try {
-    const manual = await readFile(manualPath, 'utf8')
-    await writeFile(output, manual)
-    return
-  } catch {
-    // Fall back to generated notes.
-  }
 
   const previousTag = getPreviousStableTag(tag)
   const compareUrl = previousTag
