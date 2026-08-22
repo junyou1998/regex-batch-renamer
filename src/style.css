@@ -7,6 +7,8 @@ body,
     height: 100%;
     margin: 0;
     overflow: hidden; /* Prevent body scroll, handle in components */
+    user-select: none;
+    -webkit-user-select: none;
     font-family:
         "Inter",
         system-ui,
@@ -20,6 +22,13 @@ body,
         "Open Sans",
         "Helvetica Neue",
         sans-serif;
+}
+
+input,
+textarea,
+[contenteditable="true"] {
+    user-select: text;
+    -webkit-user-select: text;
 }
 
 ::view-transition-old(root),

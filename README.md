@@ -23,7 +23,7 @@ A powerful, ultra-lightweight, and intuitive cross-platform batch file renaming 
 - **Quick & Custom Templates**: Built-in common templates (remove spaces, convert to underscores, replace all with sequence), plus the ability to save custom rule pipelines as presets.
 - **Safety & Protection**:
     - Real-time conflict detection before execution.
-    - "Copy To..." option to preserve original files.
+    - "Create Copy" option to preserve original files.
     - **Window Close Protection**: Intercepts close requests when unsaved/pending changes exist, preventing accidental data loss.
 - **Modern Polished Interface**: Native immersive titlebar with collapsible sidebar, supporting Dark and Light themes across macOS, Windows, and Linux.
 
@@ -51,7 +51,7 @@ xattr -r -d com.apple.quarantine "/Applications/Regex Batch Renamer.app"
     - Enter "Find" and "Replace with" patterns.
     - Toggle "Use Regex" mode as needed.
 4. **Preview Changes**: View live changes highlighted in the table on the right.
-5. **Execute**: Click "Rename Files" to apply changes in-place, or "Copy To..." to duplicate renamed files into a new folder.
+5. **Execute**: Click "Rename Files" to apply changes in-place, or "Create Copy" to duplicate renamed files into a new folder.
 
 ## 📖 Useful Tips
 

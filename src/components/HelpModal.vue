@@ -54,6 +54,26 @@ defineEmits<{
 
                         <hr class="border-slate-200 dark:border-slate-800">
 
+                        <!-- Pipeline & Rule Ordering -->
+                        <section class="space-y-3">
+                            <h4 class="text-base font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                                {{ $t('help.pipeline.title') }}
+                            </h4>
+                            <p class="text-sm text-slate-600 dark:text-slate-300">
+                                {{ $t('help.pipeline.description') }}
+                            </p>
+                            <ul class="list-disc list-inside space-y-1.5 text-sm text-slate-600 dark:text-slate-300 ml-2">
+                                <li>{{ $t('help.pipeline.point1') }}</li>
+                                <li>{{ $t('help.pipeline.point2') }}</li>
+                            </ul>
+                            <div class="p-3 bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200/60 dark:border-indigo-800/50 rounded-xl text-xs text-indigo-800 dark:text-indigo-300">
+                                {{ $t('help.pipeline.tip') }}
+                            </div>
+                        </section>
+
+                        <hr class="border-slate-200 dark:border-slate-800">
+
                         <!-- Regex Tutorial -->
                         <section class="space-y-4">
                             <div class="flex items-center justify-between">
@@ -143,6 +163,13 @@ defineEmits<{
                                                 $</td>
                                             <td class="px-4 py-2 text-slate-600 dark:text-slate-400">{{
                                                 $t('help.regex.table.dollar') }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td
+                                                class="px-4 py-2 font-mono text-pink-600 dark:text-pink-400 border-r border-slate-200 dark:border-slate-700">
+                                                ^.*</td>
+                                            <td class="px-4 py-2 text-slate-600 dark:text-slate-400">{{
+                                                $t('help.regex.table.all') }}</td>
                                         </tr>
                                     </tbody>
                                 </table>
