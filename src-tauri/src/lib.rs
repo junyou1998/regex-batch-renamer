@@ -198,6 +198,16 @@ fn set_zoom_factor(window: WebviewWindow, factor: f64) -> Result<(), String> {
     window.set_zoom(factor).map_err(|error| error.to_string())
 }
 
+#[tauri::command]
+fn exit_app(app_handle: tauri::AppHandle) {
+    app_handle.exit(0);
+}
+
+#[tauri::command]
+fn open_devtools(window: WebviewWindow) {
+    window.open_devtools();
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -210,6 +220,8 @@ pub fn run() {
             rename_files,
             copy_rename_files,
             set_zoom_factor,
+            exit_app,
+            open_devtools,
             install_app_update
         ])
         .run(tauri::generate_context!())
