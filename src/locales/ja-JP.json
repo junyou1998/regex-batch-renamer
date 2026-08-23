@@ -2,10 +2,13 @@
     "common": {
         "cancel": "キャンセル",
         "confirm": "確認",
-        "done": "完了"
+        "done": "完了",
+        "copied": "クリップボードにコピーしました"
     },
     "settings": {
         "title": "設定",
+        "tabGeneral": "一般",
+        "tabAi": "AI アシスタント",
         "defaults": "デフォルト",
         "defaultUseRegex": "デフォルトで正規表現を使用",
         "defaultUseRegexDesc": "新しいルール追加時に Regex モードを有効にする",
@@ -15,7 +18,23 @@
         "language": "言語",
         "theme": "テーマ",
         "zoomLevel": "画面の拡大率",
-        "zoomLevelDesc": "アプリのインターフェースサイズを調整 (80% - 200%)"
+        "zoomLevelDesc": "アプリのインターフェースサイズを調整 (80% - 200%)",
+        "aiProvider": "デフォルト AI エンジン / ツール",
+        "aiStatusAvailable": "利用可能",
+        "aiClaudeCliDesc": "ローカルの Claude Code CLI を呼び出し、API キー不要でサブスクリプションを利用",
+        "aiComingSoon": "近日対応",
+        "aiCustomApiDesc": "独自の OpenAI / Anthropic API キーまたは Ollama への接続",
+        "aiStatusTitle": "Claude Code CLI ステータスと情報",
+        "aiRecheck": "再検出",
+        "aiConnection": "接続状態",
+        "aiReady": "準備完了 (Ready)",
+        "aiNotReady": "未完了 (Not Ready)",
+        "aiVersion": "検出されたバージョン",
+        "aiPath": "実行ファイルパス",
+        "aiBehavior": "AI 自動化設定",
+        "aiAutoApply": "ルール生成時に自動適用",
+        "aiAutoApplyDesc": "AI が新しいルールを生成したときに、メイン画面の更名フローとプレビューを自動更新",
+        "aiApiNotice": "独自の API キー（OpenAI / Anthropic / Ollama）のサポートは近日対応予定です。現在はローカルの Claude Code CLI をデフォルトで使用します。"
     },
     "app": {
         "title": "Regex Batch Renamer",
@@ -229,5 +248,37 @@
         "importError": "インポート失敗：フォーマットが無効です",
         "enterName": "テンプレート名を入力してください",
         "ops": "{n} 個のルール"
+    },
+    "ai": {
+        "title": "AI ルールアシスタント",
+        "assistantBtn": "AI アシスタント",
+        "closePanel": "AI パネルを閉じる",
+        "statusChecking": "CLI のステータスを確認中...",
+        "statusNotReady": "CLI が準備できていません",
+        "refreshStatus": "CLI ステータスを再確認",
+        "autoApply": "ルールを自動適用",
+        "autoApplyDesc": "AI が新しいパイプラインを生成したときに、左側のルールとプレビューを自動更新します",
+        "clearChat": "チャット履歴をクリア",
+        "onboardingTitle": "Claude Code CLI の設定が必要です",
+        "onboardingDesc": "この機能はローカルの Claude Code CLI を介して Claude サブスクリプションと直接連携するため、個別の API キーを購入する必要はありません。ターミナルで以下のコマンドを実行してください：",
+        "stepInstallCli": "Claude Code CLI をインストール",
+        "stepLoginCli": "Claude サブスクリプションアカウントでログイン",
+        "recheck": "設定完了、再確認する",
+        "welcomeTitle": "AI 一括リネームアシスタント",
+        "welcomeSubtitle": "自然言語でリネームの要望を伝えるか、AI が読み込まれたファイル名を自動分析して正規表現パイプラインを構築します。",
+        "workspaceContext": "{n} 個のワークスペースファイルをコンテキストとして読み込みました",
+        "suggestedPrompts": "よく使われるプロンプト例",
+        "quickPromptAnalyze": "現在のファイル名の特徴を分析し、標準化された命名ルールを生成",
+        "quickPromptExtractDate": "ファイル名から日付を抽出して先頭に配置し、ハイフンで繋ぐ",
+        "quickPromptRemoveSpaces": "不要なスペースや記号を削除し、アンダースコアをハイフンに変換",
+        "quickPromptAddSequence": "主な名前を保持し、末尾に2桁の連番を追加",
+        "technicalDetails": "技術的ロジックと正規表現の解説",
+        "pipelineCardTitle": "生成されたルールパイプライン ({n} ステップ)",
+        "applyThisPipeline": "このバージョンのルールを適用",
+        "pipelineApplied": "AI ルールパイプラインを正常に適用しました",
+        "thinking": "Claude がファイルを分析してルールを考案中...",
+        "inputPlaceholder": "リネームの要望を入力してください（例：日付を末尾に移動）...",
+        "enterToSend": "Enter で送信、Shift + Enter で改行",
+        "send": "送信"
     }
 }

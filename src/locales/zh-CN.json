@@ -2,10 +2,13 @@
     "common": {
         "cancel": "取消",
         "confirm": "确认",
-        "done": "完成"
+        "done": "完成",
+        "copied": "已复制到剪贴板"
     },
     "settings": {
         "title": "设置",
+        "tabGeneral": "通用设置",
+        "tabAi": "AI 助手",
         "defaults": "默认值",
         "defaultUseRegex": "默认使用正则表达式",
         "defaultUseRegexDesc": "新增规则时默认启用 Regex 模式",
@@ -15,7 +18,23 @@
         "language": "界面语言",
         "theme": "主题",
         "zoomLevel": "界面缩放",
-        "zoomLevelDesc": "调整应用程序界面大小 (80% - 200%)"
+        "zoomLevelDesc": "调整应用程序界面大小 (80% - 200%)",
+        "aiProvider": "默认 AI 引擎 / 工具",
+        "aiStatusAvailable": "可用",
+        "aiClaudeCliDesc": "直接调用本机已登录的 Claude Code CLI，免 API Key 享受订阅账号额度",
+        "aiComingSoon": "即将支持",
+        "aiCustomApiDesc": "自定义 OpenAI / Anthropic API Key 或连接至自建 Ollama 服务",
+        "aiStatusTitle": "Claude Code CLI 状态与信息",
+        "aiRecheck": "重新检测",
+        "aiConnection": "连接状态",
+        "aiReady": "已就绪 (Ready)",
+        "aiNotReady": "未就绪 (Not Ready)",
+        "aiVersion": "检测版本",
+        "aiPath": "可执行文件路径",
+        "aiBehavior": "AI 自动化偏好",
+        "aiAutoApply": "产生规则时自动应用",
+        "aiAutoApplyDesc": "AI 每次产生新规则流程时，自动更新至主界面更名流程与预览清单",
+        "aiApiNotice": "自备 API Key（OpenAI / Anthropic / Ollama）功能正在规划中，目前默认以本机已登录的 Claude Code CLI 提供服务。"
     },
     "app": {
         "title": "Regex Batch Renamer",
@@ -229,5 +248,37 @@
         "importError": "导入失败：格式不正确",
         "enterName": "请输入模板名称",
         "ops": "{n} 个规则"
+    },
+    "ai": {
+        "title": "AI 规则助理",
+        "assistantBtn": "AI 助手",
+        "closePanel": "关闭 AI 面板",
+        "statusChecking": "正在检查 CLI 状态...",
+        "statusNotReady": "CLI 未就绪",
+        "refreshStatus": "重新检查 CLI 状态",
+        "autoApply": "自动应用规则",
+        "autoApplyDesc": "AI 每次产生新流程时，自动更新至左侧规则面板与预览",
+        "clearChat": "清空对话历史",
+        "onboardingTitle": "需要配置 Claude Code CLI",
+        "onboardingDesc": "本功能直接通过本机的 Claude Code CLI 与您的 Claude 订阅账号交互，无需另外购买 API Key。请在终端依次执行以下命令：",
+        "stepInstallCli": "安装 Claude Code CLI",
+        "stepLoginCli": "登录您的 Claude 订阅账号",
+        "recheck": "已完成配置，重新检查",
+        "welcomeTitle": "AI 智能重命名助理",
+        "welcomeSubtitle": "用自然语言描述您的更名需求，或由 AI 自动分析当前的文件特征以构建正则表达式流程。",
+        "workspaceContext": "已加载 {n} 个工作区文件作为上下文",
+        "suggestedPrompts": "常用提示词示例",
+        "quickPromptAnalyze": "分析当前文件特征并给出最干净的标准化命名规则",
+        "quickPromptExtractDate": "提取文件名中的日期移至最前面，并用横线连接",
+        "quickPromptRemoveSpaces": "移除所有多余空格与特殊符号，并将下划线转为横线",
+        "quickPromptAddSequence": "保留文件主要名称并在末尾加上两位数序号",
+        "technicalDetails": "技术逻辑与正则解析",
+        "pipelineCardTitle": "生成规则管线 ({n} 个步骤)",
+        "applyThisPipeline": "应用此版本规则",
+        "pipelineApplied": "已成功应用 AI 规则管线",
+        "thinking": "Claude 正在分析文件与构思规则...",
+        "inputPlaceholder": "描述您的重命名需求（例如：把前缀日期移到最后面）...",
+        "enterToSend": "按 Enter 发送，Shift + Enter 换行",
+        "send": "发送"
     }
 }
