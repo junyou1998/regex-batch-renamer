@@ -2,32 +2,30 @@
 
 🎉 Major Feature Release / 重大功能發布
 
-## ✨ Highlights / 功能亮點
+## 🤖 AI 自然語言智慧更名 (AI-Powered Natural Language Renaming)
 
-### 1. 🤖 AI Smart Rule Assistant / AI 智慧規則助理 (Claude Code & OpenAI Codex)
-- **Local AI CLI Integration (No API Key Required) / 本機 CLI 免 API Key 深度整合**：
-  - Directly interact with locally logged-in **Claude Code CLI** (`claude`) or **OpenAI Codex CLI** (`codex`) to leverage your subscription quota and models.
-  - Automatically analyzes loaded workspace file patterns, extracts features, and generates complete regular expression pipeline rules (`${n:2}`, capture groups, prefix/suffix).
-  - 直接調用本機已登入的 **Claude Code CLI** 或 **OpenAI Codex CLI**，免額外購買 API Key 即可享受訂閱額度與強大推理模型。
-  - 自然語言對話：即時分析載入的檔案命名特徵，自動建構包含正規表達式、序號補零（如 `${n:2}`）、捕獲群組等更名規則管線。
+本次版本迎來重大升級 —— 正式導入 **AI 自然語言智慧更名助理**！無需再手動苦思複雜的正規表達式，只要用日常語言描述您的命名需求，AI 便會即時分析檔案規律並自動建構精準的更名規則流程。
 
-### 2. 🗂️ Collapsible 3-Column Layout & Auto-Resizing Input / 側欄式對話面板與自適應輸入框
-- **Non-blocking Right Sidebar / 不遮蔽主畫面的右側收合面板**：
-  - Replaced overlay drawers with a collapsible right sidebar panel, allowing users to watch file preview updates in real-time while chatting with AI.
-  - 改用右側收合式側欄面板，與左側規則欄協同運作，對話時完整保留中間檔案清單與即時預覽視野。
-- **Auto-Resizing Input with IME Protection / 輸入框動態伸縮與注音防誤觸**：
-  - Auto-expands up to a max-height threshold when typing multi-line instructions (`Shift + Enter`).
-  - Integrated `isComposing` protection against accidental Enter submissions during Chinese / Japanese IME candidate selection.
-  - 輸入框支援多行自適應長高，並完整防護中文注音/拼音選字時誤觸發送。
-  - 對話氣泡完整保留使用者輸入的原始換行與分點條列排版。
+---
 
-### 3. ⚙️ AI Settings Tab & Official Vector Logos / AI 設定分頁與官方專屬識別圖示
-- **Dual AI Engine Switching / 雙引擎切換與狀態檢測**：
-  - Select between Claude Code CLI and OpenAI Codex CLI, with live connection indicators, detected versions, and path info.
-  - 設定彈窗新增專屬「AI 助理」分頁，可隨時切換預設引擎、檢測連線狀態與設定自動套用偏好。
-- **Pixel-Perfect Vector Icons / 向量圖示**：
-  - Integrated official **Claude 14-ray Asterisk** and **OpenAI Codex Cloud** SVG icons.
-  - 完美整合 Claude 官方星芒圖示與 Codex 官方雲朵終端識別圖示。
+### ✨ Core AI Capabilities / 核心 AI 功能亮點
+
+- **自然語言對話生成規則管線 (Natural Language Pipeline Generation)**：
+  - 支援以自然語言描述任何複雜的多步驟更名需求（例如：「*幫我把檔名中的日期提取移到最前面用橫線連接、清除壓制組標籤、並在集數後方加上兩位數序號補零*」）。
+  - AI 自動分析目前載入工作區的檔案名稱特徵，直接推導出最佳的正規表達式、字串替換與序號變數（如 `${n:2}`）組合。
+
+- **多輪對話與即時規則重構 (Multi-Turn Interactive Refinement)**：
+  - 支援多輪對話疊加與修改：在與 AI 互動過程中，AI 會根據前次溝通結果持續微調或重新覆寫規則管線。
+  - 每次生成均附帶「💡 技術邏輯與正則解析」，詳細說明每個正則步驟的比對原理與分組捕獲邏輯，讓更名過程完全透明且具可控性。
+  - 支援「即時自動套用」與歷史版本單鍵「套用此版本規則」，隨時在不同 AI 方案間切換。
+
+- **本機雙引擎免 API Key 整合 (Zero-Config Dual Local AI Engines)**：
+  - **Claude Code CLI**：直接調用本機已登入的 Claude CLI，享受您的訂閱帳號額度與最新模型。
+  - **OpenAI Codex CLI**：支援調用本機已登入的 OpenAI Codex CLI，免去設定 API Key 與額外計費的繁瑣步驟。
+  - 智慧環境探測：自動搜尋系統路徑、Homebrew、NVM、Cargo 等環境中的 CLI 執行檔，並於設定中提供即時狀態監控與一鍵切換。
+
+- **側欄即時預覽體驗 (Non-Blocking Split-Pane Experience)**：
+  - AI 對話面板與檔案清單無縫並存，使用者在輸入指令與 AI 思考生成的同時，可即時查看中間檔案列表的動態預覽結果，所說即所見。
 
 ---
 
