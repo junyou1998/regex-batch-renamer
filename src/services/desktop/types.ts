@@ -44,7 +44,37 @@ export type PendingChangesHandler = () => boolean | Promise<boolean>
 export type FileDropHandler = (paths: string[]) => void
 export type FileDragStateHandler = (isDragging: boolean) => void
 
-export type AiProviderType = 'claude' | 'codex'
+export type AiProviderType = 'claude' | 'codex' | 'grok' | 'gemini_api'
+
+export type AiProviderKind =
+  | 'claude_cli'
+  | 'codex_cli'
+  | 'grok_cli'
+  | 'anthropic'
+  | 'openai'
+  | 'gemini'
+  | 'ollama'
+  | 'claude'
+  | 'custom'
+
+export interface AiProfile {
+  id: string
+  name: string
+  provider: AiProviderKind
+  type: 'cli' | 'api'
+  apiKey?: string
+  endpoint?: string
+  model?: string
+  temperature?: number
+  isBuiltin?: boolean
+}
+
+export type AiApiProfile = AiProfile
+
+export interface AiApiTestResult {
+  success: boolean
+  message: string
+}
 
 export interface AiCliStatus {
   installed: boolean
@@ -72,6 +102,7 @@ export interface AiChatRequest {
   currentPipeline: AiRuleSnapshot[]
   processFilenameOnly?: boolean
   provider?: AiProviderType | string
+  taskId?: string
 }
 
 export interface AiPipelineItem {
@@ -104,4 +135,7 @@ export interface DesktopBridge {
   openDevTools?(): Promise<void>
   checkAiCliStatus?(provider?: AiProviderType | string): Promise<AiCliStatus>
   runAiChat?(request: AiChatRequest): Promise<AiChatResponse>
+  testAiApiConnection?(profile: AiApiProfile): Promise<AiApiTestResult>
+  runAiApiChat?(request: AiChatRequest, profile: AiApiProfile): Promise<AiChatResponse>
+  cancelAiChat?(taskId: string): Promise<boolean>
 }

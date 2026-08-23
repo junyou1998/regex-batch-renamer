@@ -6,12 +6,16 @@ import {
   AlertTriangle,
   Bot,
   Check,
+  CircleSlash,
   Copy,
   FolderOpen,
+  KeyRound,
   LoaderCircle,
   RefreshCw,
   Send,
+  Settings,
   Sparkles,
+  Square,
   Terminal,
   Trash2,
   Undo2,
@@ -21,8 +25,11 @@ import {
 import { useAiStore, type AiMessageItem } from '../stores/aiStore'
 import { useFileStore } from '../stores/fileStore'
 import { useToastStore } from '../stores/toastStore'
-import ClaudeIcon from './icons/ClaudeIcon.vue'
-import CodexIcon from './icons/CodexIcon.vue'
+import ProviderIcon from './icons/ProviderIcon.vue'
+
+const emit = defineEmits<{
+  'open-settings': []
+}>()
 
 const { t } = useI18n()
 const aiStore = useAiStore()
@@ -209,10 +216,9 @@ function handleApplyPipeline(msg: AiMessageItem) {
       <div class="px-4 pb-2.5 pt-0.5 flex items-center justify-between gap-2">
         <!-- Status Pill -->
         <div
-          class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 text-[11px] min-w-0"
+          class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 text-[11px] min-w-0 shadow-2xs"
         >
-          <CodexIcon v-if="aiStore.selectedProvider === 'codex'" className="w-3.5 h-3.5 shrink-0" />
-          <ClaudeIcon v-else className="w-3 h-3 text-[#D97757] shrink-0" />
+          <ProviderIcon :provider="aiStore.activeProfile.provider" class="w-3.5 h-3.5 shrink-0" />
           <span
             class="w-1.5 h-1.5 rounded-full shrink-0"
             :class="{
@@ -226,14 +232,15 @@ function handleApplyPipeline(msg: AiMessageItem) {
               {{ $t('ai.statusChecking') }}
             </template>
             <template v-else-if="aiStore.status?.ready">
-              {{ aiStore.selectedProvider === 'codex' ? 'Codex' : 'Claude Code' }}
+              {{ aiStore.activeProfile.name }}
               <span class="text-slate-400 font-normal">({{ aiStore.status.version || 'Ready' }})</span>
             </template>
             <template v-else>
-              {{ $t('ai.statusNotReady') }}
+              {{ aiStore.activeProfile.type === 'api' ? $t('ai.statusNoApiKey') : $t('ai.statusNotReady') }}
             </template>
           </span>
           <button
+            v-if="aiStore.activeProfile.type === 'cli'"
             type="button"
             @click="aiStore.checkStatus()"
             :disabled="aiStore.isCheckingStatus"
@@ -267,74 +274,154 @@ function handleApplyPipeline(msg: AiMessageItem) {
       ref="messagesContainer"
       class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4 min-h-0"
     >
-      <!-- Case 1: CLI Not Ready Notice -->
+      <!-- Case 1: Provider Not Ready Notice -->
       <div
         v-if="!aiStore.status?.ready && !aiStore.isCheckingStatus"
-        class="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 space-y-3"
+        class="p-4 rounded-xl space-y-3"
+        :class="aiStore.activeProfile.type === 'api' ? 'bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60' : 'bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60'"
       >
-        <div class="flex items-start gap-2.5 text-amber-800 dark:text-amber-300">
-          <AlertTriangle class="w-5 h-5 shrink-0 mt-0.5" />
-          <div class="space-y-1 text-xs">
-            <p class="font-semibold text-sm">
-              {{ aiStore.selectedProvider === 'codex' ? $t('ai.onboardingCodexTitle') : $t('ai.onboardingTitle') }}
-            </p>
-            <p class="text-amber-700 dark:text-amber-400/90 leading-relaxed">
-              {{ aiStore.selectedProvider === 'codex' ? $t('ai.onboardingCodexDesc') : $t('ai.onboardingDesc') }}
-            </p>
+        <!-- API Onboarding -->
+        <div v-if="aiStore.activeProfile.type === 'api'" class="space-y-3">
+          <div class="flex items-start gap-2.5 text-purple-900 dark:text-purple-300">
+            <KeyRound class="w-5 h-5 shrink-0 mt-0.5 text-purple-600 dark:text-purple-400" />
+            <div class="space-y-1 text-xs">
+              <p class="font-semibold text-sm">
+                {{ $t('ai.onboardingApiKeyTitle', { name: aiStore.activeProfile.name }) }}
+              </p>
+              <p class="text-purple-800/90 dark:text-purple-300/90 leading-relaxed">
+                {{ $t('ai.onboardingApiKeyDesc', { name: aiStore.activeProfile.name }) }}
+              </p>
+            </div>
           </div>
+          <button
+            @click="emit('open-settings')"
+            class="w-full py-2 px-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-medium text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+          >
+            <Settings class="w-3.5 h-3.5" />
+            {{ $t('ai.openSettingsToConfigure') }}
+          </button>
         </div>
 
-        <!-- Steps with copy buttons -->
-        <div class="space-y-2 pt-1 text-xs">
-          <div class="space-y-1">
-            <span class="font-medium text-slate-700 dark:text-slate-300">
-              1. {{ aiStore.selectedProvider === 'codex' ? $t('ai.stepInstallCodexCli') : $t('ai.stepInstallCli') }}
-            </span>
-            <div
-              class="flex items-center justify-between gap-2 p-2 rounded-lg bg-slate-900 text-slate-100 font-mono text-[11px]"
-            >
-              <span class="truncate">
-                {{ aiStore.selectedProvider === 'codex' ? 'npm i -g @openai/codex' : 'npm i -g @anthropic-ai/claude-code' }}
-              </span>
-              <button
-                @click="copyToClipboard(aiStore.selectedProvider === 'codex' ? 'npm i -g @openai/codex' : 'npm i -g @anthropic-ai/claude-code', 'install')"
-                class="text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
-              >
-                <Check v-if="copiedCommand === 'install'" class="w-3.5 h-3.5 text-emerald-400" />
-                <Copy v-else class="w-3.5 h-3.5" />
-              </button>
+        <!-- CLI Onboarding (Claude / Codex / Grok) -->
+        <template v-else>
+          <div class="flex items-start gap-2.5 text-amber-800 dark:text-amber-300">
+            <AlertTriangle class="w-5 h-5 shrink-0 mt-0.5" />
+            <div class="space-y-1 text-xs">
+              <p class="font-semibold text-sm">
+                {{
+                  aiStore.activeProfile.provider === 'grok_cli'
+                    ? $t('ai.onboardingGrokTitle')
+                    : aiStore.activeProfile.provider === 'codex_cli'
+                      ? $t('ai.onboardingCodexTitle')
+                      : $t('ai.onboardingTitle')
+                }}
+              </p>
+              <p class="text-amber-700 dark:text-amber-400/90 leading-relaxed">
+                {{
+                  aiStore.activeProfile.provider === 'grok_cli'
+                    ? $t('ai.onboardingGrokDesc')
+                    : aiStore.activeProfile.provider === 'codex_cli'
+                      ? $t('ai.onboardingCodexDesc')
+                      : $t('ai.onboardingDesc')
+                }}
+              </p>
             </div>
           </div>
 
-          <div class="space-y-1">
-            <span class="font-medium text-slate-700 dark:text-slate-300">
-              2. {{ aiStore.selectedProvider === 'codex' ? $t('ai.stepLoginCodexCli') : $t('ai.stepLoginCli') }}
-            </span>
-            <div
-              class="flex items-center justify-between gap-2 p-2 rounded-lg bg-slate-900 text-slate-100 font-mono text-[11px]"
-            >
-              <span class="truncate">
-                {{ aiStore.selectedProvider === 'codex' ? 'codex login' : 'claude login' }}
+          <!-- Steps with copy buttons -->
+          <div class="space-y-2 pt-1 text-xs">
+            <div class="space-y-1">
+              <span class="font-medium text-slate-700 dark:text-slate-300">
+                1. {{
+                  aiStore.activeProfile.provider === 'grok_cli'
+                    ? $t('ai.stepInstallGrokCli')
+                    : aiStore.activeProfile.provider === 'codex_cli'
+                      ? $t('ai.stepInstallCodexCli')
+                      : $t('ai.stepInstallCli')
+                }}
               </span>
-              <button
-                @click="copyToClipboard(aiStore.selectedProvider === 'codex' ? 'codex login' : 'claude login', 'login')"
-                class="text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
+              <div
+                class="flex items-center justify-between gap-2 p-2 rounded-lg bg-slate-900 text-slate-100 font-mono text-[11px]"
               >
-                <Check v-if="copiedCommand === 'login'" class="w-3.5 h-3.5 text-emerald-400" />
-                <Copy v-else class="w-3.5 h-3.5" />
-              </button>
+                <span class="truncate">
+                  {{
+                    aiStore.activeProfile.provider === 'grok_cli'
+                      ? 'curl -fsSL https://get.grok.com | sh'
+                      : aiStore.activeProfile.provider === 'codex_cli'
+                        ? 'npm i -g @openai/codex'
+                        : 'npm i -g @anthropic-ai/claude-code'
+                  }}
+                </span>
+                <button
+                  @click="
+                    copyToClipboard(
+                      aiStore.activeProfile.provider === 'grok_cli'
+                        ? 'curl -fsSL https://get.grok.com | sh'
+                        : aiStore.activeProfile.provider === 'codex_cli'
+                          ? 'npm i -g @openai/codex'
+                          : 'npm i -g @anthropic-ai/claude-code',
+                      'install'
+                    )
+                  "
+                  class="text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
+                >
+                  <Check v-if="copiedCommand === 'install'" class="w-3.5 h-3.5 text-emerald-400" />
+                  <Copy v-else class="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
 
-        <button
-          type="button"
-          @click="aiStore.checkStatus()"
-          class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
-        >
-          <RefreshCw class="w-3.5 h-3.5" :class="{ 'animate-spin': aiStore.isCheckingStatus }" />
-          {{ $t('ai.recheck') }}
-        </button>
+            <div class="space-y-1">
+              <span class="font-medium text-slate-700 dark:text-slate-300">
+                2. {{
+                  aiStore.activeProfile.provider === 'grok_cli'
+                    ? $t('ai.stepLoginGrokCli')
+                    : aiStore.activeProfile.provider === 'codex_cli'
+                      ? $t('ai.stepLoginCodexCli')
+                      : $t('ai.stepLoginCli')
+                }}
+              </span>
+              <div
+                class="flex items-center justify-between gap-2 p-2 rounded-lg bg-slate-900 text-slate-100 font-mono text-[11px]"
+              >
+                <span class="truncate">
+                  {{
+                    aiStore.activeProfile.provider === 'grok_cli'
+                      ? 'grok login'
+                      : aiStore.activeProfile.provider === 'codex_cli'
+                        ? 'codex login'
+                        : 'claude login'
+                  }}
+                </span>
+                <button
+                  @click="
+                    copyToClipboard(
+                      aiStore.activeProfile.provider === 'grok_cli'
+                        ? 'grok login'
+                        : aiStore.activeProfile.provider === 'codex_cli'
+                          ? 'codex login'
+                          : 'claude login',
+                      'login'
+                    )
+                  "
+                  class="text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
+                >
+                  <Check v-if="copiedCommand === 'login'" class="w-3.5 h-3.5 text-emerald-400" />
+                  <Copy v-else class="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              @click="aiStore.checkStatus()"
+              class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+            >
+              <RefreshCw class="w-3.5 h-3.5" :class="{ 'animate-spin': aiStore.isCheckingStatus }" />
+              {{ $t('ai.recheck') }}
+            </button>
+          </div>
+        </template>
       </div>
 
       <!-- Empty State / Welcome Hero -->
@@ -402,7 +489,18 @@ function handleApplyPipeline(msg: AiMessageItem) {
 
           <!-- Assistant Bubble -->
           <div v-else class="space-y-2.5 w-full">
+            <!-- Cancelled Alert Box with Lucide Icon -->
             <div
+              v-if="msg.isCancelled"
+              class="rounded-xl border border-amber-200 dark:border-amber-800/60 bg-amber-50/70 dark:bg-amber-950/30 px-3.5 py-2.5 flex items-center gap-2 text-xs text-amber-800 dark:text-amber-300 font-medium shadow-2xs"
+            >
+              <CircleSlash class="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400" />
+              <span>{{ $t('ai.generationCancelled') }}</span>
+            </div>
+
+            <!-- Standard Response / Error Box -->
+            <div
+              v-else
               class="rounded-2xl rounded-tl-xs bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 p-3.5 shadow-2xs space-y-2.5"
               :class="{ '!border-red-300 dark:!border-red-800 !bg-red-50/50 dark:!bg-red-950/20': msg.isError }"
             >
@@ -466,11 +564,32 @@ function handleApplyPipeline(msg: AiMessageItem) {
         </div>
 
         <!-- Loading Indicator Bubble -->
-        <div v-if="aiStore.isLoading" class="flex items-center gap-2 p-3 rounded-2xl bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 w-fit">
-          <LoaderCircle class="w-4 h-4 text-blue-600 dark:text-blue-400 animate-spin" />
-          <span class="text-xs text-slate-500 dark:text-slate-400 animate-pulse">
-            {{ aiStore.selectedProvider === 'codex' ? $t('ai.codexThinking') : $t('ai.thinking') }}
-          </span>
+        <div v-if="aiStore.isLoading" class="flex items-center justify-between gap-3 p-3 rounded-2xl bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 w-fit max-w-[90%] shadow-2xs">
+          <div class="flex items-center gap-2 min-w-0">
+            <ProviderIcon :provider="(aiStore.currentRunningProfile || aiStore.activeProfile).provider" class="w-3.5 h-3.5 shrink-0" />
+            <LoaderCircle class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 animate-spin shrink-0" />
+            <span class="text-xs text-slate-600 dark:text-slate-300 animate-pulse truncate font-medium">
+              {{
+                (aiStore.currentRunningProfile || aiStore.activeProfile).type === 'api'
+                  ? $t('ai.thinkingWithModel', { name: (aiStore.currentRunningProfile || aiStore.activeProfile).name })
+                  : (aiStore.currentRunningProfile || aiStore.activeProfile).provider === 'grok_cli'
+                    ? $t('ai.grokThinking')
+                    : (aiStore.currentRunningProfile || aiStore.activeProfile).provider === 'codex_cli'
+                      ? $t('ai.codexThinking')
+                      : $t('ai.thinking')
+              }}
+            </span>
+          </div>
+          <!-- Inline Stop Button in Bubble -->
+          <button
+            type="button"
+            @click="aiStore.stopGeneration()"
+            class="px-2 py-0.5 rounded-md text-[11px] font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 border border-red-200 dark:border-red-800/60 transition-colors flex items-center gap-1 cursor-pointer shrink-0 ml-1"
+            :title="$t('ai.stopGenerating')"
+          >
+            <Square class="w-2.5 h-2.5 fill-current" />
+            <span>{{ $t('ai.stopGenerating') }}</span>
+          </button>
         </div>
       </template>
     </div>
@@ -515,13 +634,25 @@ function handleApplyPipeline(msg: AiMessageItem) {
             {{ $t('ai.enterToSend') }}
           </span>
 
+          <!-- Send / Stop Button -->
           <button
+            v-if="aiStore.isLoading"
+            type="button"
+            @click="aiStore.stopGeneration()"
+            class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer flex items-center gap-1.5 animate-pulse"
+            :title="$t('ai.stopGenerating')"
+          >
+            <Square class="w-3.5 h-3.5 fill-current" />
+            <span>{{ $t('ai.stopGenerating') }}</span>
+          </button>
+          <button
+            v-else
+            type="button"
             @click="handleSend"
-            :disabled="!inputText.trim() || aiStore.isLoading"
+            :disabled="!inputText.trim()"
             class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1.5"
           >
-            <LoaderCircle v-if="aiStore.isLoading" class="w-3.5 h-3.5 animate-spin" />
-            <Send v-else class="w-3.5 h-3.5" />
+            <Send class="w-3.5 h-3.5" />
             <span>{{ $t('ai.send') }}</span>
           </button>
         </div>
