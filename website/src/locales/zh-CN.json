@@ -24,6 +24,10 @@
         "opensource": {
             "title": "开源・安全・隐私",
             "description": "完全免费且开源 (MIT)。全离线运行，您的文件绝不需上传至云端。无追踪、无广告。"
+        },
+        "ai": {
+            "title": "AI 智能规则助理",
+            "description": "用自然语言描述重命名需求，AI 自动分析文件特征并生成精准的 Regex 规则管道。支持本地 CLI (Claude / Codex / Grok) 与 API (Gemini / OpenAI / Anthropic / 本地 Ollama)。"
         }
     },
     "download": {

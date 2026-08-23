@@ -24,6 +24,10 @@
         "opensource": {
             "title": "開源・安全・隱私",
             "description": "完全免費且開源 (MIT)。全離線執行，您的檔案絕不需上傳至雲端。無追蹤、無廣告。"
+        },
+        "ai": {
+            "title": "AI 智慧規則助理",
+            "description": "用自然語言描述更名需求，AI 自動分析檔案特徵並生成精確的 Regex 規則管道。支援本機 CLI (Claude / Codex / Grok) 與 API (Gemini / OpenAI / Anthropic / 本地 Ollama)。"
         }
     },
     "download": {

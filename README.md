@@ -15,6 +15,11 @@ A powerful, ultra-lightweight, and intuitive cross-platform batch file renaming 
 
 ## ✨ Key Features
 
+- **🤖 AI Rule Assistant**:
+    - **Natural Language to Regex Pipeline**: Describe what you want to achieve in plain words (e.g. "move dates to front, strip brackets, convert to lowercase snake_case"), and the AI assistant analyzes current filenames to construct precise rule pipelines.
+    - **Local CLI Mode**: Directly integrates with locally installed and authenticated **Claude Code CLI**, **OpenAI Codex CLI**, and **xAI Grok CLI**.
+    - **Cloud & Local APIs**: Supports **Google Gemini**, **OpenAI**, **Anthropic**, and **Local Ollama** (zero-key offline inference with automatic model tag resolution).
+    - **Two-tier Profiles & Instant Abort**: Manage multiple AI configurations with one-click default switching and in-flight cancellation (process termination / connection abort).
 - **Intuitive Workflow**: Drag & Drop file importing with live highlighted preview of renaming outcomes.
 - **Dual Renaming Modes**:
     - **Regex Mode**: Full Regular Expression support for advanced batch operations.
@@ -66,6 +71,18 @@ Use sequence variables in the "Replace with" field:
 - **Remove Whitespace**: Find `\s+`, Replace with `(Leave Empty)`
 - **Standardize Date**: Find `(\d{4})(\d{2})(\d{2})`, Replace with `$1-$2-$3` (20231125 → 2023-11-25)
 - **Remove Parentheses & Content**: Find `\s*\([^)]*\)`, Replace with `(Leave Empty)`
+
+## 🤖 AI Rule Assistant Guide
+
+1. **Open Assistant**: Click the "✨ AI Assistant" button at the top right to open the chat sidebar.
+2. **Choose or Add Profile**:
+   - Default CLI options: **Claude Code CLI**, **OpenAI Codex CLI**, and **xAI Grok CLI** (uses local CLI login session).
+   - Or open "Settings > AI Assistant" to add **Google Gemini**, **OpenAI**, **Anthropic**, or **Local Ollama** API profiles.
+3. **Prompt in Natural Language**:
+   - "Change date format in filenames from 20240101 to 2024-01-01"
+   - "Remove [Group] prefix from anime episode titles and insert S01E sequence numbering"
+   - "Extract text before the first underscore and convert the rest to uppercase"
+4. **Apply in One Click**: The assistant returns filename analysis and generated rule pipeline cards. Toggle "Auto Apply" or click "Apply this pipeline" to load rules directly into your renaming pipeline!
 
 ## 🛠️ Tech Stack & Development
 

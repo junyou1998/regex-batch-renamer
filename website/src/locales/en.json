@@ -24,6 +24,10 @@
         "opensource": {
             "title": "Open Source & Privacy First",
             "description": "100% Free, MIT Licensed, and Offline-capable. Your files never leave your device. No tracking, no paywalls."
+        },
+        "ai": {
+            "title": "AI Rule Assistant",
+            "description": "Describe your renaming intent in plain words. AI analyzes filename patterns and constructs exact Regex pipelines. Supports local CLIs (Claude / Codex / Grok) and APIs (Gemini / OpenAI / Anthropic / Local Ollama)."
         }
     },
     "download": {

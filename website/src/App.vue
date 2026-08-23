@@ -189,47 +189,61 @@ onMounted(async () => {
           <p class="mt-4 text-slate-600 max-w-2xl mx-auto">{{ t('features.subtitle') }}</p>
         </div>
 
-        <div class="grid md:grid-cols-3 gap-8">
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+          <!-- AI Assistant -->
+          <div
+            class="group p-7 rounded-2xl bg-linear-to-br from-slate-50 to-white border border-slate-200 hover:border-purple-300 hover:shadow-xl hover:shadow-purple-500/10 transition-all">
+            <div
+              class="w-14 h-14 rounded-2xl bg-linear-to-br from-purple-500 to-indigo-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-purple-500/30">
+              <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-3">{{ t('features.ai.title') }}</h3>
+            <p class="text-slate-600 text-sm leading-relaxed">{{ t('features.ai.description') }}</p>
+          </div>
+
           <!-- Batch -->
           <div
-            class="group p-8 rounded-2xl bg-linear-to-br from-slate-50 to-white border border-slate-200 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/10 transition-all">
+            class="group p-7 rounded-2xl bg-linear-to-br from-slate-50 to-white border border-slate-200 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/10 transition-all">
             <div
-              class="w-16 h-16 rounded-2xl bg-linear-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-blue-500/30">
-              <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              class="w-14 h-14 rounded-2xl bg-linear-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-blue-500/30">
+              <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round"
                   d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
               </svg>
             </div>
-            <h3 class="text-2xl font-bold text-slate-900 mb-4">{{ t('features.batch.title') }}</h3>
-            <p class="text-slate-600 leading-relaxed">{{ t('features.batch.description') }}</p>
+            <h3 class="text-xl font-bold text-slate-900 mb-3">{{ t('features.batch.title') }}</h3>
+            <p class="text-slate-600 text-sm leading-relaxed">{{ t('features.batch.description') }}</p>
           </div>
 
           <!-- Preview -->
           <div
-            class="group p-8 rounded-2xl bg-linear-to-br from-slate-50 to-white border border-slate-200 hover:border-cyan-300 hover:shadow-xl hover:shadow-cyan-500/10 transition-all">
+            class="group p-7 rounded-2xl bg-linear-to-br from-slate-50 to-white border border-slate-200 hover:border-cyan-300 hover:shadow-xl hover:shadow-cyan-500/10 transition-all">
             <div
-              class="w-16 h-16 rounded-2xl bg-linear-to-br from-cyan-500 to-cyan-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-cyan-500/30">
-              <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              class="w-14 h-14 rounded-2xl bg-linear-to-br from-cyan-500 to-cyan-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-cyan-500/30">
+              <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path stroke-linecap="round" stroke-linejoin="round"
                   d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
             </div>
-            <h3 class="text-2xl font-bold text-slate-900 mb-4">{{ t('features.preview.title') }}</h3>
-            <p class="text-slate-600 leading-relaxed">{{ t('features.preview.description') }}</p>
+            <h3 class="text-xl font-bold text-slate-900 mb-3">{{ t('features.preview.title') }}</h3>
+            <p class="text-slate-600 text-sm leading-relaxed">{{ t('features.preview.description') }}</p>
           </div>
 
           <!-- Open Source -->
           <div
-            class="group p-8 rounded-2xl bg-linear-to-br from-slate-50 to-white border border-slate-200 hover:border-emerald-300 hover:shadow-xl hover:shadow-emerald-500/10 transition-all">
+            class="group p-7 rounded-2xl bg-linear-to-br from-slate-50 to-white border border-slate-200 hover:border-emerald-300 hover:shadow-xl hover:shadow-emerald-500/10 transition-all">
             <div
-              class="w-16 h-16 rounded-2xl bg-linear-to-br from-emerald-500 to-emerald-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-emerald-500/30">
-              <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              class="w-14 h-14 rounded-2xl bg-linear-to-br from-emerald-500 to-emerald-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-emerald-500/30">
+              <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
               </svg>
             </div>
-            <h3 class="text-2xl font-bold text-slate-900 mb-4">{{ t('features.opensource.title') }}</h3>
-            <p class="text-slate-600 leading-relaxed">{{ t('features.opensource.description') }}</p>
+            <h3 class="text-xl font-bold text-slate-900 mb-3">{{ t('features.opensource.title') }}</h3>
+            <p class="text-slate-600 text-sm leading-relaxed">{{ t('features.opensource.description') }}</p>
           </div>
         </div>
       </div>
