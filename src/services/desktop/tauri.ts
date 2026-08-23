@@ -160,8 +160,8 @@ export const tauriDesktopBridge: DesktopBridge = {
   async openDevTools() {
     await invoke('open_devtools')
   },
-  async checkAiCliStatus(): Promise<AiCliStatus> {
-    return invoke<AiCliStatus>('check_ai_cli_status')
+  async checkAiCliStatus(provider?: string): Promise<AiCliStatus> {
+    return invoke<AiCliStatus>('check_ai_cli_status', { provider })
   },
   async runAiChat(request: AiChatRequest): Promise<AiChatResponse> {
     return invoke<AiChatResponse>('run_ai_chat', { request })

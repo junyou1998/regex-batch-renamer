@@ -44,16 +44,19 @@ export type PendingChangesHandler = () => boolean | Promise<boolean>
 export type FileDropHandler = (paths: string[]) => void
 export type FileDragStateHandler = (isDragging: boolean) => void
 
+export type AiProviderType = 'claude' | 'codex'
+
 export interface AiCliStatus {
   installed: boolean
   path?: string
   version?: string
   ready: boolean
   message?: string
+  provider?: AiProviderType | string
 }
 
 export interface AiChatMessage {
-  role: 'user' | 'assistant'
+  role: 'user' | 'assistant' | 'system'
   content: string
 }
 
@@ -68,6 +71,7 @@ export interface AiChatRequest {
   sampleFilenames: string[]
   currentPipeline: AiRuleSnapshot[]
   processFilenameOnly?: boolean
+  provider?: AiProviderType | string
 }
 
 export interface AiPipelineItem {
@@ -98,7 +102,6 @@ export interface DesktopBridge {
   startDragging?(): Promise<void>
   toggleMaximize?(): Promise<void>
   openDevTools?(): Promise<void>
-  checkAiCliStatus?(): Promise<AiCliStatus>
+  checkAiCliStatus?(provider?: AiProviderType | string): Promise<AiCliStatus>
   runAiChat?(request: AiChatRequest): Promise<AiChatResponse>
 }
-

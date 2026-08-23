@@ -211,8 +211,8 @@ fn open_devtools(window: WebviewWindow) {
 }
 
 #[tauri::command]
-fn check_ai_cli_status() -> ai_cli::AiCliStatus {
-    ai_cli::check_status()
+fn check_ai_cli_status(provider: Option<String>) -> ai_cli::AiCliStatus {
+    ai_cli::check_status(provider.as_deref())
 }
 
 #[tauri::command]
