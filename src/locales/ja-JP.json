@@ -130,7 +130,8 @@
             "addSuffix": "サフィックスを追加...",
             "enterPrefix": "プレフィックスを入力してください",
             "enterSuffix": "サフィックスを入力してください"
-        }
+        },
+        "regexRule": "正規表現 / テキスト置換ルール"
     },
     "preview": {
         "title": "プレビュー ({n} ファイル)",
@@ -342,7 +343,8 @@
         "toggleSidebar": "サイドバーの切り替え",
         "aiReady": "準備完了",
         "aiOffline": "未準備",
-        "history": "履歴 ({n})"
+        "history": "履歴 ({n})",
+        "plugins": "プラグイン ({n})"
     },
     "history": {
         "title": "変更履歴と監査ログ",
@@ -392,5 +394,31 @@
         "exportBatch": "このバッチを出力",
         "csvFormat": "CSV スプレッドシート (.csv)",
         "jsonFormat": "JSON データファイル (.json)"
+    },
+    "plugins": {
+        "title": "プラグイン",
+        "manage": "プラグインを管理・インストール...",
+        "installedCount": "件インストール済み",
+        "tabInstalled": "インストール済み",
+        "tabMarketplace": "マーケットプレイス",
+        "installLocal": "ローカルプラグインをインストール (.zip)",
+        "searchPlaceholder": "プラグイン名または説明を検索...",
+        "refresh": "ストアを更新",
+        "emptyInstalled": "カスタムプラグインはまだありません",
+        "emptyInstalledDesc": "上のボタンから、または .rbr-plugin アーカイブを直接ドロップしてインストールできます。",
+        "builtin": "内蔵",
+        "permNetwork": "ネットワーク通信",
+        "optionsCount": "個のオプション",
+        "exportZip": ".rbr-plugin として出力",
+        "uninstall": "アンインストール",
+        "marketplaceTitle": "公式・コミュニティプラグインストア",
+        "marketplaceDesc": "マーケットプレイスのエンドポイントは準備完了です。リモートリポジトリが公開され次第、ワンクリックでプラグインを導入できます。",
+        "install": "インストール",
+        "storeComingSoon": "マーケットプレイスは近日公開",
+        "storeComingSoonDesc": "現在は .zip または .rbr-plugin ファイルをドロップしてローカルインストールが可能です。",
+        "dragOrSelectToInstall": "ファイルを選択またはドロップして導入",
+        "securityNotice": "すべてのプラグインは隔離されたサンドボックス環境で安全に実行されます。",
+        "close": "閉じる",
+        "unknownPlugin": "不明なプラグイン"
     }
 }

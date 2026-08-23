@@ -130,7 +130,8 @@
             "addSuffix": "Add Suffix...",
             "enterPrefix": "Enter prefix text",
             "enterSuffix": "Enter suffix text"
-        }
+        },
+        "regexRule": "Regex / Text Replace Rule"
     },
     "preview": {
         "title": "Preview Changes ({n} files)",
@@ -342,7 +343,8 @@
         "toggleSidebar": "Toggle Sidebar",
         "aiReady": "Ready",
         "aiOffline": "Offline",
-        "history": "History ({n})"
+        "history": "History ({n})",
+        "plugins": "Plugins ({n})"
     },
     "history": {
         "title": "Renaming History & Audit Log",
@@ -392,5 +394,31 @@
         "exportBatch": "Export Batch",
         "csvFormat": "CSV Spreadsheet (.csv)",
         "jsonFormat": "JSON Data File (.json)"
+    },
+    "plugins": {
+        "title": "Plugins",
+        "manage": "Manage / Install Plugins...",
+        "installedCount": "installed",
+        "tabInstalled": "Installed Plugins",
+        "tabMarketplace": "Marketplace",
+        "installLocal": "Install Local Plugin (.zip)",
+        "searchPlaceholder": "Search plugin name or description...",
+        "refresh": "Refresh Store",
+        "emptyInstalled": "No custom plugins installed",
+        "emptyInstalledDesc": "Install a plugin using the button above or drag & drop a .rbr-plugin archive onto the window.",
+        "builtin": "Built-in",
+        "permNetwork": "Network",
+        "optionsCount": "options",
+        "exportZip": "Export as .rbr-plugin",
+        "uninstall": "Uninstall",
+        "marketplaceTitle": "Official & Community Plugin Store",
+        "marketplaceDesc": "Marketplace store endpoint is ready. Once remote repositories are published, you will be able to discover and install community transformers with one click.",
+        "install": "Install",
+        "storeComingSoon": "Store Marketplace Coming Soon",
+        "storeComingSoonDesc": "You can currently install local plugins by dropping .zip or .rbr-plugin files directly into the window.",
+        "dragOrSelectToInstall": "Select or Drop Plugin to Install",
+        "securityNotice": "All plugins run inside an isolated sandbox to protect system and file integrity.",
+        "close": "Close",
+        "unknownPlugin": "Unknown Plugin"
     }
 }

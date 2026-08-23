@@ -233,15 +233,19 @@ async function openChangelogForTag(tagName: string) {
             enter-to-class="opacity-100" leave-active-class="transition duration-150 ease-in"
             leave-from-class="opacity-100" leave-to-class="opacity-0">
             <div v-if="modelValue"
-                class="fixed inset-0 z-100 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+                class="fixed inset-0 z-100 flex items-center justify-center p-4 pt-10 bg-slate-900/60 backdrop-blur-sm"
                 @click.self="$emit('update:modelValue', false)">
 
-                <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden border border-slate-200 dark:border-slate-700 transform transition-all max-h-[85vh]"
+                <!-- Top Titlebar Window Drag Region (Pass-through for macOS window dragging) -->
+                <div data-tauri-drag-region class="absolute top-0 left-0 right-0 h-[38px] z-10 pointer-events-auto"></div>
+
+                <div class="relative z-20 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden border border-slate-200 dark:border-slate-700 transform transition-all max-h-[85vh]"
                     role="dialog" aria-modal="true">
                     <!-- Header -->
                     <div
-                        class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50 shrink-0">
-                        <div class="flex items-center gap-3">
+                        data-tauri-drag-region
+                        class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50 shrink-0 select-none">
+                        <div class="flex items-center gap-3 no-drag">
                             <button v-if="showChangelog" @click="showChangelog = false"
                                 class="text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors cursor-pointer">
                                 <ArrowLeft class="h-5 w-5" />
@@ -250,8 +254,12 @@ async function openChangelogForTag(tagName: string) {
                                 {{ showChangelog ? $t('about.changelog') : $t('about.title') }}
                             </h3>
                         </div>
+
+                        <!-- Middle Drag Area -->
+                        <div data-tauri-drag-region class="flex-1 h-full min-w-4"></div>
+
                         <button @click="$emit('update:modelValue', false)"
-                            class="p-2 rounded-lg text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+                            class="p-2 rounded-lg text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors cursor-pointer no-drag">
                             <X class="h-5 w-5" />
                         </button>
                     </div>

@@ -110,21 +110,29 @@ function formatDate(ts: number): string {
 <template>
     <Teleport to="body">
         <Transition name="fade">
-            <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div class="fixed inset-0 z-50 flex items-center justify-center p-4 pt-10">
+                <!-- Top Titlebar Window Drag Region (Pass-through for macOS window dragging) -->
+                <div data-tauri-drag-region class="absolute top-0 left-0 right-0 h-[38px] z-10 pointer-events-auto"></div>
+
                 <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="emit('close')"></div>
 
                 <div
-                    class="relative bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-lg max-h-[80vh] flex flex-col animate-in zoom-in-95 duration-200">
+                    class="relative z-20 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-lg max-h-[80vh] flex flex-col animate-in zoom-in-95 duration-200">
 
                     <!-- Header -->
                     <div
-                        class="flex items-center justify-between p-5 pb-3 border-b border-slate-200 dark:border-slate-700">
-                        <h3 class="text-base font-semibold text-slate-800 dark:text-white flex items-center gap-2">
+                        data-tauri-drag-region
+                        class="flex items-center justify-between p-5 pb-3 border-b border-slate-200 dark:border-slate-700 select-none shrink-0">
+                        <h3 class="text-base font-semibold text-slate-800 dark:text-white flex items-center gap-2 no-drag">
                             <FolderOpen class="h-5 w-5" />
                             {{ $t('templates.title') }}
                         </h3>
+
+                        <!-- Middle Drag Area -->
+                        <div data-tauri-drag-region class="flex-1 h-full min-w-4"></div>
+
                         <button @click="emit('close')"
-                            class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer">
+                            class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer no-drag">
                             <X class="h-5 w-5" />
                         </button>
                     </div>

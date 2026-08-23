@@ -216,11 +216,14 @@ function close() {
     <div
       v-if="modelValue"
       class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm animate-fade-in transition-all"
-      :class="isMaximized ? 'p-0' : 'p-3 sm:p-5'"
+      :class="isMaximized ? 'p-0' : 'p-3 sm:p-5 pt-10'"
       @click.self="close"
     >
+      <!-- Top Titlebar Window Drag Region (Pass-through for macOS window dragging when not maximized) -->
+      <div v-if="!isMaximized" data-tauri-drag-region class="absolute top-0 left-0 right-0 h-[38px] z-10 pointer-events-auto"></div>
+
       <div
-        class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden text-slate-800 dark:text-slate-200 transition-all duration-200"
+        class="relative z-20 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden text-slate-800 dark:text-slate-200 transition-all duration-200"
         :class="[
           isMaximized
             ? 'w-full h-full max-w-none max-h-none rounded-none'

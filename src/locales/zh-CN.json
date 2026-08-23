@@ -130,7 +130,8 @@
             "addSuffix": "添加后缀...",
             "enterPrefix": "请输入前缀文本",
             "enterSuffix": "请输入后缀文本"
-        }
+        },
+        "regexRule": "正则 / 文本替换规则"
     },
     "preview": {
         "title": "预览变更 ({n} 文件)",
@@ -342,7 +343,8 @@
         "toggleSidebar": "展开/收起侧边栏",
         "aiReady": "就绪",
         "aiOffline": "未就绪",
-        "history": "历程 ({n})"
+        "history": "历程 ({n})",
+        "plugins": "插件 ({n})"
     },
     "history": {
         "title": "重命名历程日志",
@@ -392,5 +394,31 @@
         "exportBatch": "导出此批次",
         "csvFormat": "CSV 电子表格 (.csv)",
         "jsonFormat": "JSON 数据文件 (.json)"
+    },
+    "plugins": {
+        "title": "扩展插件",
+        "manage": "管理 / 安装插件...",
+        "installedCount": "个已安装",
+        "tabInstalled": "已安装插件",
+        "tabMarketplace": "插件市场",
+        "installLocal": "安装本地插件 (.zip)",
+        "searchPlaceholder": "搜索插件名称或描述...",
+        "refresh": "刷新市场",
+        "emptyInstalled": "尚未安装任何自定义插件",
+        "emptyInstalledDesc": "可通过上方「安装本地插件」或直接拖拽 .rbr-plugin 压缩包至窗口完成安装。",
+        "builtin": "内置",
+        "permNetwork": "网络请求",
+        "optionsCount": "个自定义选项",
+        "exportZip": "导出为 .rbr-plugin",
+        "uninstall": "卸载",
+        "marketplaceTitle": "官方与社区插件市场 (Store Repository)",
+        "marketplaceDesc": "插件市场接口已就绪。当远程仓库发布时，将可在此一键浏览并安装社区提供的强大转换工具。",
+        "install": "安装",
+        "storeComingSoon": "插件市场即将开放",
+        "storeComingSoonDesc": "目前支持直接拖拽 .zip 或 .rbr-plugin 文件至窗口中进行本地安装。",
+        "dragOrSelectToInstall": "选择或拖拽本地文件安装",
+        "securityNotice": "所有插件均在隔离沙盒中运行，保护您的系统与文件安全。",
+        "close": "关闭",
+        "unknownPlugin": "未知插件"
     }
 }

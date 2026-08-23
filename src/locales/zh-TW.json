@@ -130,7 +130,8 @@
             "addSuffix": "加入後綴...",
             "enterPrefix": "請輸入前綴文字",
             "enterSuffix": "請輸入後綴文字"
-        }
+        },
+        "regexRule": "正則 / 文字取代規則"
     },
     "preview": {
         "title": "預覽變更 ({n} 檔案)",
@@ -342,7 +343,8 @@
         "toggleSidebar": "展開/收合側邊欄",
         "aiReady": "就緒",
         "aiOffline": "未就緒",
-        "history": "歷程 ({n})"
+        "history": "歷程 ({n})",
+        "plugins": "插件 ({n})"
     },
     "history": {
         "title": "更名歷程日誌",
@@ -392,5 +394,31 @@
         "exportBatch": "匯出此批次",
         "csvFormat": "CSV 試算表格 (.csv)",
         "jsonFormat": "JSON 資料檔案 (.json)"
+    },
+    "plugins": {
+        "title": "外掛插件",
+        "manage": "管理 / 安裝插件...",
+        "installedCount": "個已安裝",
+        "tabInstalled": "已安裝插件",
+        "tabMarketplace": "插件市集",
+        "installLocal": "安裝本地插件 (.zip)",
+        "searchPlaceholder": "搜尋插件名稱或描述...",
+        "refresh": "重新整理市集",
+        "emptyInstalled": "尚未安裝任何自訂插件",
+        "emptyInstalledDesc": "可透過上方「安裝本地插件」或直接拖曳 .rbr-plugin 壓縮包至視窗完成安裝。",
+        "builtin": "內建",
+        "permNetwork": "網路請求",
+        "optionsCount": "個自訂選項",
+        "exportZip": "匯出為 .rbr-plugin",
+        "uninstall": "解除安裝",
+        "marketplaceTitle": "官方與社群插件市集 (Store Repository)",
+        "marketplaceDesc": "插件市集介面已就緒。當遠端倉庫發布時，將可在此一鍵瀏覽並安裝社群提供的強大轉換工具。",
+        "install": "安裝",
+        "storeComingSoon": "插件市集即將開放",
+        "storeComingSoonDesc": "目前支援直接拖曳 .zip 或 .rbr-plugin 檔案至視窗中進行本地安裝。",
+        "dragOrSelectToInstall": "選取或拖曳本地檔案安裝",
+        "securityNotice": "所有插件皆於隔離沙盒中執行，保護您的系統與檔案安全。",
+        "close": "關閉",
+        "unknownPlugin": "未知外掛"
     }
 }

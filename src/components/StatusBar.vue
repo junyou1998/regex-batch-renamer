@@ -5,6 +5,7 @@ import { useOperationStore } from '../stores/operationStore'
 import { useSettingsStore } from '../stores/settingsStore'
 import { useAiStore } from '../stores/aiStore'
 import { useHistoryStore } from '../stores/historyStore'
+import { usePluginStore } from '../stores/pluginStore'
 import ProviderIcon from './icons/ProviderIcon.vue'
 import {
   PanelLeft,
@@ -14,7 +15,8 @@ import {
   AlertTriangle,
   RotateCcw,
   Tag,
-  History
+  History,
+  Puzzle
 } from 'lucide-vue-next'
 
 defineProps<{
@@ -29,6 +31,7 @@ const emit = defineEmits<{
   (e: 'undo'): void
   (e: 'openSettings'): void
   (e: 'openHistory'): void
+  (e: 'openPlugins'): void
 }>()
 
 const fileStore = useFileStore()
@@ -36,6 +39,7 @@ const operationStore = useOperationStore()
 const settingsStore = useSettingsStore()
 const aiStore = useAiStore()
 const historyStore = useHistoryStore()
+const pluginStore = usePluginStore()
 
 const fileCount = computed(() => fileStore.files.length)
 
@@ -153,6 +157,19 @@ function toggleProcessFilenameOnly() {
       >
         <History class="w-2.5 h-2.5 opacity-70" />
         <span>{{ $t('statusBar.history', { n: historyStore.batches.length }) }}</span>
+      </button>
+
+      <!-- Plugins Shortcut -->
+      <button
+        type="button"
+        @click="emit('openPlugins')"
+        :title="$t('plugins.title')"
+        class="flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-slate-200/80 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 transition-colors cursor-pointer text-slate-600 dark:text-slate-400 text-[10.5px]"
+        :class="{ 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40': pluginStore.isAnyPluginBusy }"
+      >
+        <Puzzle class="w-2.5 h-2.5 opacity-70" :class="{ 'animate-spin text-blue-500': pluginStore.isAnyPluginBusy }" />
+        <span v-if="pluginStore.isAnyPluginBusy" class="text-blue-600 dark:text-blue-400 font-medium">運算中...</span>
+        <span v-else>{{ $t('statusBar.plugins', { n: pluginStore.enabledTransformerPlugins.length }) }}</span>
       </button>
 
       <!-- Scope Switcher (Process Filename Only Toggle) -->

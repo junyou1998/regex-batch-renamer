@@ -16,10 +16,11 @@ import { useToastStore } from './stores/toastStore'
 import { useThemeStore } from './stores/themeStore'
 import { useAiStore } from './stores/aiStore'
 import { useHistoryStore, type RenameFileLog } from './stores/historyStore'
-import { CircleAlert, History, Info, LoaderCircle, PanelLeft, Settings, Sparkles, X } from 'lucide-vue-next'
+import { CircleAlert, History, Info, LoaderCircle, PanelLeft, Settings, Sparkles, X, Puzzle } from 'lucide-vue-next'
+import PluginModal from './components/PluginModal.vue'
 
 import { getLatestRelease, getReleasePageUrl, isNewerVersion, normalizeReleaseVersion } from './services/updateService'
-import { generateRenamePreview } from './services/renameEngine'
+import { generateRenamePreviewAsync } from './services/renameEngine'
 import { replaceBasename } from './utils/path'
 import { desktop, type DesktopRuntimeInfo } from './services/desktop'
 
@@ -47,6 +48,7 @@ const aboutInitialReleaseTag = ref<string | null>(null)
 const postUpdateVersion = ref<string | null>(null)
 const showSettings = ref(false)
 const showHistory = ref(false)
+const showPlugins = ref(false)
 const isFileDragActive = ref(false)
 let unlistenFileDrop: null | (() => void) = null
 let unlistenFileDragState: null | (() => void) = null
@@ -267,14 +269,14 @@ function debounce(fn: Function, delay: number) {
   }
 }
 
-const updatePreviews = debounce(() => {
+const updatePreviews = debounce(async () => {
   if (fileStore.files.length === 0) {
     hasConflicts.value = false
     conflictMessage.value = ''
     return
   }
 
-  const preview = generateRenamePreview(
+  const preview = await generateRenamePreviewAsync(
     fileStore.files,
     operationStore.operations,
     { processFilenameOnly: processFilenameOnly.value }
@@ -645,6 +647,14 @@ async function handleCopyTo() {
         </button>
 
         <button
+          @click="showPlugins = true"
+          :title="$t('plugins.title')"
+          class="w-6 h-6 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 hover:text-slate-900 dark:hover:text-slate-100 transition-colors cursor-pointer flex items-center justify-center relative"
+        >
+          <Puzzle class="w-3.5 h-3.5" />
+        </button>
+
+        <button
           @click="showHistory = true"
           :title="$t('history.title')"
           class="w-6 h-6 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 hover:text-slate-900 dark:hover:text-slate-100 transition-colors cursor-pointer flex items-center justify-center relative"
@@ -741,6 +751,7 @@ async function handleCopyTo() {
       @undo="handleUndo"
       @open-settings="showSettings = true"
       @open-history="showHistory = true"
+      @open-plugins="showPlugins = true"
     />
 
     <ToastNotification />
@@ -752,6 +763,7 @@ async function handleCopyTo() {
   />
     <SettingsModal v-model="showSettings" />
     <HistoryModal v-model="showHistory" />
+    <PluginModal v-model="showPlugins" />
   </div>
 </template>
 

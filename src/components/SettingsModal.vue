@@ -314,27 +314,35 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
     <Transition name="fade">
       <div
         v-if="isOpen"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 pt-10"
         @keydown="handleKeydown"
       >
+        <!-- Top Titlebar Window Drag Region (Pass-through for macOS window dragging) -->
+        <div data-tauri-drag-region class="absolute top-0 left-0 right-0 h-[38px] z-10 pointer-events-auto"></div>
+
         <!-- Backdrop -->
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="isOpen = false"></div>
 
         <!-- Modal -->
         <div
-          class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-lg overflow-hidden flex flex-col max-h-[85vh]"
+          class="relative z-20 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 w-full max-w-lg overflow-hidden flex flex-col max-h-[85vh]"
         >
           <!-- Header -->
           <div
-            class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700 shrink-0"
+            data-tauri-drag-region
+            class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700 shrink-0 select-none"
           >
-            <h2 class="text-lg font-semibold text-slate-800 dark:text-white flex items-center gap-2">
+            <h2 class="text-lg font-semibold text-slate-800 dark:text-white flex items-center gap-2 no-drag">
               <Settings class="w-5 h-5 text-slate-500" />
               {{ $t('settings.title') }}
             </h2>
+
+            <!-- Middle Drag Area -->
+            <div data-tauri-drag-region class="flex-1 h-full min-w-4"></div>
+
             <button
               @click="isOpen = false"
-              class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+              class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer no-drag"
             >
               <X class="h-5 w-5" />
             </button>

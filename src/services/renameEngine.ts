@@ -1,5 +1,6 @@
 import type { FileItem } from '../stores/fileStore'
 import type { Operation } from '../stores/operationStore'
+import { runPluginTransformBatch } from './pluginRunner'
 
 export type RenameIssue = 'invalid-char' | 'duplicate'
 
@@ -80,12 +81,15 @@ function splitName(originalName: string, processFilenameOnly: boolean) {
   return { base: originalName, ext: '' }
 }
 
+/**
+ * Synchronous preview generation (for regex operations)
+ */
 export function generateRenamePreview(
   files: FileItem[],
   operations: Operation[],
   options: { processFilenameOnly: boolean }
 ): RenamePreviewResult {
-  const enabledOps = operations.filter(op => op.enabled)
+  const enabledOps = operations.filter(op => op.enabled && op.type !== 'plugin')
   const generatedNames = new Set<string>()
   const items: RenamePreviewItem[] = []
   let conflictReason: RenameIssue | undefined
@@ -114,6 +118,66 @@ export function generateRenamePreview(
     }
 
     items.push({ id: file.id, newName: currentName, issue })
+  })
+
+  return {
+    items,
+    hasConflicts: Boolean(conflictReason),
+    conflictReason,
+  }
+}
+
+/**
+ * Asynchronous preview generation supporting both standard operations and plugins
+ */
+export async function generateRenamePreviewAsync(
+  files: FileItem[],
+  operations: Operation[],
+  options: { processFilenameOnly: boolean }
+): Promise<RenamePreviewResult> {
+  const enabledOps = operations.filter(op => op.enabled)
+  const items: RenamePreviewItem[] = []
+  const generatedNames = new Set<string>()
+  let conflictReason: RenameIssue | undefined
+
+  if (files.length === 0) {
+    return { items: [], hasConflicts: false }
+  }
+
+  // Initial bases and extensions
+  const parsed = files.map(f => splitName(f.originalName, options.processFilenameOnly))
+  let currentNames = parsed.map(p => p.base)
+
+  // Pipeline step-by-step transformation
+  for (const op of enabledOps) {
+    if (op.type === 'plugin' && op.params.pluginId) {
+      currentNames = await runPluginTransformBatch(op.params.pluginId, currentNames, op.params)
+    } else {
+      currentNames = currentNames.map((name, index) => applyOperation(name, op, { index }))
+    }
+  }
+
+  // Combine extensions and check conflicts
+  files.forEach((file, index) => {
+    let finalName = currentNames[index]
+    const ext = parsed[index].ext
+
+    if (options.processFilenameOnly && ext) {
+      finalName += ext
+    }
+
+    let issue: RenameIssue | undefined
+    if (INVALID_FILENAME_REGEX.test(finalName)) {
+      issue = 'invalid-char'
+      conflictReason = issue
+    } else if (generatedNames.has(finalName)) {
+      issue = 'duplicate'
+      conflictReason = issue
+    } else {
+      generatedNames.add(finalName)
+    }
+
+    items.push({ id: file.id, newName: finalName, issue })
   })
 
   return {

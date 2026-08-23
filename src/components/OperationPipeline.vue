@@ -7,6 +7,10 @@ import HelpModal from './HelpModal.vue'
 import PresetManager from './PresetManager.vue'
 import { savePreset, loadPresets, type Preset } from '../services/presetService'
 import { useToastStore } from '../stores/toastStore'
+import { usePluginStore, type InstalledPlugin } from '../stores/pluginStore'
+import { runPluginHealthCheck } from '../services/pluginRunner'
+import PluginModal from './PluginModal.vue'
+import CustomSelect from './CustomSelect.vue'
 import {
   Check,
   ChevronDown,
@@ -22,6 +26,10 @@ import {
   Undo2,
   X,
   Zap,
+  Sparkles,
+  Puzzle,
+  AlertCircle,
+  LoaderCircle
 } from 'lucide-vue-next'
 
 defineProps<{
@@ -37,6 +45,53 @@ const operationStore = useOperationStore()
 const settingsStore = useSettingsStore()
 const toastStore = useToastStore()
 const showHelp = ref(false)
+
+const pluginStore = usePluginStore()
+const showPluginModal = ref(false)
+const showAddDropdown = ref(false)
+const addDropdownContainerRef = ref<HTMLElement | null>(null)
+const openDropdownOpId = ref<string | null>(null)
+
+async function checkHealth(pluginId?: string) {
+  if (!pluginId) return
+  await runPluginHealthCheck(pluginId)
+}
+
+// Automatically perform health check for newly added network plugins
+watch(
+  () => operationStore.operations,
+  (ops) => {
+    ops.forEach(op => {
+      if (op.type === 'plugin' && op.params?.pluginId) {
+        const plugin = pluginStore.getPlugin(op.params.pluginId)
+        if (plugin?.manifest.permissions?.includes('network')) {
+          const currentHealth = pluginStore.getPluginHealth(op.params.pluginId)
+          if (currentHealth.status === 'unknown') {
+            runPluginHealthCheck(op.params.pluginId)
+          }
+        }
+      }
+    })
+  },
+  { immediate: true, deep: true }
+)
+
+function addPluginOperation(plugin: InstalledPlugin) {
+  showAddDropdown.value = false
+  const defaultParams: Record<string, any> = {
+    pluginId: plugin.manifest.id
+  }
+  if (plugin.manifest.options) {
+    plugin.manifest.options.forEach(opt => {
+      defaultParams[opt.key] = opt.default !== undefined ? opt.default : ''
+    })
+  }
+  operationStore.addOperation('plugin', defaultParams)
+  scrollToBottom()
+  if (plugin.manifest.permissions?.includes('network')) {
+    runPluginHealthCheck(plugin.manifest.id)
+  }
+}
 
 const operationsModel = computed({
   get: () => operationStore.operations,
@@ -217,6 +272,16 @@ interface Badge {
 
 function getBadges(op: any): Badge[] {
   const badges: Badge[] = []
+  if (op.type === 'plugin') {
+    badges.push({
+      type: 'mode-plugin',
+      label: '外掛',
+      color: 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60',
+      isLiteral: true
+    })
+    return badges
+  }
+
   if (op.type !== 'regex') return badges
 
   // 1. Type badge (Regex vs Text) always first
@@ -284,6 +349,7 @@ function scrollToBottom() {
 }
 
 function addRegexOperation() {
+  showAddDropdown.value = false
   operationStore.addOperation('regex', { pattern: '', replacement: '', useRegex: settingsStore.defaultUseRegex })
   scrollToBottom()
 }
@@ -380,15 +446,17 @@ const savedTemplates = ref<Preset[]>([])
 const templateContainerRef = ref<HTMLElement | null>(null)
 
 function handleDocumentClick(e: MouseEvent | PointerEvent) {
-  if (!showTemplateDropdown.value) return
   const target = e.target as Node | null
-  if (templateContainerRef.value && target && !templateContainerRef.value.contains(target)) {
+  if (showTemplateDropdown.value && templateContainerRef.value && target && !templateContainerRef.value.contains(target)) {
     showTemplateDropdown.value = false
+  }
+  if (showAddDropdown.value && addDropdownContainerRef.value && target && !addDropdownContainerRef.value.contains(target)) {
+    showAddDropdown.value = false
   }
 }
 
-watch(showTemplateDropdown, (isOpen) => {
-  if (isOpen) {
+watch([showTemplateDropdown, showAddDropdown], ([isTplOpen, isAddOpen]) => {
+  if (isTplOpen || isAddOpen) {
     nextTick(() => {
       window.addEventListener('pointerdown', handleDocumentClick)
     })
@@ -617,10 +685,65 @@ function confirmPrefixSuffix() {
           </Transition>
         </div>
 
-        <button @click="addRegexOperation"
-          class="px-2.5 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500 rounded-lg transition-colors flex items-center gap-1 shadow-2xs cursor-pointer">
-          <Plus class="h-3.5 w-3.5" /> {{ $t('operations.add') }}
-        </button>
+        <!-- Add Operation Button & Dropdown -->
+        <div ref="addDropdownContainerRef" class="relative">
+          <button
+            type="button"
+            @click="showAddDropdown = !showAddDropdown"
+            class="px-2.5 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500 rounded-lg transition-colors flex items-center gap-1 shadow-2xs cursor-pointer"
+          >
+            <Plus class="h-3.5 w-3.5" />
+            <span>{{ $t('operations.add') }}</span>
+            <ChevronDown class="h-3 w-3 ml-0.5" />
+          </button>
+
+          <!-- Add Dropdown Menu -->
+          <Transition name="dropdown">
+            <div
+              v-if="showAddDropdown"
+              class="absolute right-0 top-full mt-1.5 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 py-1.5 z-50 overflow-y-auto max-h-80 custom-scrollbar text-xs select-none"
+            >
+              <button
+                type="button"
+                @click="addRegexOperation"
+                class="w-full px-3.5 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer flex items-center gap-2 font-medium"
+              >
+                <Sparkles class="w-3.5 h-3.5 text-blue-500" />
+                <span>{{ $t('operations.regexRule') }}</span>
+              </button>
+
+              <!-- Enabled Plugin Rules -->
+              <template v-if="pluginStore.enabledTransformerPlugins.length > 0">
+                <div class="border-t border-slate-200 dark:border-slate-700 my-1"></div>
+                <div class="px-3 py-1 text-[10.5px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1">
+                  <Puzzle class="w-3 h-3 text-purple-500" />
+                  <span>{{ $t('plugins.title') }}</span>
+                </div>
+
+                <button
+                  v-for="plugin in pluginStore.enabledTransformerPlugins"
+                  :key="plugin.manifest.id"
+                  type="button"
+                  @click="addPluginOperation(plugin)"
+                  class="w-full px-3.5 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-purple-50 dark:hover:bg-purple-950/40 hover:text-purple-600 dark:hover:text-purple-300 transition-colors cursor-pointer flex items-center justify-between gap-1.5"
+                >
+                  <span class="truncate">{{ plugin.manifest.name }}</span>
+                  <span class="text-[10px] px-1.5 py-0.2 rounded bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 font-mono shrink-0">外掛</span>
+                </button>
+              </template>
+
+              <div class="border-t border-slate-200 dark:border-slate-700 my-1"></div>
+              <button
+                type="button"
+                @click="showAddDropdown = false; showPluginModal = true"
+                class="w-full px-3.5 py-2 text-left text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer flex items-center gap-2"
+              >
+                <Puzzle class="w-3.5 h-3.5 text-purple-500" />
+                <span>{{ $t('plugins.manage') }}</span>
+              </button>
+            </div>
+          </Transition>
+        </div>
       </div>
     </div>
 
@@ -629,6 +752,7 @@ function confirmPrefixSuffix() {
       <div class="space-y-3">
         <div v-for="(op, index) in operationsModel" :key="op.id" :data-operation-id="op.id"
           class="relative bg-slate-200/50 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-300 dark:border-slate-700 rounded-xl p-4 shadow-2xs transition-colors hover:border-slate-400 dark:hover:border-slate-600 group"
+          :style="{ zIndex: activeOperationDragId === op.id ? 1000 : (openDropdownOpId === op.id ? 100 : (operationsModel.length - index + 5)) }"
           :class="{
             'opacity-50 grayscale': !op.enabled,
             'ring-2 ring-blue-400/50 bg-blue-50 dark:bg-blue-950/30': activeOperationDragId === op.id,
@@ -645,7 +769,13 @@ function confirmPrefixSuffix() {
               </button>
               <span class="text-xs font-bold text-slate-500 dark:text-slate-500 shrink-0">#{{ index + 1 }}</span>
               <span class="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">
-                {{ op.type === 'regex' ? $t('operations.regex') : $t('operations.other') }}
+                {{
+                  op.type === 'regex'
+                    ? $t('operations.regex')
+                    : op.type === 'plugin'
+                    ? (pluginStore.getPlugin(op.params.pluginId)?.manifest.name || $t('plugins.unknownPlugin'))
+                    : $t('operations.other')
+                }}
               </span>
             </div>
             <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
@@ -669,8 +799,67 @@ function confirmPrefixSuffix() {
               class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-md" :class="badge.color">
               {{ badge.isLiteral ? badge.label : $t(badge.label) }}
             </span>
+            <!-- Plugin Health Status Badge with Click to Check -->
+            <button
+              v-if="op.type === 'plugin' && pluginStore.getPlugin(op.params?.pluginId)?.manifest.permissions?.includes('network')"
+              type="button"
+              @click.stop="checkHealth(op.params?.pluginId)"
+              class="text-[10px] font-medium px-1.5 py-0.5 rounded-md border flex items-center gap-1 transition-colors cursor-pointer"
+              :class="{
+                'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60': pluginStore.getPluginHealth(op.params?.pluginId).status === 'healthy',
+                'bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800/60 hover:bg-red-100 dark:hover:bg-red-900/60': pluginStore.getPluginHealth(op.params?.pluginId).status === 'unhealthy',
+                'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700': pluginStore.getPluginHealth(op.params?.pluginId).status === 'unknown' || pluginStore.getPluginHealth(op.params?.pluginId).status === 'checking'
+              }"
+              :title="pluginStore.getPluginHealth(op.params?.pluginId).message || '點擊檢測健康度'"
+            >
+              <span
+                v-if="pluginStore.getPluginHealth(op.params?.pluginId).status === 'healthy'"
+                class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"
+              ></span>
+              <span
+                v-else-if="pluginStore.getPluginHealth(op.params?.pluginId).status === 'unhealthy'"
+                class="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0"
+              ></span>
+              <LoaderCircle
+                v-else-if="pluginStore.getPluginHealth(op.params?.pluginId).status === 'checking'"
+                class="w-2.5 h-2.5 animate-spin text-blue-500 shrink-0"
+              />
+              <span v-else class="w-1.5 h-1.5 rounded-full bg-slate-400 shrink-0"></span>
+
+              <span>
+                {{
+                  pluginStore.getPluginHealth(op.params?.pluginId).status === 'healthy'
+                    ? (pluginStore.getPluginHealth(op.params?.pluginId).latencyMs !== undefined
+                        ? `連線正常 (${pluginStore.getPluginHealth(op.params?.pluginId).latencyMs}ms)`
+                        : '連線正常')
+                    : pluginStore.getPluginHealth(op.params?.pluginId).status === 'unhealthy'
+                    ? '服務異常 (重試)'
+                    : pluginStore.getPluginHealth(op.params?.pluginId).status === 'checking'
+                    ? '檢測中...'
+                    : '檢測連線'
+                }}
+              </span>
+            </button>
+
+            <!-- Plugin Running Indicator -->
+            <span v-if="op.type === 'plugin' && pluginStore.getPluginStatus(op.params?.pluginId).isBusy"
+              class="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60 flex items-center gap-1">
+              <LoaderCircle class="w-2.5 h-2.5 animate-spin" />
+              <span>運算中...</span>
+            </span>
           </div>
 
+          <!-- Plugin Execution Error Alert -->
+          <div v-if="op.type === 'plugin' && pluginStore.getPluginStatus(op.params?.pluginId).lastError"
+            class="mb-3 p-2.5 rounded-lg border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/40 text-xs text-red-700 dark:text-red-300 flex items-start gap-2">
+            <AlertCircle class="w-4 h-4 shrink-0 mt-0.5 text-red-500" />
+            <div class="min-w-0">
+              <div class="font-semibold text-[11.5px]">外掛運算錯誤</div>
+              <div class="text-[11px] opacity-90 break-all font-mono">{{ pluginStore.getPluginStatus(op.params?.pluginId).lastError }}</div>
+            </div>
+          </div>
+
+          <!-- REGEX OPERATION FORM -->
           <div v-if="op.type === 'regex'" class="space-y-3">
             <div class="space-y-1">
               <div class="flex justify-between items-center mb-1">
@@ -705,6 +894,68 @@ function confirmPrefixSuffix() {
                 class="w-full bg-white dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all" />
             </div>
           </div>
+
+          <!-- PLUGIN OPERATION FORM (DYNAMIC SCHEMA-DRIVEN) -->
+          <div v-else-if="op.type === 'plugin'" class="space-y-3">
+            <template v-if="pluginStore.getPlugin(op.params.pluginId)">
+              <div
+                v-for="option in (pluginStore.getPlugin(op.params.pluginId)?.manifest.options || [])"
+                :key="option.key"
+                class="space-y-1"
+              >
+                <div class="flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-400 ml-0.5">
+                  <span>{{ option.label }}</span>
+                  <span v-if="option.description" class="text-[10.5px] text-slate-400 font-normal truncate max-w-[200px]" :title="option.description">
+                    {{ option.description }}
+                  </span>
+                </div>
+
+                <!-- Custom Select Option -->
+                <CustomSelect
+                  v-if="option.type === 'select'"
+                  v-model="op.params[option.key]"
+                  :options="option.options || []"
+                  @toggle="(isOpen) => { openDropdownOpId = isOpen ? op.id : null }"
+                />
+
+                <!-- Boolean Option (Checkbox) -->
+                <label v-else-if="option.type === 'boolean'" class="flex items-center gap-2 cursor-pointer pt-1 select-none">
+                  <div class="relative flex items-center justify-center shrink-0">
+                    <input type="checkbox" v-model="op.params[option.key]" class="sr-only peer">
+                    <div
+                      class="w-4 h-4 rounded-sm border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-500/40 transition-all flex items-center justify-center shadow-2xs">
+                      <Check v-if="op.params[option.key]" class="w-3 h-3 text-white stroke-[3.5]" />
+                    </div>
+                  </div>
+                  <span class="text-xs text-slate-600 dark:text-slate-300">{{ option.label }}</span>
+                </label>
+
+                <!-- String Option -->
+                <input
+                  v-else-if="option.type === 'string'"
+                  type="text"
+                  v-model="op.params[option.key]"
+                  class="w-full bg-white dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 font-mono"
+                />
+
+                <!-- Number Option -->
+                <input
+                  v-else-if="option.type === 'number'"
+                  type="number"
+                  :min="option.min"
+                  :max="option.max"
+                  :step="option.step"
+                  v-model.number="op.params[option.key]"
+                  class="w-full bg-white dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 font-mono"
+                />
+              </div>
+            </template>
+
+            <div v-else class="p-3 rounded-lg border border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/40 text-xs text-amber-700 dark:text-amber-300 flex items-center gap-2">
+              <AlertCircle class="w-4 h-4 shrink-0" />
+              <span>插件尚未安裝或已被停用 (ID: {{ op.params.pluginId }})</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -726,21 +977,30 @@ function confirmPrefixSuffix() {
         </div>
       </div>
       <Transition name="fade">
-        <div v-if="activeHelperId" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div v-if="activeHelperId" class="fixed inset-0 z-50 flex items-center justify-center p-4 pt-10">
+          <!-- Top Titlebar Window Drag Region (Pass-through for macOS window dragging) -->
+          <div data-tauri-drag-region class="absolute top-0 left-0 right-0 h-[38px] z-10 pointer-events-auto"></div>
+
           <!-- Backdrop -->
           <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="closeHelper"></div>
 
           <!-- Modal -->
           <div
-            class="relative bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 w-full max-w-sm space-y-5 animate-in zoom-in-95 duration-200">
+            class="relative z-20 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 w-full max-w-sm space-y-5 animate-in zoom-in-95 duration-200">
             <!-- Header -->
-            <div class="flex items-center justify-between">
-              <h3 class="text-base font-semibold text-slate-800 dark:text-white flex items-center gap-2">
+            <div
+              data-tauri-drag-region
+              class="flex items-center justify-between select-none shrink-0">
+              <h3 class="text-base font-semibold text-slate-800 dark:text-white flex items-center gap-2 no-drag">
                 <Zap class="h-5 w-5" />
                 {{ $t('operations.variableHelper') }}
               </h3>
+
+              <!-- Middle Drag Area -->
+              <div data-tauri-drag-region class="flex-1 h-full min-w-4"></div>
+
               <button @click="closeHelper"
-                class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer">
+                class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer no-drag">
                 <X class="h-5 w-5" />
               </button>
             </div>
@@ -792,22 +1052,31 @@ function confirmPrefixSuffix() {
     <!-- Prefix/Suffix Input Modal -->
     <Teleport to="body">
       <Transition name="fade">
-        <div v-if="showPrefixSuffixModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div v-if="showPrefixSuffixModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 pt-10">
+          <!-- Top Titlebar Window Drag Region (Pass-through for macOS window dragging) -->
+          <div data-tauri-drag-region class="absolute top-0 left-0 right-0 h-[38px] z-10 pointer-events-auto"></div>
+
           <!-- Backdrop -->
           <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="closePrefixSuffixModal"></div>
 
           <!-- Modal -->
           <div
-            class="relative bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 w-full max-w-sm space-y-5 animate-in zoom-in-95 duration-200">
+            class="relative z-20 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 w-full max-w-sm space-y-5 animate-in zoom-in-95 duration-200">
             <!-- Header -->
-            <div class="flex items-center justify-between">
-              <h3 class="text-base font-semibold text-slate-800 dark:text-white flex items-center gap-2">
+            <div
+              data-tauri-drag-region
+              class="flex items-center justify-between select-none shrink-0">
+              <h3 class="text-base font-semibold text-slate-800 dark:text-white flex items-center gap-2 no-drag">
                 <Pencil class="h-5 w-5" />
                 {{ prefixSuffixMode === 'prefix' ? $t('operations.template.addPrefix') :
                   $t('operations.template.addSuffix') }}
               </h3>
+
+              <!-- Middle Drag Area -->
+              <div data-tauri-drag-region class="flex-1 h-full min-w-4"></div>
+
               <button @click="closePrefixSuffixModal"
-                class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer">
+                class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer no-drag">
                 <X class="h-5 w-5" />
               </button>
             </div>
@@ -842,17 +1111,26 @@ function confirmPrefixSuffix() {
     <!-- Save Preset Name Modal -->
     <Teleport to="body">
       <Transition name="fade">
-        <div v-if="showSavePresetModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div v-if="showSavePresetModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 pt-10">
+          <!-- Top Titlebar Window Drag Region (Pass-through for macOS window dragging) -->
+          <div data-tauri-drag-region class="absolute top-0 left-0 right-0 h-[38px] z-10 pointer-events-auto"></div>
+
           <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="closeSavePresetModal"></div>
           <div
-            class="relative bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 w-full max-w-sm space-y-5 animate-in zoom-in-95 duration-200">
-            <div class="flex items-center justify-between">
-              <h3 class="text-base font-semibold text-slate-800 dark:text-white flex items-center gap-2">
+            class="relative z-20 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 w-full max-w-sm space-y-5 animate-in zoom-in-95 duration-200">
+            <div
+              data-tauri-drag-region
+              class="flex items-center justify-between select-none shrink-0">
+              <h3 class="text-base font-semibold text-slate-800 dark:text-white flex items-center gap-2 no-drag">
                 <Save class="h-5 w-5" />
                 {{ $t('templates.saveCurrent') }}
               </h3>
+
+              <!-- Middle Drag Area -->
+              <div data-tauri-drag-region class="flex-1 h-full min-w-4"></div>
+
               <button @click="closeSavePresetModal"
-                class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer">
+                class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer no-drag">
                 <X class="h-5 w-5" />
               </button>
             </div>
@@ -883,6 +1161,8 @@ function confirmPrefixSuffix() {
     <HelpModal v-model="showHelp" />
 
     <PresetManager v-if="showPresetManager" @close="showPresetManager = false" @loaded="handlePresetLoaded" />
+
+    <PluginModal v-model="showPluginModal" />
   </div>
 </template>
 
