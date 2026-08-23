@@ -138,4 +138,5 @@ export interface DesktopBridge {
   testAiApiConnection?(profile: AiApiProfile): Promise<AiApiTestResult>
   runAiApiChat?(request: AiChatRequest, profile: AiApiProfile): Promise<AiChatResponse>
   cancelAiChat?(taskId: string): Promise<boolean>
+  saveTextFile?(content: string, options?: { defaultPath?: string; filters?: Array<{ name: string; extensions: string[] }> }): Promise<string | null>
 }

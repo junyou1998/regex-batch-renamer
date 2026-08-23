@@ -7,13 +7,16 @@ import ToastNotification from './components/ToastNotification.vue'
 import AboutModal from './components/AboutModal.vue'
 import SettingsModal from './components/SettingsModal.vue'
 import AiAssistantPanel from './components/AiAssistantPanel.vue'
+import StatusBar from './components/StatusBar.vue'
+import HistoryModal from './components/HistoryModal.vue'
 import { useFileStore } from './stores/fileStore'
 import { useOperationStore } from './stores/operationStore'
 import { useSettingsStore } from './stores/settingsStore'
 import { useToastStore } from './stores/toastStore'
 import { useThemeStore } from './stores/themeStore'
 import { useAiStore } from './stores/aiStore'
-import { CircleAlert, Info, LoaderCircle, PanelLeft, Settings, Sparkles, X } from 'lucide-vue-next'
+import { useHistoryStore, type RenameFileLog } from './stores/historyStore'
+import { CircleAlert, History, Info, LoaderCircle, PanelLeft, Settings, Sparkles, X } from 'lucide-vue-next'
 
 import { getLatestRelease, getReleasePageUrl, isNewerVersion, normalizeReleaseVersion } from './services/updateService'
 import { generateRenamePreview } from './services/renameEngine'
@@ -25,6 +28,7 @@ const operationStore = useOperationStore()
 const settingsStore = useSettingsStore()
 const toastStore = useToastStore()
 const aiStore = useAiStore()
+const historyStore = useHistoryStore()
 useThemeStore()
 const { t } = useI18n()
 const isProcessing = ref(false)
@@ -42,6 +46,7 @@ const aboutInitialView = ref<'about' | 'changelog'>('about')
 const aboutInitialReleaseTag = ref<string | null>(null)
 const postUpdateVersion = ref<string | null>(null)
 const showSettings = ref(false)
+const showHistory = ref(false)
 const isFileDragActive = ref(false)
 let unlistenFileDrop: null | (() => void) = null
 let unlistenFileDragState: null | (() => void) = null
@@ -323,8 +328,12 @@ async function handleRename() {
 
   const results = await desktop.renameFiles(filesToRename, { failOnExist: true })
   const successfulRenames: { id: string; oldPath: string; newPath: string; originalName: string; newName: string }[] = []
+  const fileLogs: RenameFileLog[] = []
 
   let conflictCount = 0
+  let failedCount = 0
+  let successCount = 0
+
   results.forEach(res => {
     const file = fileStore.files.find(f => f.path === res.path)
     if (file) {
@@ -337,16 +346,47 @@ async function handleRename() {
           originalName: file.originalName,
           newName: file.newName
         })
+        fileLogs.push({
+          id: file.id,
+          oldPath: file.path,
+          newPath: newPath,
+          originalName: file.originalName,
+          newName: file.newName,
+          status: 'success'
+        })
+        successCount++
         fileStore.updateFileAfterRename(file.id, newPath, file.newName)
       } else {
-        if (res.code === 'FILE_EXISTS' || res.error === 'FILE_EXISTS') {
+        const isConflict = res.code === 'FILE_EXISTS' || res.error === 'FILE_EXISTS'
+        if (isConflict) {
           conflictCount++
           fileStore.updateFileStatus(file.id, 'error', t('app.targetFileExists'))
         } else {
+          failedCount++
           fileStore.updateFileStatus(file.id, 'error', res.error)
         }
+        fileLogs.push({
+          id: file.id,
+          oldPath: file.path,
+          newPath: replaceBasename(file.path, file.newName),
+          originalName: file.originalName,
+          newName: file.newName,
+          status: isConflict ? 'conflict' : 'failed',
+          error: isConflict ? t('app.targetFileExists') : res.error
+        })
       }
     }
+  })
+
+  // Record to History Store
+  historyStore.addBatchLog({
+    action: 'rename',
+    totalFiles: fileStore.files.length,
+    successCount,
+    failedCount,
+    conflictCount,
+    rulesSnapshot: operationStore.getSnapshot(),
+    files: fileLogs
   })
 
   if (successfulRenames.length > 0) {
@@ -388,32 +428,64 @@ async function handleUndo() {
   const skippedCount = undoBatch.length - safeUndoBatch.length
 
   if (skippedCount > 0) {
-    fileStore.updateFileStatus(fileStore.lastRenameBatch[0].id, 'error', `Skipped ${skippedCount} files due to conflicts`) // Just a way to show error, maybe toast is better but this works for now
+    fileStore.updateFileStatus(fileStore.lastRenameBatch[0].id, 'error', `Skipped ${skippedCount} files due to conflicts`)
   }
 
   const results = await desktop.renameFiles(safeUndoBatch, { failOnExist: true })
+  const fileLogs: RenameFileLog[] = []
 
   let conflictCount = 0
+  let failedCount = 0
+  let successCount = 0
+
   results.forEach(res => {
-    // Find the original item in history to get original ID and names
-    // Note: res.path is the 'oldPath' of the undo operation, which is 'newPath' of the original rename
     const historyItem = fileStore.lastRenameBatch.find(h => h.newPath === res.path)
     if (historyItem) {
       const file = fileStore.files.find(f => f.id === historyItem.id)
       if (file) {
         if (res.success) {
           fileStore.updateFileAfterRename(file.id, historyItem.oldPath, historyItem.originalName)
-          fileStore.updateNewName(file.id, historyItem.originalName) // Reset newName preview to match
+          fileStore.updateNewName(file.id, historyItem.originalName)
+          fileLogs.push({
+            id: file.id,
+            oldPath: historyItem.newPath,
+            newPath: historyItem.oldPath,
+            originalName: historyItem.newName,
+            newName: historyItem.originalName,
+            status: 'undone'
+          })
+          successCount++
         } else {
-          if (res.code === 'FILE_EXISTS' || res.error === 'FILE_EXISTS') {
+          const isConflict = res.code === 'FILE_EXISTS' || res.error === 'FILE_EXISTS'
+          if (isConflict) {
             conflictCount++
             fileStore.updateFileStatus(file.id, 'error', t('app.targetFileExists'))
           } else {
+            failedCount++
             fileStore.updateFileStatus(file.id, 'error', res.error)
           }
+          fileLogs.push({
+            id: file.id,
+            oldPath: historyItem.newPath,
+            newPath: historyItem.oldPath,
+            originalName: historyItem.newName,
+            newName: historyItem.originalName,
+            status: isConflict ? 'conflict' : 'failed',
+            error: isConflict ? t('app.targetFileExists') : res.error
+          })
         }
       }
     }
+  })
+
+  // Record to History Store
+  historyStore.addBatchLog({
+    action: 'undo',
+    totalFiles: undoBatch.length,
+    successCount,
+    failedCount,
+    conflictCount,
+    files: fileLogs
   })
 
   if (conflictCount > 0) {
@@ -449,16 +521,50 @@ async function handleCopyTo() {
   }))
 
   const results = await desktop.copyRenameFiles(filesToCopy)
+  const fileLogs: RenameFileLog[] = []
+
+  let successCount = 0
+  let failedCount = 0
 
   results.forEach(res => {
     const file = fileStore.files.find(f => f.path === res.path)
     if (file) {
       if (res.success) {
+        successCount++
         fileStore.updateFileStatus(file.id, 'success')
+        fileLogs.push({
+          id: file.id,
+          oldPath: file.path,
+          newPath: `${targetDir}${separator}${file.newName}`,
+          originalName: file.originalName,
+          newName: file.newName,
+          status: 'success'
+        })
       } else {
+        failedCount++
         fileStore.updateFileStatus(file.id, 'error', res.error)
+        fileLogs.push({
+          id: file.id,
+          oldPath: file.path,
+          newPath: `${targetDir}${separator}${file.newName}`,
+          originalName: file.originalName,
+          newName: file.newName,
+          status: 'failed',
+          error: res.error
+        })
       }
     }
+  })
+
+  // Record to History Store
+  historyStore.addBatchLog({
+    action: 'copy',
+    totalFiles: fileStore.files.length,
+    successCount,
+    failedCount,
+    conflictCount: 0,
+    rulesSnapshot: operationStore.getSnapshot(),
+    files: fileLogs
   })
 
   isProcessing.value = false
@@ -539,6 +645,14 @@ async function handleCopyTo() {
         </button>
 
         <button
+          @click="showHistory = true"
+          :title="$t('history.title')"
+          class="w-6 h-6 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 hover:text-slate-900 dark:hover:text-slate-100 transition-colors cursor-pointer flex items-center justify-center relative"
+        >
+          <History class="w-3.5 h-3.5" />
+        </button>
+
+        <button
           @click="openAboutModal"
           :title="$t('app.about')"
           class="w-6 h-6 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 hover:text-slate-900 dark:hover:text-slate-100 transition-colors cursor-pointer flex items-center justify-center relative"
@@ -616,6 +730,19 @@ async function handleCopyTo() {
         <AiAssistantPanel @open-settings="showSettings = true" />
       </aside>
     </div>
+
+    <!-- Bottom Status Bar -->
+    <StatusBar
+      :is-sidebar-collapsed="isSidebarCollapsed"
+      :has-conflicts="hasConflicts"
+      :conflict-message="conflictMessage"
+      :version="runtimeInfo?.version"
+      @toggle-sidebar="isSidebarCollapsed = !isSidebarCollapsed"
+      @undo="handleUndo"
+      @open-settings="showSettings = true"
+      @open-history="showHistory = true"
+    />
+
     <ToastNotification />
   <AboutModal
     v-model="showAbout"
@@ -624,6 +751,7 @@ async function handleCopyTo() {
     :post-update-version="postUpdateVersion"
   />
     <SettingsModal v-model="showSettings" />
+    <HistoryModal v-model="showHistory" />
   </div>
 </template>
 

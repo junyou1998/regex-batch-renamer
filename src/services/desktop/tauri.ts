@@ -1,6 +1,6 @@
 import { invoke } from '@tauri-apps/api/core'
 import { getCurrentWindow } from '@tauri-apps/api/window'
-import { confirm, open } from '@tauri-apps/plugin-dialog'
+import { confirm, open, save } from '@tauri-apps/plugin-dialog'
 import { openUrl } from '@tauri-apps/plugin-opener'
 import { check } from '@tauri-apps/plugin-updater'
 import type {
@@ -176,5 +176,14 @@ export const tauriDesktopBridge: DesktopBridge = {
   },
   async cancelAiChat(taskId: string): Promise<boolean> {
     return invoke<boolean>('cancel_ai_chat', { taskId })
+  },
+  async saveTextFile(content: string, options?: { defaultPath?: string; filters?: Array<{ name: string; extensions: string[] }> }) {
+    const selected = await save({
+      defaultPath: options?.defaultPath,
+      filters: options?.filters,
+    })
+    if (!selected) return null
+    await invoke('save_text_file', { path: selected, content })
+    return selected
   },
 }

@@ -30,6 +30,12 @@ A powerful, ultra-lightweight, and intuitive cross-platform batch file renaming 
     - Real-time conflict detection before execution.
     - "Create Copy" option to preserve original files.
     - **Window Close Protection**: Intercepts close requests when unsaved/pending changes exist, preventing accidental data loss.
+- **🕒 Renaming History & Audit Log**:
+    - Automatically persists renaming, copy, and undo batch records.
+    - Visual timeline inspection, name diff comparison, search, and status filtering.
+    - One-click "Load Rule Pipeline" to reproduce previous transformations.
+    - Native file dialog export for **CSV** and **JSON** audit logs (both single batch and full history).
+- **📊 Bottom Status Bar**: Real-time stats for file counts, distinct folder counts, pending changes, conflict alerts, processing scope toggle (Filename Only vs Full Name), AI engine indicator, and quick Undo.
 - **Modern Polished Interface**: Native immersive titlebar with collapsible sidebar, supporting Dark and Light themes across macOS, Windows, and Linux.
 
 ## 📥 Installation

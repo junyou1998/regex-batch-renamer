@@ -240,6 +240,11 @@ fn cancel_ai_chat(task_id: String) -> bool {
     ai_task::cancel_task(&task_id)
 }
 
+#[tauri::command]
+fn save_text_file(path: String, content: String) -> Result<(), String> {
+    fs::write(&path, content).map_err(|error| format!("無法儲存檔案: {error}"))
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -251,6 +256,7 @@ pub fn run() {
             runtime_info,
             rename_files,
             copy_rename_files,
+            save_text_file,
             set_zoom_factor,
             exit_app,
             open_devtools,
