@@ -28,6 +28,11 @@ const isProcessing = ref(false)
 const isInstallingUpdate = ref(false)
 const isSidebarCollapsed = ref(false)
 const isMac = ref(false)
+const macTrafficLightsPadding = computed(() => {
+  if (!isMac.value) return '4px'
+  const zoomFactor = Math.max(0.5, (settingsStore.zoomLevel || 100) / 100)
+  return `${Math.round(72 / zoomFactor)}px`
+})
 const runtimeInfo = ref<DesktopRuntimeInfo | null>(null)
 const showAbout = ref(false)
 const aboutInitialView = ref<'about' | 'changelog'>('about')
@@ -466,7 +471,7 @@ async function handleCopyTo() {
       class="h-[34px] w-full shrink-0 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-slate-100/80 dark:bg-slate-900/80 backdrop-blur-xl px-3 z-30 select-none"
     >
       <!-- Left Section: Traffic Lights Safe Area + 常駐收合按鈕 (w-6 h-6 像素級垂直中心對齊) -->
-      <div class="flex items-center no-drag" :class="{ 'pl-[70px]': isMac, 'pl-1': !isMac }">
+      <div class="flex items-center no-drag" :style="{ paddingLeft: macTrafficLightsPadding }">
         <button
           @click="isSidebarCollapsed = !isSidebarCollapsed"
           :title="isSidebarCollapsed ? $t('app.showSidebar') : $t('app.hideSidebar')"

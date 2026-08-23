@@ -72,8 +72,9 @@
         "placeholderReplacement": "置換後のテキストを入力...",
         "empty": "ルールが追加されていません",
         "variableHelper": "連番を挿入",
-        "variableWidth": "桁数 (0でゼロ埋めなし)",
+        "variableWidth": "桁数 (ゼロ埋め)",
         "variableStart": "開始番号",
+        "preview": "プレビュー",
         "insert": "挿入",
         "quickTemplates": "クイックテンプレート",
         "template": {

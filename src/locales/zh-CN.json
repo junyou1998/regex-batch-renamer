@@ -72,8 +72,9 @@
         "placeholderReplacement": "输入替换后的文本...",
         "empty": "尚未新增任何规则",
         "variableHelper": "插入序号",
-        "variableWidth": "位数 (0 为不补零)",
+        "variableWidth": "序号位数 (补零)",
         "variableStart": "起始值",
+        "preview": "效果预览",
         "insert": "插入",
         "quickTemplates": "快速模板",
         "template": {

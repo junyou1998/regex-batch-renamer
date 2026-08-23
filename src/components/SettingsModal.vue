@@ -189,32 +189,42 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                                 {{ $t('settings.defaults') }}
                             </h3>
 
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" v-model="settingsStore.defaultUseRegex"
-                                    class="mt-0.5 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
-                                <div>
+                            <label class="block cursor-pointer group/item select-none space-y-1">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="relative flex items-center justify-center shrink-0">
+                                        <input type="checkbox" v-model="settingsStore.defaultUseRegex" class="sr-only peer">
+                                        <div
+                                            class="w-4 h-4 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-500/40 transition-all flex items-center justify-center shadow-2xs group-hover/item:border-slate-400 dark:group-hover/item:border-slate-500">
+                                            <Check v-if="settingsStore.defaultUseRegex" class="w-3 h-3 text-white stroke-[3.5]" />
+                                        </div>
+                                    </div>
                                     <span
-                                        class="text-sm font-medium text-slate-700 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                        class="text-sm font-medium text-slate-700 dark:text-slate-200 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400 transition-colors leading-none pt-px">
                                         {{ $t('settings.defaultUseRegex') }}
                                     </span>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                                        {{ $t('settings.defaultUseRegexDesc') }}
-                                    </p>
                                 </div>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 pl-[26px]">
+                                    {{ $t('settings.defaultUseRegexDesc') }}
+                                </p>
                             </label>
 
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input type="checkbox" v-model="settingsStore.processFilenameOnly"
-                                    class="mt-0.5 w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
-                                <div>
+                            <label class="block cursor-pointer group/item select-none space-y-1">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="relative flex items-center justify-center shrink-0">
+                                        <input type="checkbox" v-model="settingsStore.processFilenameOnly" class="sr-only peer">
+                                        <div
+                                            class="w-4 h-4 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-500/40 transition-all flex items-center justify-center shadow-2xs group-hover/item:border-slate-400 dark:group-hover/item:border-slate-500">
+                                            <Check v-if="settingsStore.processFilenameOnly" class="w-3 h-3 text-white stroke-[3.5]" />
+                                        </div>
+                                    </div>
                                     <span
-                                        class="text-sm font-medium text-slate-700 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                        class="text-sm font-medium text-slate-700 dark:text-slate-200 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400 transition-colors leading-none pt-px">
                                         {{ $t('settings.processFilenameOnly') }}
                                     </span>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                                        {{ $t('settings.processFilenameOnlyDesc') }}
-                                    </p>
                                 </div>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 pl-[26px]">
+                                    {{ $t('settings.processFilenameOnlyDesc') }}
+                                </p>
                             </label>
                         </div>
 

@@ -8,6 +8,7 @@ import PresetManager from './PresetManager.vue'
 import { savePreset, loadPresets, type Preset } from '../services/presetService'
 import { useToastStore } from '../stores/toastStore'
 import {
+  Check,
   ChevronDown,
   Eye,
   EyeOff,
@@ -211,28 +212,47 @@ interface Badge {
   type: string
   label: string
   color: string
+  isLiteral?: boolean
 }
 
 function getBadges(op: any): Badge[] {
   const badges: Badge[] = []
   if (op.type !== 'regex') return badges
 
-  const pattern = op.params.pattern || ''
-  const replacement = op.params.replacement || ''
+  // 1. Type badge (Regex vs Text) always first
+  if (op.params?.useRegex) {
+    badges.push({
+      type: 'mode-regex',
+      label: 'Regex',
+      color: 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60',
+      isLiteral: true
+    })
+  } else {
+    badges.push({
+      type: 'mode-text',
+      label: 'Text',
+      color: 'bg-slate-200/80 dark:bg-slate-700/60 text-slate-600 dark:text-slate-400 border border-slate-300/60 dark:border-slate-600/60',
+      isLiteral: true
+    })
+  }
 
+  const pattern = op.params?.pattern || ''
+  const replacement = op.params?.replacement || ''
+
+  // 2. Feature badges: Prefix, Suffix, Sequence
   // Prefix detection: Pattern is exactly '^'
   if (pattern === '^') {
-    badges.push({ type: 'prefix', label: 'badges.prefix', color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300' })
+    badges.push({ type: 'prefix', label: 'badges.prefix', color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/50' })
   }
 
   // Suffix detection: Pattern is exactly '$'
   if (pattern === '$') {
-    badges.push({ type: 'suffix', label: 'badges.suffix', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300' })
+    badges.push({ type: 'suffix', label: 'badges.suffix', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/50' })
   }
 
   // Sequence detection: Replacement contains strictly valid ${n...}
   if (/\$\{n(?::\d+(?::\d+)?)?\}/.test(replacement)) {
-    badges.push({ type: 'sequence', label: 'badges.sequence', color: 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300' })
+    badges.push({ type: 'sequence', label: 'badges.sequence', color: 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/50' })
   }
 
   return badges
@@ -269,10 +289,16 @@ function addRegexOperation() {
 }
 
 const activeHelperId = ref<string | null>(null)
-// ... existing helper logic ...
-const helperWidth = ref(3)
+const helperWidth = ref(1)
 const helperStart = ref(1)
 const inputRefs = ref<Record<string, HTMLInputElement>>({})
+
+const helperPreviewList = computed(() => {
+  const width = Math.max(1, typeof helperWidth.value === 'number' ? helperWidth.value : 1)
+  const start = typeof helperStart.value === 'number' ? helperStart.value : 1
+  const examples = [start, start + 1, start + 2].map(n => n.toString().padStart(width, '0'))
+  return `${examples.join(', ')}...`
+})
 
 function setInputRef(el: any, id: string) {
   if (el) inputRefs.value[id] = el
@@ -280,7 +306,7 @@ function setInputRef(el: any, id: string) {
 
 function openHelper(id: string) {
   activeHelperId.value = id
-  helperWidth.value = 0
+  helperWidth.value = 1
   helperStart.value = 1
 }
 
@@ -304,17 +330,16 @@ function handleKeydown(e: KeyboardEvent) {
 }
 
 function insertVariable() {
-  // ... existing variable logic ...
   if (!activeHelperId.value) return
 
   const op = operationStore.operations.find(o => o.id === activeHelperId.value)
   if (!op) return
 
-  const width = helperWidth.value
-  const start = helperStart.value
+  const width = Math.max(1, typeof helperWidth.value === 'number' ? helperWidth.value : 1)
+  const start = typeof helperStart.value === 'number' ? helperStart.value : 1
 
   let varStr = '${n'
-  if (width > 0 || start !== 1) {
+  if (width > 1 || start !== 1) {
     varStr += `:${width}`
     if (start !== 1) {
       varStr += `:${start}`
@@ -610,25 +635,20 @@ function confirmPrefixSuffix() {
             '!border-t-4 !border-t-blue-500 dark:!border-t-blue-400': operationDropTargetId === op.id && operationDropPosition === 'before',
             '!border-b-4 !border-b-blue-500 dark:!border-b-blue-400': operationDropTargetId === op.id && operationDropPosition === 'after'
           }">
-          <div class="flex items-center justify-between mb-3 select-none group/header">
-            <div class="flex items-center gap-2">
+          <div class="flex items-center justify-between mb-2.5 select-none group/header">
+            <div class="flex items-center gap-2 min-w-0">
               <button type="button"
-                class="drag-handle inline-flex h-7 w-7 items-center justify-center rounded-md text-slate-400 hover:bg-slate-300/70 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-700 dark:hover:text-slate-300 cursor-grab active:cursor-grabbing"
+                class="drag-handle inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-400 hover:bg-slate-300/70 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-700 dark:hover:text-slate-300 cursor-grab active:cursor-grabbing"
                 @pointerdown.stop="startOperationReorder($event, op.id)"
                 :title="$t('operations.reorder')">
                 <GripVertical class="h-4 w-4" />
               </button>
-              <span class="text-xs font-bold text-slate-500 dark:text-slate-500">#{{ index + 1 }}</span>
-              <span class="text-sm font-medium text-slate-700 dark:text-slate-200">
+              <span class="text-xs font-bold text-slate-500 dark:text-slate-500 shrink-0">#{{ index + 1 }}</span>
+              <span class="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">
                 {{ op.type === 'regex' ? $t('operations.regex') : $t('operations.other') }}
               </span>
-              <span v-if="op.type === 'regex'"
-                class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md transition-colors"
-                :class="op.params.useRegex ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60' : 'bg-slate-200/80 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 border border-slate-300/60 dark:border-slate-600/60'">
-                {{ op.params.useRegex ? 'Regex' : 'Text' }}
-              </span>
             </div>
-            <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
               <button @click="operationStore.toggleOperation(op.id)"
                 class="p-1 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 rounded hover:bg-slate-300 dark:hover:bg-slate-700 cursor-pointer mr-2"
                 :title="$t('operations.toggleEnable')">
@@ -643,23 +663,28 @@ function confirmPrefixSuffix() {
             </div>
           </div>
 
-          <!-- Smart Badges (New Row) -->
-          <div v-if="getBadges(op).length" class="flex gap-1 mb-3 -mt-1">
+          <!-- Smart Badges (Type badge first, then features) -->
+          <div v-if="getBadges(op).length" class="flex flex-wrap items-center gap-1.5 mb-3">
             <span v-for="badge in getBadges(op)" :key="badge.type"
               class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-md" :class="badge.color">
-              {{ $t(badge.label) }}
+              {{ badge.isLiteral ? badge.label : $t(badge.label) }}
             </span>
           </div>
 
           <div v-if="op.type === 'regex'" class="space-y-3">
             <div class="space-y-1">
-              <div class="flex justify-between items-center">
-                <label class="text-xs text-slate-600 dark:text-slate-400 ml-1">{{ $t('operations.patternLabel')
+              <div class="flex justify-between items-center mb-1">
+                <label class="text-xs font-medium text-slate-600 dark:text-slate-400 ml-0.5">{{ $t('operations.patternLabel')
                   }}</label>
-                <label class="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" v-model="op.params.useRegex"
-                    class="w-3.5 h-3.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
-                  <span class="text-xs text-slate-500 dark:text-slate-400">{{ $t('operations.useRegex') }}</span>
+                <label class="flex items-center gap-1.5 cursor-pointer group/cb select-none">
+                  <div class="relative flex items-center justify-center shrink-0">
+                    <input type="checkbox" v-model="op.params.useRegex" class="sr-only peer">
+                    <div
+                      class="w-3.5 h-3.5 rounded-sm border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-500/40 transition-all flex items-center justify-center shadow-2xs group-hover/cb:border-slate-400 dark:group-hover/cb:border-slate-500">
+                      <Check v-if="op.params.useRegex" class="w-2.5 h-2.5 text-white stroke-[3.5]" />
+                    </div>
+                  </div>
+                  <span class="text-xs text-slate-500 dark:text-slate-400 group-hover/cb:text-slate-700 dark:group-hover/cb:text-slate-300 transition-colors leading-none pt-px">{{ $t('operations.useRegex') }}</span>
                 </label>
               </div>
               <input v-model="op.params.pattern" type="text"
@@ -726,7 +751,7 @@ function confirmPrefixSuffix() {
                 <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">
                   {{ $t('operations.variableWidth') }}
                 </label>
-                <input type="number" v-model.number="helperWidth" min="0" max="10"
+                <input type="number" v-model.number="helperWidth" min="1" max="10"
                   class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50">
               </div>
               <div class="space-y-2">
@@ -735,6 +760,16 @@ function confirmPrefixSuffix() {
                 </label>
                 <input type="number" v-model.number="helperStart" min="0"
                   class="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-lg dark:bg-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50">
+              </div>
+
+              <!-- Real-time Preview -->
+              <div class="p-3 bg-slate-100/80 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 rounded-lg space-y-1">
+                <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                  {{ $t('operations.preview') }}
+                </div>
+                <div class="font-mono text-sm font-bold text-blue-600 dark:text-blue-400 tracking-wide select-text">
+                  {{ helperPreviewList }}
+                </div>
               </div>
             </div>
 
