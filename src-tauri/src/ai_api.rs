@@ -2,6 +2,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use crate::ai_cli::{build_prompt, extract_json_payload, AiChatRequest, AiChatResponse};
 
+pub const USER_AGENT: &str = "RegexBatchRenamer/0.7.0";
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct AiApiProfile {
@@ -45,7 +47,7 @@ pub async fn test_gemini_api_connection(profile: &AiApiProfile) -> Result<AiApiT
             format!("{base_endpoint}/api/tags")
         };
 
-        let mut req = client.get(&url).header("User-Agent", "RegexBatchRenamer/0.6.2");
+        let mut req = client.get(&url).header("User-Agent", USER_AGENT);
         if !api_key.is_empty() {
             req = req.header("Authorization", format!("Bearer {api_key}"));
         }
@@ -124,7 +126,7 @@ pub async fn test_gemini_api_connection(profile: &AiApiProfile) -> Result<AiApiT
         }
         let base_endpoint = if raw_endpoint.is_empty() { "https://api.openai.com/v1" } else { raw_endpoint.trim_end_matches('/') };
         let url = format!("{base_endpoint}/models");
-        match client.get(&url).header("Authorization", format!("Bearer {api_key}")).header("User-Agent", "RegexBatchRenamer/0.6.2").send().await {
+        match client.get(&url).header("Authorization", format!("Bearer {api_key}")).header("User-Agent", USER_AGENT).send().await {
             Ok(res) if res.status().is_success() => {
                 let model = if profile.model.trim().is_empty() { "gpt-4o-mini" } else { profile.model.trim() };
                 Ok(AiApiTestResult {
@@ -151,7 +153,7 @@ pub async fn test_gemini_api_connection(profile: &AiApiProfile) -> Result<AiApiT
         }
         let base_endpoint = if raw_endpoint.is_empty() { "https://api.anthropic.com/v1" } else { raw_endpoint.trim_end_matches('/') };
         let url = format!("{base_endpoint}/models");
-        match client.get(&url).header("x-api-key", api_key).header("anthropic-version", "2023-06-01").header("User-Agent", "RegexBatchRenamer/0.6.2").send().await {
+        match client.get(&url).header("x-api-key", api_key).header("anthropic-version", "2023-06-01").header("User-Agent", USER_AGENT).send().await {
             Ok(res) if res.status().is_success() => {
                 let model = if profile.model.trim().is_empty() { "claude-4-6-sonnet" } else { profile.model.trim() };
                 Ok(AiApiTestResult {
@@ -194,7 +196,7 @@ pub async fn test_gemini_api_connection(profile: &AiApiProfile) -> Result<AiApiT
 
         let res = client
             .get(&url)
-            .header("User-Agent", "RegexBatchRenamer/0.6.2")
+            .header("User-Agent", USER_AGENT)
             .send()
             .await
             .map_err(|e| format!("連線至 Gemini API 伺服器失敗: {e}"))?;
@@ -277,7 +279,7 @@ async fn resolve_ollama_model(client: &reqwest::Client, base_endpoint: &str, mod
         format!("{base_endpoint}/api/tags")
     };
 
-    let mut req = client.get(&tags_url).header("User-Agent", "RegexBatchRenamer/0.6.2");
+    let mut req = client.get(&tags_url).header("User-Agent", USER_AGENT);
     if !api_key.is_empty() {
         req = req.header("Authorization", format!("Bearer {api_key}"));
     }
@@ -375,7 +377,7 @@ async fn run_ollama_chat_inner(
     let mut req_builder = client
         .post(&url)
         .header("Content-Type", "application/json")
-        .header("User-Agent", "RegexBatchRenamer/0.6.2")
+        .header("User-Agent", USER_AGENT)
         .json(&payload);
 
     if !profile.api_key.trim().is_empty() {
@@ -477,7 +479,7 @@ async fn run_openai_chat_inner(
         .post(&url)
         .header("Content-Type", "application/json")
         .header("Authorization", format!("Bearer {api_key}"))
-        .header("User-Agent", "RegexBatchRenamer/0.6.2")
+        .header("User-Agent", USER_AGENT)
         .json(&payload);
 
     let res = if let Some(rx) = cancel_rx.as_mut() {
@@ -565,7 +567,7 @@ async fn run_anthropic_chat_inner(
         .header("Content-Type", "application/json")
         .header("x-api-key", api_key)
         .header("anthropic-version", "2023-06-01")
-        .header("User-Agent", "RegexBatchRenamer/0.6.2")
+        .header("User-Agent", USER_AGENT)
         .json(&payload);
 
     let res = if let Some(rx) = cancel_rx.as_mut() {
@@ -655,7 +657,7 @@ async fn run_gemini_chat_inner(
             r = client
                 .post(&url)
                 .header("Content-Type", "application/json")
-                .header("User-Agent", "RegexBatchRenamer/0.6.0")
+                .header("User-Agent", USER_AGENT)
                 .json(&payload)
                 .send() => {
                     r.map_err(|e| format!("Gemini API 請求失敗: {e}"))?
@@ -668,7 +670,7 @@ async fn run_gemini_chat_inner(
         client
             .post(&url)
             .header("Content-Type", "application/json")
-            .header("User-Agent", "RegexBatchRenamer/0.6.0")
+            .header("User-Agent", USER_AGENT)
             .json(&payload)
             .send()
             .await
