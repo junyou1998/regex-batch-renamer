@@ -323,6 +323,6 @@
         "onboardingApiKeyDesc": "本功能直接通过 {name} 官方 API 互动。请点击下方按钮前往「设置 > AI 助理」填入您的 API Key。",
         "thinkingWithModel": "{name} 正在分析文件与思考规则...",
         "stopGenerating": "停止生成",
-        "generationCancelled": "⚠️ 已中止生成。"
+        "generationCancelled": "已中止生成。"
     }
 }

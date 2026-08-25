@@ -323,6 +323,6 @@
         "onboardingApiKeyDesc": "この機能は {name} 公式 API と直接通信します。下のボタンをクリックして「設定 > AI アシスタント」で API キーを設定してください。",
         "thinkingWithModel": "{name} がファイルを分析してルールを思考中...",
         "stopGenerating": "生成停止",
-        "generationCancelled": "⚠️ 生成が中断されました。"
+        "generationCancelled": "生成が中断されました。"
     }
 }

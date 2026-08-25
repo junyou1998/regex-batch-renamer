@@ -24,6 +24,7 @@ export interface AiMessageItem {
   pipeline?: AiPipelineItem[]
   timestamp: number
   isError?: boolean
+  isCancelled?: boolean
   provider?: AiProviderType | string
 }
 
@@ -418,9 +419,9 @@ export const useAiStore = defineStore('ai', () => {
     messages.value.push({
       id: uuidv4(),
       role: 'assistant',
-      content: '⚠️ 已中止生成。',
+      content: '已中止生成。',
       timestamp: Date.now(),
-      isError: true,
+      isCancelled: true,
       provider: runningProf?.provider,
     })
     toastStore.addToast('已中止 AI 生成', 'info')

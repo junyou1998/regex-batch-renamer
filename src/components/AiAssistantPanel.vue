@@ -6,6 +6,7 @@ import {
   AlertTriangle,
   Bot,
   Check,
+  CircleSlash,
   Copy,
   FolderOpen,
   KeyRound,
@@ -488,7 +489,18 @@ function handleApplyPipeline(msg: AiMessageItem) {
 
           <!-- Assistant Bubble -->
           <div v-else class="space-y-2.5 w-full">
+            <!-- Cancelled Alert Box with Lucide Icon -->
             <div
+              v-if="msg.isCancelled"
+              class="rounded-xl border border-amber-200 dark:border-amber-800/60 bg-amber-50/70 dark:bg-amber-950/30 px-3.5 py-2.5 flex items-center gap-2 text-xs text-amber-800 dark:text-amber-300 font-medium shadow-2xs"
+            >
+              <CircleSlash class="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400" />
+              <span>{{ $t('ai.generationCancelled') }}</span>
+            </div>
+
+            <!-- Standard Response / Error Box -->
+            <div
+              v-else
               class="rounded-2xl rounded-tl-xs bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 p-3.5 shadow-2xs space-y-2.5"
               :class="{ '!border-red-300 dark:!border-red-800 !bg-red-50/50 dark:!bg-red-950/20': msg.isError }"
             >
