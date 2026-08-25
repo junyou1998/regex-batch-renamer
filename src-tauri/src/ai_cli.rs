@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::process::{Command, Stdio};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -10,6 +10,7 @@ pub struct AiCliStatus {
     pub version: Option<String>,
     pub ready: bool,
     pub message: Option<String>,
+    pub provider: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -35,6 +36,7 @@ pub struct AiChatRequest {
     pub sample_filenames: Vec<String>,
     pub current_pipeline: Vec<AiRuleSnapshot>,
     pub process_filename_only: Option<bool>,
+    pub provider: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -91,10 +93,10 @@ fn expand_home_dir(path_str: &str) -> Option<PathBuf> {
     }
 }
 
-pub fn find_claude_cli() -> Option<PathBuf> {
+pub fn find_cli(binary_name: &str) -> Option<PathBuf> {
     // 1. Direct which / where check
     let which_cmd = if cfg!(target_os = "windows") { "where" } else { "which" };
-    if let Ok(output) = Command::new(which_cmd).arg("claude").output() {
+    if let Ok(output) = Command::new(which_cmd).arg(binary_name).output() {
         if output.status.success() {
             let stdout = String::from_utf8_lossy(&output.stdout);
             if let Some(first_line) = stdout.lines().next() {
@@ -106,11 +108,11 @@ pub fn find_claude_cli() -> Option<PathBuf> {
         }
     }
 
-    // 2. On macOS/Linux, try querying login shell (in case GUI app has limited PATH)
+    // 2. On macOS/Linux, query user login shell
     #[cfg(unix)]
     {
         if let Ok(shell) = std::env::var("SHELL") {
-            if let Ok(output) = Command::new(shell).args(["-l", "-c", "which claude"]).output() {
+            if let Ok(output) = Command::new(shell).args(["-l", "-c", &format!("which {binary_name}")]).output() {
                 if output.status.success() {
                     let stdout = String::from_utf8_lossy(&output.stdout);
                     if let Some(first_line) = stdout.lines().next() {
@@ -124,29 +126,31 @@ pub fn find_claude_cli() -> Option<PathBuf> {
         }
     }
 
-    // 3. Known common paths
+    // 3. Known common binary installation paths
     #[allow(unused_mut)]
-    let mut candidate_paths: Vec<&str> = vec![
-        "/opt/homebrew/bin/claude",
-        "/usr/local/bin/claude",
-        "/usr/bin/claude",
-        "~/.npm-global/bin/claude",
-        "~/.local/bin/claude",
-        "~/.volta/bin/claude",
-        "~/.asdf/shims/claude",
-        "~/.bun/bin/claude",
+    let mut candidate_paths: Vec<String> = vec![
+        format!("/opt/homebrew/bin/{binary_name}"),
+        format!("/usr/local/bin/{binary_name}"),
+        format!("/usr/bin/{binary_name}"),
+        format!("~/.cargo/bin/{binary_name}"),
+        format!("~/.npm-global/bin/{binary_name}"),
+        format!("~/.local/bin/{binary_name}"),
+        format!("~/.volta/bin/{binary_name}"),
+        format!("~/.asdf/shims/{binary_name}"),
+        format!("~/.bun/bin/{binary_name}"),
     ];
 
     #[cfg(target_os = "windows")]
     {
         candidate_paths.extend_from_slice(&[
-            "~\\AppData\\Roaming\\npm\\claude.cmd",
-            "~\\AppData\\Local\\Programs\\claude\\claude.exe",
+            format!("~\\AppData\\Roaming\\npm\\{binary_name}.cmd"),
+            format!("~\\AppData\\Local\\Programs\\{binary_name}\\{binary_name}.exe"),
+            format!("~\\.cargo\\bin\\{binary_name}.exe"),
         ]);
     }
 
     for path_str in candidate_paths {
-        if let Some(expanded) = expand_home_dir(path_str) {
+        if let Some(expanded) = expand_home_dir(&path_str) {
             if expanded.is_file() {
                 return Some(expanded);
             }
@@ -156,13 +160,13 @@ pub fn find_claude_cli() -> Option<PathBuf> {
     // 4. Glob check for NVM node versions on unix
     #[cfg(unix)]
     {
-        if let Some(home) = std::env::var("HOME").ok() {
+        if let Ok(home) = std::env::var("HOME") {
             let nvm_versions_dir = Path::new(&home).join(".nvm/versions/node");
             if let Ok(entries) = std::fs::read_dir(nvm_versions_dir) {
                 for entry in entries.flatten() {
-                    let claude_bin = entry.path().join("bin/claude");
-                    if claude_bin.is_file() {
-                        return Some(claude_bin);
+                    let node_bin = entry.path().join(format!("bin/{binary_name}"));
+                    if node_bin.is_file() {
+                        return Some(node_bin);
                     }
                 }
             }
@@ -172,8 +176,12 @@ pub fn find_claude_cli() -> Option<PathBuf> {
     None
 }
 
-pub fn check_status() -> AiCliStatus {
-    let cli_path = match find_claude_cli() {
+pub fn check_status(provider: Option<&str>) -> AiCliStatus {
+    let prov = provider.unwrap_or("claude").to_lowercase();
+    let binary_name = if prov == "codex" { "codex" } else { "claude" };
+    let provider_name = if prov == "codex" { "OpenAI Codex" } else { "Claude Code" };
+
+    let cli_path = match find_cli(binary_name) {
         Some(p) => p,
         None => {
             return AiCliStatus {
@@ -181,14 +189,14 @@ pub fn check_status() -> AiCliStatus {
                 path: None,
                 version: None,
                 ready: false,
-                message: Some("未偵測到 Claude Code CLI。請先安裝並登入。".to_string()),
+                message: Some(format!("未偵測到 {provider_name} CLI。請先安裝並登入。")),
+                provider: Some(prov),
             };
         }
     };
 
     let path_str = cli_path.display().to_string();
 
-    // Prepare execution environment with parent dir added to PATH
     let mut cmd = Command::new(&cli_path);
     if let Some(parent) = cli_path.parent() {
         let current_path = std::env::var("PATH").unwrap_or_default();
@@ -197,6 +205,7 @@ pub fn check_status() -> AiCliStatus {
     }
 
     cmd.arg("--version");
+    cmd.stdin(Stdio::null());
 
     match cmd.output() {
         Ok(output) => {
@@ -208,6 +217,7 @@ pub fn check_status() -> AiCliStatus {
                     version: Some(stdout),
                     ready: true,
                     message: None,
+                    provider: Some(prov),
                 }
             } else {
                 let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
@@ -217,6 +227,7 @@ pub fn check_status() -> AiCliStatus {
                     version: None,
                     ready: false,
                     message: Some(format!("執行版本檢查時發生錯誤: {stderr}")),
+                    provider: Some(prov),
                 }
             }
         }
@@ -225,7 +236,8 @@ pub fn check_status() -> AiCliStatus {
             path: Some(path_str),
             version: None,
             ready: false,
-            message: Some(format!("無法執行 Claude CLI: {e}")),
+            message: Some(format!("無法執行 {provider_name} CLI: {e}")),
+            provider: Some(prov),
         },
     }
 }
@@ -333,7 +345,12 @@ fn extract_json_payload(raw: &str) -> Option<&str> {
 }
 
 pub fn run_chat(request: AiChatRequest) -> Result<AiChatResponse, String> {
-    let cli_path = find_claude_cli().ok_or_else(|| "未偵測到 Claude Code CLI，請確認已安裝並登入。".to_string())?;
+    let prov = request.provider.as_deref().unwrap_or("claude").to_lowercase();
+    let binary_name = if prov == "codex" { "codex" } else { "claude" };
+    let provider_name = if prov == "codex" { "OpenAI Codex" } else { "Claude Code" };
+
+    let cli_path = find_cli(binary_name)
+        .ok_or_else(|| format!("未偵測到 {provider_name} CLI，請確認已安裝並登入。"))?;
 
     let prompt = build_prompt(&request);
 
@@ -344,20 +361,26 @@ pub fn run_chat(request: AiChatRequest) -> Result<AiChatResponse, String> {
         cmd.env("PATH", new_path);
     }
 
-    cmd.args(["-p", &prompt]);
+    cmd.stdin(Stdio::null());
 
-    let output = cmd.output().map_err(|e| format!("啟動 Claude CLI 失敗: {e}"))?;
+    if prov == "codex" {
+        cmd.args(["exec", "--ephemeral", "--color", "never", "--skip-git-repo-check", &prompt]);
+    } else {
+        cmd.args(["-p", &prompt]);
+    }
+
+    let output = cmd.output().map_err(|e| format!("啟動 {provider_name} CLI 失敗: {e}"))?;
 
     let raw_stdout = String::from_utf8_lossy(&output.stdout);
     let raw_stderr = String::from_utf8_lossy(&output.stderr);
     let clean_stdout = strip_ansi_codes(&raw_stdout);
 
     if !output.status.success() && clean_stdout.trim().is_empty() {
-        return Err(format!("Claude CLI 執行錯誤: {}", raw_stderr.trim()));
+        return Err(format!("{provider_name} CLI 執行錯誤: {}", raw_stderr.trim()));
     }
 
     let json_str = extract_json_payload(&clean_stdout)
-        .ok_or_else(|| format!("無法從 Claude CLI 輸出解析 JSON 回應:\n{}", clean_stdout.trim()))?;
+        .ok_or_else(|| format!("無法從 {provider_name} CLI 輸出解析 JSON 回應:\n{}", clean_stdout.trim()))?;
 
     let response: AiChatResponse = serde_json::from_str(json_str)
         .map_err(|e| format!("JSON 結構反序列化失敗: {e}\n原始內容:\n{json_str}"))?;
