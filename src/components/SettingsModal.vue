@@ -27,8 +27,8 @@ const providerOptions = [
     id: 'anthropic',
     name: 'Anthropic',
     defaultEndpoint: 'https://api.anthropic.com/v1',
-    defaultModel: 'claude-3-7-sonnet-latest',
-    models: ['claude-3-7-sonnet-latest', 'claude-3-5-sonnet-latest', 'claude-3-5-haiku-latest'],
+    defaultModel: 'claude-4-6-sonnet',
+    models: ['claude-4-6-sonnet', 'claude-sonnet-5', 'claude-opus-5', 'claude-3-7-sonnet-latest'],
   },
   {
     id: 'openai',
