@@ -568,7 +568,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                   <button
                     type="button"
                     @click="startCreateProfile"
-                    class="px-3 py-1.5 rounded-lg bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-semibold hover:opacity-90 transition-opacity flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                    class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
                   >
                     <Plus class="w-3.5 h-3.5" />
                     {{ $t('settings.addProfileBtn') }}
@@ -583,7 +583,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                     class="p-3.5 sm:p-4 rounded-xl border flex items-center justify-between gap-3 transition-all"
                     :class="[
                       profile.id === aiStore.activeProfileId
-                        ? 'border-2 border-slate-900 dark:border-slate-100 bg-slate-50/70 dark:bg-slate-900/90 shadow-xs'
+                        ? 'border-2 border-blue-500 bg-blue-50/40 dark:bg-blue-950/30 shadow-xs ring-1 ring-blue-500/20'
                         : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/40',
                     ]"
                   >
@@ -599,7 +599,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                           </span>
                           <span
                             v-if="profile.id === aiStore.activeProfileId"
-                            class="px-2 py-0.5 rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-[10px] font-bold shrink-0 tracking-wide"
+                            class="px-2 py-0.5 rounded-full bg-blue-600 text-white dark:bg-blue-500 text-[10px] font-bold shrink-0 tracking-wide"
                           >
                             {{ $t('settings.profileDefaultBadge') }}
                           </span>

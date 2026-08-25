@@ -6,12 +6,12 @@
 
   <!-- Anthropic API (Uses official Anthropic mark) -->
   <span v-else-if="provider === 'anthropic'" :class="wrapperClass">
-    <AnthropicIcon :class="iconClass || 'w-4 h-4 text-[#D97757]'" />
+    <AnthropicIcon :class="iconClass || 'w-4 h-4 text-slate-800 dark:text-slate-200'" />
   </span>
 
   <!-- OpenAI API (Uses official ChatGPT rosette knot logo) -->
   <span v-else-if="provider === 'openai'" :class="wrapperClass">
-    <OpenAiIcon :class="iconClass || 'w-4 h-4 text-emerald-600 dark:text-emerald-400'" />
+    <OpenAiIcon :class="iconClass || 'w-4 h-4 text-slate-800 dark:text-slate-200'" />
   </span>
 
   <!-- Claude Code CLI (Uses Claude sunburst icon) -->
