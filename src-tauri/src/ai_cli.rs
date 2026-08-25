@@ -37,6 +37,7 @@ pub struct AiChatRequest {
     pub current_pipeline: Vec<AiRuleSnapshot>,
     pub process_filename_only: Option<bool>,
     pub provider: Option<String>,
+    pub task_id: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -349,7 +350,23 @@ pub fn extract_json_payload(raw: &str) -> Option<&str> {
     None
 }
 
-pub fn run_chat(request: AiChatRequest) -> Result<AiChatResponse, String> {
+pub async fn run_chat(request: AiChatRequest) -> Result<AiChatResponse, String> {
+    let task_id = request.task_id.clone();
+    let mut cancel_rx = task_id.as_deref().map(crate::ai_task::register_task);
+
+    let result = run_chat_inner(request, &mut cancel_rx).await;
+
+    if let Some(ref tid) = task_id {
+        crate::ai_task::finish_task(tid);
+    }
+
+    result
+}
+
+async fn run_chat_inner(
+    request: AiChatRequest,
+    cancel_rx: &mut Option<tokio::sync::oneshot::Receiver<()>>,
+) -> Result<AiChatResponse, String> {
     let prov = request.provider.as_deref().unwrap_or("claude").to_lowercase();
     let (binary_name, provider_name) = match prov.as_str() {
         "codex" => ("codex", "OpenAI Codex"),
@@ -362,7 +379,9 @@ pub fn run_chat(request: AiChatRequest) -> Result<AiChatResponse, String> {
 
     let prompt = build_prompt(&request);
 
-    let mut cmd = Command::new(&cli_path);
+    let mut cmd = tokio::process::Command::new(&cli_path);
+    cmd.kill_on_drop(true);
+
     if let Some(parent) = cli_path.parent() {
         let current_path = std::env::var("PATH").unwrap_or_default();
         let new_path = format!("{}:{}", parent.display(), current_path);
@@ -370,6 +389,8 @@ pub fn run_chat(request: AiChatRequest) -> Result<AiChatResponse, String> {
     }
 
     cmd.stdin(Stdio::null());
+    cmd.stdout(Stdio::piped());
+    cmd.stderr(Stdio::piped());
 
     if prov == "codex" {
         cmd.args(["exec", "--ephemeral", "--color", "never", "--skip-git-repo-check", &prompt]);
@@ -377,7 +398,20 @@ pub fn run_chat(request: AiChatRequest) -> Result<AiChatResponse, String> {
         cmd.args(["-p", &prompt]);
     }
 
-    let output = cmd.output().map_err(|e| format!("啟動 {provider_name} CLI 失敗: {e}"))?;
+    let child = cmd.spawn().map_err(|e| format!("啟動 {provider_name} CLI 失敗: {e}"))?;
+
+    let output = if let Some(rx) = cancel_rx.as_mut() {
+        tokio::select! {
+            res = child.wait_with_output() => {
+                res.map_err(|e| format!("等待 {provider_name} CLI 執行失敗: {e}"))?
+            }
+            _ = rx => {
+                return Err("AI_TASK_CANCELLED".into());
+            }
+        }
+    } else {
+        child.wait_with_output().await.map_err(|e| format!("等待 {provider_name} CLI 執行失敗: {e}"))?
+    };
 
     let raw_stdout = String::from_utf8_lossy(&output.stdout);
     let raw_stderr = String::from_utf8_lossy(&output.stderr);

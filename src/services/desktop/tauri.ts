@@ -174,4 +174,7 @@ export const tauriDesktopBridge: DesktopBridge = {
   async runAiApiChat(request: AiChatRequest, profile: AiApiProfile): Promise<AiChatResponse> {
     return invoke<AiChatResponse>('run_ai_api_chat', { request, profile })
   },
+  async cancelAiChat(taskId: string): Promise<boolean> {
+    return invoke<boolean>('cancel_ai_chat', { taskId })
+  },
 }

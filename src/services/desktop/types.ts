@@ -102,6 +102,7 @@ export interface AiChatRequest {
   currentPipeline: AiRuleSnapshot[]
   processFilenameOnly?: boolean
   provider?: AiProviderType | string
+  taskId?: string
 }
 
 export interface AiPipelineItem {
@@ -136,4 +137,5 @@ export interface DesktopBridge {
   runAiChat?(request: AiChatRequest): Promise<AiChatResponse>
   testAiApiConnection?(profile: AiApiProfile): Promise<AiApiTestResult>
   runAiApiChat?(request: AiChatRequest, profile: AiApiProfile): Promise<AiChatResponse>
+  cancelAiChat?(taskId: string): Promise<boolean>
 }

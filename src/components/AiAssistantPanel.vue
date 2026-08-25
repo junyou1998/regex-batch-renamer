@@ -14,6 +14,7 @@ import {
   Send,
   Settings,
   Sparkles,
+  Square,
   Terminal,
   Trash2,
   Undo2,
@@ -551,19 +552,32 @@ function handleApplyPipeline(msg: AiMessageItem) {
         </div>
 
         <!-- Loading Indicator Bubble -->
-        <div v-if="aiStore.isLoading" class="flex items-center gap-2 p-3 rounded-2xl bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 w-fit">
-          <LoaderCircle class="w-4 h-4 text-blue-600 dark:text-blue-400 animate-spin" />
-          <span class="text-xs text-slate-500 dark:text-slate-400 animate-pulse">
-            {{
-              aiStore.activeProfile.type === 'api'
-                ? $t('ai.thinkingWithModel', { name: aiStore.activeProfile.name })
-                : aiStore.activeProfile.provider === 'grok_cli'
-                  ? $t('ai.grokThinking')
-                  : aiStore.activeProfile.provider === 'codex_cli'
-                    ? $t('ai.codexThinking')
-                    : $t('ai.thinking')
-            }}
-          </span>
+        <div v-if="aiStore.isLoading" class="flex items-center justify-between gap-3 p-3 rounded-2xl bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 w-fit max-w-[90%] shadow-2xs">
+          <div class="flex items-center gap-2 min-w-0">
+            <ProviderIcon :provider="(aiStore.currentRunningProfile || aiStore.activeProfile).provider" class="w-3.5 h-3.5 shrink-0" />
+            <LoaderCircle class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 animate-spin shrink-0" />
+            <span class="text-xs text-slate-600 dark:text-slate-300 animate-pulse truncate font-medium">
+              {{
+                (aiStore.currentRunningProfile || aiStore.activeProfile).type === 'api'
+                  ? $t('ai.thinkingWithModel', { name: (aiStore.currentRunningProfile || aiStore.activeProfile).name })
+                  : (aiStore.currentRunningProfile || aiStore.activeProfile).provider === 'grok_cli'
+                    ? $t('ai.grokThinking')
+                    : (aiStore.currentRunningProfile || aiStore.activeProfile).provider === 'codex_cli'
+                      ? $t('ai.codexThinking')
+                      : $t('ai.thinking')
+              }}
+            </span>
+          </div>
+          <!-- Inline Stop Button in Bubble -->
+          <button
+            type="button"
+            @click="aiStore.stopGeneration()"
+            class="px-2 py-0.5 rounded-md text-[11px] font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 border border-red-200 dark:border-red-800/60 transition-colors flex items-center gap-1 cursor-pointer shrink-0 ml-1"
+            :title="$t('ai.stopGenerating')"
+          >
+            <Square class="w-2.5 h-2.5 fill-current" />
+            <span>{{ $t('ai.stopGenerating') }}</span>
+          </button>
         </div>
       </template>
     </div>
@@ -608,13 +622,25 @@ function handleApplyPipeline(msg: AiMessageItem) {
             {{ $t('ai.enterToSend') }}
           </span>
 
+          <!-- Send / Stop Button -->
           <button
+            v-if="aiStore.isLoading"
+            type="button"
+            @click="aiStore.stopGeneration()"
+            class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer flex items-center gap-1.5 animate-pulse"
+            :title="$t('ai.stopGenerating')"
+          >
+            <Square class="w-3.5 h-3.5 fill-current" />
+            <span>{{ $t('ai.stopGenerating') }}</span>
+          </button>
+          <button
+            v-else
+            type="button"
             @click="handleSend"
-            :disabled="!inputText.trim() || aiStore.isLoading"
+            :disabled="!inputText.trim()"
             class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1.5"
           >
-            <LoaderCircle v-if="aiStore.isLoading" class="w-3.5 h-3.5 animate-spin" />
-            <Send v-else class="w-3.5 h-3.5" />
+            <Send class="w-3.5 h-3.5" />
             <span>{{ $t('ai.send') }}</span>
           </button>
         </div>

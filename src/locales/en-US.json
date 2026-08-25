@@ -321,6 +321,8 @@
         "geminiThinking": "Gemini is analyzing files and thinking...",
         "onboardingApiKeyTitle": "{name} API Key Required",
         "onboardingApiKeyDesc": "This feature connects directly to {name} API. Click the button below to go to Settings > AI Assistant and enter your API Key.",
-        "thinkingWithModel": "{name} is analyzing files and thinking..."
+        "thinkingWithModel": "{name} is analyzing files and thinking...",
+        "stopGenerating": "Stop",
+        "generationCancelled": "⚠️ Generation cancelled."
     }
 }

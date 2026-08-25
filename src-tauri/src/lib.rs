@@ -1,5 +1,6 @@
 mod ai_cli;
 mod ai_api;
+mod ai_task;
 
 use serde::Serialize;
 use std::fs;
@@ -218,9 +219,7 @@ fn check_ai_cli_status(provider: Option<String>) -> ai_cli::AiCliStatus {
 
 #[tauri::command]
 async fn run_ai_chat(request: ai_cli::AiChatRequest) -> Result<ai_cli::AiChatResponse, String> {
-    tauri::async_runtime::spawn_blocking(move || ai_cli::run_chat(request))
-        .await
-        .map_err(|e| e.to_string())?
+    ai_cli::run_chat(request).await
 }
 
 #[tauri::command]
@@ -234,6 +233,11 @@ async fn run_ai_api_chat(
     profile: ai_api::AiApiProfile,
 ) -> Result<ai_cli::AiChatResponse, String> {
     ai_api::run_gemini_api_chat(request, profile).await
+}
+
+#[tauri::command]
+fn cancel_ai_chat(task_id: String) -> bool {
+    ai_task::cancel_task(&task_id)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -254,7 +258,8 @@ pub fn run() {
             check_ai_cli_status,
             run_ai_chat,
             test_ai_api_connection,
-            run_ai_api_chat
+            run_ai_api_chat,
+            cancel_ai_chat
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

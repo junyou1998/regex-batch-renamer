@@ -125,6 +125,8 @@ export const useAiStore = defineStore('ai', () => {
   const messages = ref<AiMessageItem[]>([])
   const isLoading = ref(false)
   const autoApply = ref(true)
+  const currentTaskId = ref<string | null>(null)
+  const currentRunningProfile = ref<AiProfile | null>(null)
 
   const operationStore = useOperationStore()
   const fileStore = useFileStore()
@@ -309,6 +311,9 @@ export const useAiStore = defineStore('ai', () => {
     }
     messages.value.push(userMessage)
 
+    const taskId = uuidv4()
+    currentTaskId.value = taskId
+    currentRunningProfile.value = { ...prof }
     isLoading.value = true
 
     try {
@@ -331,6 +336,7 @@ export const useAiStore = defineStore('ai', () => {
         currentPipeline,
         processFilenameOnly: settingsStore.processFilenameOnly,
         provider: prof.provider,
+        taskId,
       }
 
       let response: AiChatResponse
@@ -345,6 +351,11 @@ export const useAiStore = defineStore('ai', () => {
         }
         const cliTarget = prof.provider === 'codex_cli' ? 'codex' : prof.provider === 'grok_cli' ? 'grok' : 'claude'
         response = await desktop.runAiChat({ ...chatRequest, provider: cliTarget })
+      }
+
+      // If task was cancelled during wait, drop response
+      if (currentTaskId.value !== taskId) {
+        return
       }
 
       const assistantMessage: AiMessageItem = {
@@ -363,8 +374,12 @@ export const useAiStore = defineStore('ai', () => {
         applyPipeline(response.pipeline)
       }
     } catch (error: any) {
-      console.error('Failed to send AI chat message:', error)
       const errorMsg = error?.message || String(error)
+      if (errorMsg.includes('AI_TASK_CANCELLED') || currentTaskId.value !== taskId) {
+        console.log('AI task was cancelled')
+        return
+      }
+      console.error('Failed to send AI chat message:', error)
       messages.value.push({
         id: uuidv4(),
         role: 'assistant',
@@ -375,8 +390,40 @@ export const useAiStore = defineStore('ai', () => {
       })
       toastStore.addToast(`AI 生成失敗: ${errorMsg}`, 'error')
     } finally {
-      isLoading.value = false
+      if (currentTaskId.value === taskId) {
+        currentTaskId.value = null
+        currentRunningProfile.value = null
+        isLoading.value = false
+      }
     }
+  }
+
+  async function stopGeneration() {
+    if (!isLoading.value) return
+    const taskId = currentTaskId.value
+    const runningProf = currentRunningProfile.value
+
+    isLoading.value = false
+    currentTaskId.value = null
+    currentRunningProfile.value = null
+
+    if (taskId && desktop.cancelAiChat) {
+      try {
+        await desktop.cancelAiChat(taskId)
+      } catch (err) {
+        console.warn('Failed to cancel AI task:', err)
+      }
+    }
+
+    messages.value.push({
+      id: uuidv4(),
+      role: 'assistant',
+      content: '⚠️ 已中止生成。',
+      timestamp: Date.now(),
+      isError: true,
+      provider: runningProf?.provider,
+    })
+    toastStore.addToast('已中止 AI 生成', 'info')
   }
 
   return {
@@ -385,6 +432,8 @@ export const useAiStore = defineStore('ai', () => {
     profiles,
     activeProfileId,
     activeProfile,
+    currentTaskId,
+    currentRunningProfile,
     selectedProvider,
     claudeStatus,
     codexStatus,
@@ -407,5 +456,6 @@ export const useAiStore = defineStore('ai', () => {
     clearHistory,
     applyPipeline,
     sendMessage,
+    stopGeneration,
   }
 })
