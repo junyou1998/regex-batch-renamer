@@ -247,7 +247,7 @@ pub fn check_status(provider: Option<&str>) -> AiCliStatus {
     }
 }
 
-fn build_prompt(request: &AiChatRequest) -> String {
+pub fn build_prompt(request: &AiChatRequest) -> String {
     let mut prompt = String::new();
 
     prompt.push_str("You are an expert renaming assistant for the application 'Regex Batch Renamer'.\n");
@@ -320,7 +320,7 @@ fn build_prompt(request: &AiChatRequest) -> String {
     prompt
 }
 
-fn extract_json_payload(raw: &str) -> Option<&str> {
+pub fn extract_json_payload(raw: &str) -> Option<&str> {
     let clean = raw.trim();
 
     // 1. Look for ```json ... ``` block

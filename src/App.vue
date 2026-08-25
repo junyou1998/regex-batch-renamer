@@ -613,7 +613,7 @@ async function handleCopyTo() {
         'flex flex-col border-l border-slate-200 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-900/50 backdrop-blur-xl transition-all duration-300 overflow-hidden shrink-0',
         aiStore.isOpen ? 'w-96' : 'w-0 border-l-0'
       ]">
-        <AiAssistantPanel />
+        <AiAssistantPanel @open-settings="showSettings = true" />
       </aside>
     </div>
     <ToastNotification />

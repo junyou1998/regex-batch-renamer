@@ -4,6 +4,8 @@ import { confirm, open } from '@tauri-apps/plugin-dialog'
 import { openUrl } from '@tauri-apps/plugin-opener'
 import { check } from '@tauri-apps/plugin-updater'
 import type {
+  AiApiProfile,
+  AiApiTestResult,
   AiCliStatus,
   AiChatRequest,
   AiChatResponse,
@@ -165,5 +167,11 @@ export const tauriDesktopBridge: DesktopBridge = {
   },
   async runAiChat(request: AiChatRequest): Promise<AiChatResponse> {
     return invoke<AiChatResponse>('run_ai_chat', { request })
+  },
+  async testAiApiConnection(profile: AiApiProfile): Promise<AiApiTestResult> {
+    return invoke<AiApiTestResult>('test_ai_api_connection', { profile })
+  },
+  async runAiApiChat(request: AiChatRequest, profile: AiApiProfile): Promise<AiChatResponse> {
+    return invoke<AiChatResponse>('run_ai_api_chat', { request, profile })
   },
 }

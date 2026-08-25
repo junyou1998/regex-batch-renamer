@@ -39,7 +39,15 @@
         "aiBehavior": "AI 自動化設定",
         "aiAutoApply": "ルール生成時に自動適用",
         "aiAutoApplyDesc": "AI が新しいルールを生成したときに、メイン画面の更名フローとプレビューを自動更新",
-        "aiApiNotice": "独自の API キー（OpenAI / Anthropic / xAI / Ollama 端点）のサポートは近日対応予定です。現在はローカルにログイン済みの Claude Code、OpenAI Codex、または xAI Grok CLI を利用できます。"
+        "aiApiNotice": "独自の API キー（OpenAI / Anthropic / xAI / Ollama 端点）のサポートは近日対応予定です。現在はローカルにログイン済みの Claude Code、OpenAI Codex、または xAI Grok CLI を利用できます。",
+        "aiGeminiApiDesc": "独自の Google AI Studio API キーを使用して Gemini 公式モデル（Gemini 2.5 Flash / Pro など）を利用",
+        "geminiConfigTitle": "Google Gemini API 設定",
+        "profileName": "設定名",
+        "profileNamePlaceholder": "設定名を入力",
+        "apiProviderLabel": "プロバイダー",
+        "defaultModel": "デフォルトモデル",
+        "modelIdPlaceholder": "モデル ID (例: gemini-2.5-flash)",
+        "testConnection": "接続テスト"
     },
     "app": {
         "title": "Regex Batch Renamer",
@@ -144,14 +152,14 @@
         "bio": "こんにちは！Junyouです。このプロジェクトは、面倒なファイルリネーム作業を簡単にするために作られました。もしこのツールが役立ったら、コーヒーを一杯奢っていただけると、開発とメンテナンスの励みになります！",
         "thanks": "ご支援と励ましに感謝します",
         "version": "バージョン",
-  "changelog": "更新履歴",
-  "changelogLoading": "更新履歴を読み込み中...",
-  "changelogError": "更新履歴の読み込みに失敗しました",
-  "changelogEmpty": "表示できる更新履歴はまだありません",
-  "viewOnGithub": "GitHubで見る",
-  "viewVersionRelease": "リリースページを見る",
-  "postUpdateTitle": "v{version} への更新が完了しました。変更内容はこちらです。",
-  "newVersionAvailable": "新しいバージョンが利用可能です",
+        "changelog": "更新履歴",
+        "changelogLoading": "更新履歴を読み込み中...",
+        "changelogError": "更新履歴の読み込みに失敗しました",
+        "changelogEmpty": "表示できる更新履歴はまだありません",
+        "viewOnGithub": "GitHubで見る",
+        "viewVersionRelease": "リリースページを見る",
+        "postUpdateTitle": "v{version} への更新が完了しました。変更内容はこちらです。",
+        "newVersionAvailable": "新しいバージョンが利用可能です",
         "installUpdate": "更新をインストール",
         "installingUpdate": "インストール中...",
         "downloadUpdate": "ダウンロード",
@@ -294,6 +302,11 @@
         "grokThinking": "Grok がファイルを分析してルールを思考中...",
         "inputPlaceholder": "リネームの要望を入力してください（例：日付を末尾に移動）...",
         "enterToSend": "Enter で送信、Shift + Enter で改行",
-        "send": "送信"
+        "send": "送信",
+        "statusNoApiKey": "API キー未設定",
+        "onboardingGeminiTitle": "Google Gemini API キーの設定が必要です",
+        "onboardingGeminiDesc": "この機能は Google Gemini 公式 API と直接通信します。下のボタンをクリックして「設定 > AI アシスタント」で Google AI Studio API キーを設定してください。",
+        "openSettingsToConfigure": "設定を開いて設定する",
+        "geminiThinking": "Gemini がファイルを分析してルールを思考中..."
     }
 }

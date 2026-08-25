@@ -44,7 +44,22 @@ export type PendingChangesHandler = () => boolean | Promise<boolean>
 export type FileDropHandler = (paths: string[]) => void
 export type FileDragStateHandler = (isDragging: boolean) => void
 
-export type AiProviderType = 'claude' | 'codex' | 'grok'
+export type AiProviderType = 'claude' | 'codex' | 'grok' | 'gemini_api'
+
+export interface AiApiProfile {
+  id: string
+  name: string
+  provider: 'gemini' | string
+  apiKey: string
+  endpoint: string
+  model: string
+  temperature?: number
+}
+
+export interface AiApiTestResult {
+  success: boolean
+  message: string
+}
 
 export interface AiCliStatus {
   installed: boolean
@@ -104,4 +119,6 @@ export interface DesktopBridge {
   openDevTools?(): Promise<void>
   checkAiCliStatus?(provider?: AiProviderType | string): Promise<AiCliStatus>
   runAiChat?(request: AiChatRequest): Promise<AiChatResponse>
+  testAiApiConnection?(profile: AiApiProfile): Promise<AiApiTestResult>
+  runAiApiChat?(request: AiChatRequest, profile: AiApiProfile): Promise<AiChatResponse>
 }

@@ -8,8 +8,9 @@ import {
   AlertTriangle,
   Check,
   ChevronDown,
+  Eye,
+  EyeOff,
   Info,
-  KeyRound,
   Minus,
   Plus,
   RefreshCw,
@@ -21,6 +22,17 @@ import {
 import ClaudeIcon from './icons/ClaudeIcon.vue'
 import CodexIcon from './icons/CodexIcon.vue'
 import GrokIcon from './icons/GrokIcon.vue'
+import GeminiIcon from './icons/GeminiIcon.vue'
+
+const showApiKey = ref(false)
+
+function selectModel(modelName: string) {
+  aiStore.saveGeminiProfile({ model: modelName })
+}
+
+async function handleTestGeminiConnection() {
+  await aiStore.testGeminiConnection()
+}
 
 const props = defineProps<{
   modelValue: boolean
@@ -553,26 +565,40 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                     </div>
                   </div>
 
-                  <!-- Option 4: Custom API (Coming soon) -->
+                  <!-- Option 4: Google Gemini API -->
                   <div
-                    class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100/50 dark:bg-slate-800/40 opacity-70 flex items-start gap-3"
+                    @click="aiStore.setProvider('gemini_api')"
+                    class="p-3.5 rounded-xl transition-all cursor-pointer flex items-start gap-3"
+                    :class="[
+                      aiStore.selectedProvider === 'gemini_api'
+                        ? 'border-2 border-purple-500 bg-purple-50/50 dark:bg-purple-950/30 shadow-xs ring-1 ring-purple-500/30'
+                        : 'border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-900/40',
+                    ]"
                   >
-                    <div class="p-2 rounded-lg bg-slate-300 dark:bg-slate-700 text-slate-600 dark:text-slate-400 shrink-0 mt-0.5">
-                      <KeyRound class="w-4 h-4" />
+                    <div class="p-1.5 rounded-lg bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 shrink-0 mt-0.5 flex items-center justify-center">
+                      <GeminiIcon class="w-5 h-5" />
                     </div>
                     <div class="space-y-1 flex-1 min-w-0">
                       <div class="flex items-center justify-between">
-                        <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                          Custom API (OpenAI / Anthropic / xAI)
+                        <span class="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                          Google Gemini API
                         </span>
                         <span
-                          class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-md bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-400"
+                          v-if="aiStore.selectedProvider === 'gemini_api'"
+                          class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-md bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300 flex items-center gap-1"
                         >
-                          {{ $t('settings.aiComingSoon') }}
+                          <Check class="w-3 h-3 stroke-[3]" />
+                          {{ $t('settings.aiActive') }}
+                        </span>
+                        <span
+                          v-else
+                          class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                        >
+                          {{ $t('settings.aiStatusAvailable') }}
                         </span>
                       </div>
-                      <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                        {{ $t('settings.aiCustomApiDesc') }}
+                      <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                        {{ $t('settings.aiGeminiApiDesc') }}
                       </p>
                     </div>
                   </div>
@@ -581,8 +607,135 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
 
               <hr class="border-slate-200 dark:border-slate-700" />
 
-              <!-- CLI Status & Details -->
-              <div class="space-y-3">
+              <!-- Case A: Gemini API Configuration Form -->
+              <div v-if="aiStore.selectedProvider === 'gemini_api'" class="space-y-3">
+                <div class="flex items-center justify-between">
+                  <h3 class="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide flex items-center gap-1.5">
+                    <GeminiIcon class="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <span>{{ $t('settings.geminiConfigTitle') }}</span>
+                  </h3>
+                  <button
+                    type="button"
+                    @click="handleTestGeminiConnection"
+                    :disabled="aiStore.isTestingApi || !aiStore.geminiProfile.apiKey.trim()"
+                    class="text-xs font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer"
+                  >
+                    <RefreshCw class="w-3.5 h-3.5" :class="{ 'animate-spin': aiStore.isTestingApi }" />
+                    {{ $t('settings.testConnection') }}
+                  </button>
+                </div>
+
+                <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/60 space-y-3 text-xs shadow-2xs">
+                  <!-- 1. 配置名稱 -->
+                  <div class="grid grid-cols-1 sm:grid-cols-4 items-center gap-2">
+                    <label class="font-medium text-slate-700 dark:text-slate-300">{{ $t('settings.profileName') }}</label>
+                    <div class="sm:col-span-3">
+                      <input
+                        type="text"
+                        v-model="aiStore.geminiProfile.name"
+                        @change="aiStore.saveGeminiProfile({ name: aiStore.geminiProfile.name })"
+                        :placeholder="$t('settings.profileNamePlaceholder')"
+                        class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 text-xs focus:ring-2 focus:ring-purple-500 focus:outline-hidden"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- 2. 供應商 -->
+                  <div class="grid grid-cols-1 sm:grid-cols-4 items-center gap-2">
+                    <label class="font-medium text-slate-700 dark:text-slate-300">{{ $t('settings.apiProviderLabel') }}</label>
+                    <div class="sm:col-span-3">
+                      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 text-xs font-medium">
+                        <GeminiIcon class="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                        <span>Gemini</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 3. API Key -->
+                  <div class="grid grid-cols-1 sm:grid-cols-4 items-center gap-2">
+                    <label class="font-medium text-slate-700 dark:text-slate-300">API Key</label>
+                    <div class="sm:col-span-3 relative">
+                      <input
+                        :type="showApiKey ? 'text' : 'password'"
+                        v-model="aiStore.geminiProfile.apiKey"
+                        @change="aiStore.saveGeminiProfile({ apiKey: aiStore.geminiProfile.apiKey })"
+                        placeholder="請輸入 API Key (AIzaSy...)"
+                        class="w-full pl-3 pr-9 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 text-xs focus:ring-2 focus:ring-purple-500 focus:outline-hidden font-mono"
+                      />
+                      <button
+                        type="button"
+                        @click="showApiKey = !showApiKey"
+                        class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                        :title="showApiKey ? '隱藏 API Key' : '顯示 API Key'"
+                      >
+                        <EyeOff v-if="showApiKey" class="w-3.5 h-3.5" />
+                        <Eye v-else class="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- 4. Endpoint -->
+                  <div class="grid grid-cols-1 sm:grid-cols-4 items-center gap-2">
+                    <label class="font-medium text-slate-700 dark:text-slate-300">Endpoint</label>
+                    <div class="sm:col-span-3">
+                      <input
+                        type="text"
+                        v-model="aiStore.geminiProfile.endpoint"
+                        @change="aiStore.saveGeminiProfile({ endpoint: aiStore.geminiProfile.endpoint })"
+                        placeholder="https://generativelanguage.googleapis.com"
+                        class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 text-xs focus:ring-2 focus:ring-purple-500 focus:outline-hidden font-mono text-[11px]"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- 5. 預設模型 -->
+                  <div class="grid grid-cols-1 sm:grid-cols-4 items-center gap-2">
+                    <label class="font-medium text-slate-700 dark:text-slate-300">{{ $t('settings.defaultModel') }}</label>
+                    <div class="sm:col-span-3 space-y-1.5">
+                      <input
+                        type="text"
+                        list="gemini-models-list"
+                        v-model="aiStore.geminiProfile.model"
+                        @change="aiStore.saveGeminiProfile({ model: aiStore.geminiProfile.model })"
+                        :placeholder="$t('settings.modelIdPlaceholder')"
+                        class="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 text-xs focus:ring-2 focus:ring-purple-500 focus:outline-hidden font-mono"
+                      />
+                      <datalist id="gemini-models-list">
+                        <option value="gemini-2.5-flash" />
+                        <option value="gemini-2.5-pro" />
+                        <option value="gemini-1.5-flash" />
+                        <option value="gemini-1.5-pro" />
+                      </datalist>
+                      <div class="flex items-center gap-1.5 flex-wrap pt-0.5">
+                        <span class="text-[10px] text-slate-400">快速選擇:</span>
+                        <button
+                          v-for="m in ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-1.5-flash']"
+                          :key="m"
+                          type="button"
+                          @click="selectModel(m)"
+                          class="px-1.5 py-0.5 rounded text-[10px] bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors cursor-pointer border border-purple-200/60 dark:border-purple-800/50"
+                        >
+                          {{ m }}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Test Result Alert -->
+                  <div
+                    v-if="aiStore.apiTestResult"
+                    class="p-2.5 rounded-lg text-[11px] flex items-start gap-2"
+                    :class="aiStore.apiTestResult.success ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300' : 'bg-red-50 dark:bg-red-950/40 text-red-800 dark:text-red-300'"
+                  >
+                    <Check v-if="aiStore.apiTestResult.success" class="w-4 h-4 shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
+                    <AlertTriangle v-else class="w-4 h-4 shrink-0 mt-0.5 text-red-600 dark:text-red-400" />
+                    <span>{{ aiStore.apiTestResult.message }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Case B: CLI Status & Details -->
+              <div v-else class="space-y-3">
                 <div class="flex items-center justify-between">
                   <h3 class="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide flex items-center gap-1.5">
                     <GrokIcon v-if="aiStore.selectedProvider === 'grok'" className="w-4 h-4" />

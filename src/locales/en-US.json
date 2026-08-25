@@ -39,7 +39,15 @@
         "aiBehavior": "AI Automation Preferences",
         "aiAutoApply": "Auto-apply generated rules",
         "aiAutoApplyDesc": "Automatically update the rule pipeline and live preview when AI outputs a new workflow",
-        "aiApiNotice": "Custom API Key support (OpenAI / Anthropic / xAI / Ollama endpoints) is in development. Currently powered by local Claude Code, OpenAI Codex, or xAI Grok CLI."
+        "aiApiNotice": "Custom API Key support (OpenAI / Anthropic / xAI / Ollama endpoints) is in development. Currently powered by local Claude Code, OpenAI Codex, or xAI Grok CLI.",
+        "aiGeminiApiDesc": "Directly connect to Google AI Studio with your API Key to use Gemini models (e.g. Gemini 2.5 Flash / Pro)",
+        "geminiConfigTitle": "Google Gemini API Configuration",
+        "profileName": "Profile Name",
+        "profileNamePlaceholder": "Enter profile name",
+        "apiProviderLabel": "Provider",
+        "defaultModel": "Default Model",
+        "modelIdPlaceholder": "Model ID (e.g. gemini-2.5-flash)",
+        "testConnection": "Test Connection"
     },
     "app": {
         "title": "Regex Batch Renamer",
@@ -144,14 +152,14 @@
         "bio": "Hi! I'm Junyou. This project was created to make tedious file renaming tasks easier. If you find this tool helpful, consider buying me a coffee to support continued development and maintenance!",
         "thanks": "Thank you for your support and encouragement",
         "version": "Version",
-  "changelog": "Changelog",
-  "changelogLoading": "Loading changelog...",
-  "changelogError": "Failed to load changelog",
-  "changelogEmpty": "No changelog entries are available yet",
-  "viewOnGithub": "View on GitHub",
-  "viewVersionRelease": "View release page",
-  "postUpdateTitle": "Updated successfully to v{version}. Here's what's new.",
-  "newVersionAvailable": "New version available",
+        "changelog": "Changelog",
+        "changelogLoading": "Loading changelog...",
+        "changelogError": "Failed to load changelog",
+        "changelogEmpty": "No changelog entries are available yet",
+        "viewOnGithub": "View on GitHub",
+        "viewVersionRelease": "View release page",
+        "postUpdateTitle": "Updated successfully to v{version}. Here's what's new.",
+        "newVersionAvailable": "New version available",
         "installUpdate": "Install Update",
         "installingUpdate": "Installing...",
         "downloadUpdate": "Download",
@@ -294,6 +302,11 @@
         "grokThinking": "Grok is analyzing files and thinking...",
         "inputPlaceholder": "Describe your renaming request (e.g., move the prefix date to the end)...",
         "enterToSend": "Press Enter to send, Shift + Enter for new line",
-        "send": "Send"
+        "send": "Send",
+        "statusNoApiKey": "API Key Not Set",
+        "onboardingGeminiTitle": "Google Gemini API Key Required",
+        "onboardingGeminiDesc": "This feature connects directly to Google Gemini API. Click the button below to go to Settings > AI Assistant and enter your Google AI Studio API Key.",
+        "openSettingsToConfigure": "Go to Settings to Configure",
+        "geminiThinking": "Gemini is analyzing files and thinking..."
     }
 }
