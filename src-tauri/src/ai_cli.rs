@@ -294,12 +294,12 @@ fn build_prompt(request: &AiChatRequest) -> String {
 
     prompt.push_str(&format!("\n### User Request:\n{}\n\n", request.prompt));
 
-    prompt.push_str("### Output Format Instructions:\n");
-    prompt.push_str("You MUST respond in Traditional Chinese (Taiwan phrasing) for user explanations.\n");
-    prompt.push_str("You MUST provide your response strictly as a JSON object inside a ```json ``` block with the following schema:\n");
+    prompt.push_str("### Output Format & Language Instructions:\n");
+    prompt.push_str("1. Language Consistency: You MUST reply in the SAME language used by the user in their request (e.g. if the user writes in English, reply in English; if in Traditional Chinese, reply in Traditional Chinese; if in Simplified Chinese, reply in Simplified Chinese; if in Japanese, reply in Japanese; etc.).\n");
+    prompt.push_str("2. Output Format: You MUST provide your response strictly as a single JSON object inside a ```json ``` block with the following schema:\n");
     prompt.push_str("{\n");
-    prompt.push_str("  \"reply\": \"(string) 友善、簡要的繁體中文說明（向使用者說明分析結果與做了哪些調整）\",\n");
-    prompt.push_str("  \"explanation\": \"(optional string) 正則表達式或替換邏輯的技術細節解析\",\n");
+    prompt.push_str("  \"reply\": \"(string) Friendly and clear explanation in the user's language describing what you analyzed and adjusted\",\n");
+    prompt.push_str("  \"explanation\": \"(optional string) Technical breakdown in the user's language explaining the regex matching or substitution logic\",\n");
     prompt.push_str("  \"pipeline\": [\n");
     prompt.push_str("    {\n");
     prompt.push_str("      \"type\": \"regex\",\n");
