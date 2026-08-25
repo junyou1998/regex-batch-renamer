@@ -23,10 +23,7 @@ import {
 import { useAiStore, type AiMessageItem } from '../stores/aiStore'
 import { useFileStore } from '../stores/fileStore'
 import { useToastStore } from '../stores/toastStore'
-import ClaudeIcon from './icons/ClaudeIcon.vue'
-import CodexIcon from './icons/CodexIcon.vue'
-import GrokIcon from './icons/GrokIcon.vue'
-import GeminiIcon from './icons/GeminiIcon.vue'
+import ProviderIcon from './icons/ProviderIcon.vue'
 
 const emit = defineEmits<{
   'open-settings': []
@@ -219,10 +216,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
         <div
           class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 text-[11px] min-w-0"
         >
-          <GeminiIcon v-if="aiStore.selectedProvider === 'gemini_api'" className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400 shrink-0" />
-          <GrokIcon v-else-if="aiStore.selectedProvider === 'grok'" className="w-3.5 h-3.5 shrink-0" />
-          <CodexIcon v-else-if="aiStore.selectedProvider === 'codex'" className="w-3.5 h-3.5 shrink-0" />
-          <ClaudeIcon v-else className="w-3 h-3 text-[#D97757] shrink-0" />
+          <ProviderIcon :provider="aiStore.activeProfile.provider" class="w-3.5 h-3.5 shrink-0" />
           <span
             class="w-1.5 h-1.5 rounded-full shrink-0"
             :class="{
@@ -236,23 +230,15 @@ function handleApplyPipeline(msg: AiMessageItem) {
               {{ $t('ai.statusChecking') }}
             </template>
             <template v-else-if="aiStore.status?.ready">
-              {{
-                aiStore.selectedProvider === 'gemini_api'
-                  ? 'Gemini'
-                  : aiStore.selectedProvider === 'grok'
-                    ? 'Grok'
-                    : aiStore.selectedProvider === 'codex'
-                      ? 'Codex'
-                      : 'Claude Code'
-              }}
+              {{ aiStore.activeProfile.name }}
               <span class="text-slate-400 font-normal">({{ aiStore.status.version || 'Ready' }})</span>
             </template>
             <template v-else>
-              {{ aiStore.selectedProvider === 'gemini_api' ? $t('ai.statusNoApiKey') : $t('ai.statusNotReady') }}
+              {{ aiStore.activeProfile.type === 'api' ? $t('ai.statusNoApiKey') : $t('ai.statusNotReady') }}
             </template>
           </span>
           <button
-            v-if="aiStore.selectedProvider !== 'gemini_api'"
+            v-if="aiStore.activeProfile.type === 'cli'"
             type="button"
             @click="aiStore.checkStatus()"
             :disabled="aiStore.isCheckingStatus"
@@ -290,18 +276,18 @@ function handleApplyPipeline(msg: AiMessageItem) {
       <div
         v-if="!aiStore.status?.ready && !aiStore.isCheckingStatus"
         class="p-4 rounded-xl space-y-3"
-        :class="aiStore.selectedProvider === 'gemini_api' ? 'bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60' : 'bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60'"
+        :class="aiStore.activeProfile.type === 'api' ? 'bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/60' : 'bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60'"
       >
-        <!-- Gemini API Onboarding -->
-        <div v-if="aiStore.selectedProvider === 'gemini_api'" class="space-y-3">
+        <!-- API Onboarding -->
+        <div v-if="aiStore.activeProfile.type === 'api'" class="space-y-3">
           <div class="flex items-start gap-2.5 text-purple-900 dark:text-purple-300">
             <KeyRound class="w-5 h-5 shrink-0 mt-0.5 text-purple-600 dark:text-purple-400" />
             <div class="space-y-1 text-xs">
               <p class="font-semibold text-sm">
-                {{ $t('ai.onboardingGeminiTitle') }}
+                {{ $t('ai.onboardingApiKeyTitle', { name: aiStore.activeProfile.name }) }}
               </p>
               <p class="text-purple-800/90 dark:text-purple-300/90 leading-relaxed">
-                {{ $t('ai.onboardingGeminiDesc') }}
+                {{ $t('ai.onboardingApiKeyDesc', { name: aiStore.activeProfile.name }) }}
               </p>
             </div>
           </div>
@@ -321,18 +307,18 @@ function handleApplyPipeline(msg: AiMessageItem) {
             <div class="space-y-1 text-xs">
               <p class="font-semibold text-sm">
                 {{
-                  aiStore.selectedProvider === 'grok'
+                  aiStore.activeProfile.provider === 'grok_cli'
                     ? $t('ai.onboardingGrokTitle')
-                    : aiStore.selectedProvider === 'codex'
+                    : aiStore.activeProfile.provider === 'codex_cli'
                       ? $t('ai.onboardingCodexTitle')
                       : $t('ai.onboardingTitle')
                 }}
               </p>
               <p class="text-amber-700 dark:text-amber-400/90 leading-relaxed">
                 {{
-                  aiStore.selectedProvider === 'grok'
+                  aiStore.activeProfile.provider === 'grok_cli'
                     ? $t('ai.onboardingGrokDesc')
-                    : aiStore.selectedProvider === 'codex'
+                    : aiStore.activeProfile.provider === 'codex_cli'
                       ? $t('ai.onboardingCodexDesc')
                       : $t('ai.onboardingDesc')
                 }}
@@ -345,9 +331,9 @@ function handleApplyPipeline(msg: AiMessageItem) {
             <div class="space-y-1">
               <span class="font-medium text-slate-700 dark:text-slate-300">
                 1. {{
-                  aiStore.selectedProvider === 'grok'
+                  aiStore.activeProfile.provider === 'grok_cli'
                     ? $t('ai.stepInstallGrokCli')
-                    : aiStore.selectedProvider === 'codex'
+                    : aiStore.activeProfile.provider === 'codex_cli'
                       ? $t('ai.stepInstallCodexCli')
                       : $t('ai.stepInstallCli')
                 }}
@@ -357,9 +343,9 @@ function handleApplyPipeline(msg: AiMessageItem) {
               >
                 <span class="truncate">
                   {{
-                    aiStore.selectedProvider === 'grok'
+                    aiStore.activeProfile.provider === 'grok_cli'
                       ? 'curl -fsSL https://get.grok.com | sh'
-                      : aiStore.selectedProvider === 'codex'
+                      : aiStore.activeProfile.provider === 'codex_cli'
                         ? 'npm i -g @openai/codex'
                         : 'npm i -g @anthropic-ai/claude-code'
                   }}
@@ -367,9 +353,9 @@ function handleApplyPipeline(msg: AiMessageItem) {
                 <button
                   @click="
                     copyToClipboard(
-                      aiStore.selectedProvider === 'grok'
+                      aiStore.activeProfile.provider === 'grok_cli'
                         ? 'curl -fsSL https://get.grok.com | sh'
-                        : aiStore.selectedProvider === 'codex'
+                        : aiStore.activeProfile.provider === 'codex_cli'
                           ? 'npm i -g @openai/codex'
                           : 'npm i -g @anthropic-ai/claude-code',
                       'install'
@@ -386,9 +372,9 @@ function handleApplyPipeline(msg: AiMessageItem) {
             <div class="space-y-1">
               <span class="font-medium text-slate-700 dark:text-slate-300">
                 2. {{
-                  aiStore.selectedProvider === 'grok'
+                  aiStore.activeProfile.provider === 'grok_cli'
                     ? $t('ai.stepLoginGrokCli')
-                    : aiStore.selectedProvider === 'codex'
+                    : aiStore.activeProfile.provider === 'codex_cli'
                       ? $t('ai.stepLoginCodexCli')
                       : $t('ai.stepLoginCli')
                 }}
@@ -398,9 +384,9 @@ function handleApplyPipeline(msg: AiMessageItem) {
               >
                 <span class="truncate">
                   {{
-                    aiStore.selectedProvider === 'grok'
+                    aiStore.activeProfile.provider === 'grok_cli'
                       ? 'grok login'
-                      : aiStore.selectedProvider === 'codex'
+                      : aiStore.activeProfile.provider === 'codex_cli'
                         ? 'codex login'
                         : 'claude login'
                   }}
@@ -408,9 +394,9 @@ function handleApplyPipeline(msg: AiMessageItem) {
                 <button
                   @click="
                     copyToClipboard(
-                      aiStore.selectedProvider === 'grok'
+                      aiStore.activeProfile.provider === 'grok_cli'
                         ? 'grok login'
-                        : aiStore.selectedProvider === 'codex'
+                        : aiStore.activeProfile.provider === 'codex_cli'
                           ? 'codex login'
                           : 'claude login',
                       'login'
@@ -569,11 +555,11 @@ function handleApplyPipeline(msg: AiMessageItem) {
           <LoaderCircle class="w-4 h-4 text-blue-600 dark:text-blue-400 animate-spin" />
           <span class="text-xs text-slate-500 dark:text-slate-400 animate-pulse">
             {{
-              aiStore.selectedProvider === 'gemini_api'
-                ? $t('ai.geminiThinking')
-                : aiStore.selectedProvider === 'grok'
+              aiStore.activeProfile.type === 'api'
+                ? $t('ai.thinkingWithModel', { name: aiStore.activeProfile.name })
+                : aiStore.activeProfile.provider === 'grok_cli'
                   ? $t('ai.grokThinking')
-                  : aiStore.selectedProvider === 'codex'
+                  : aiStore.activeProfile.provider === 'codex_cli'
                     ? $t('ai.codexThinking')
                     : $t('ai.thinking')
             }}

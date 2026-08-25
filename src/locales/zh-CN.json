@@ -47,7 +47,18 @@
         "apiProviderLabel": "供应商",
         "defaultModel": "默认模型",
         "modelIdPlaceholder": "模型 ID (例如: gemini-2.5-flash)",
-        "testConnection": "测试连接"
+        "testConnection": "测试连接",
+        "profileListTitle": "AI 配置列表",
+        "addProfileBtn": "新增配置",
+        "profileDefaultBadge": "默认",
+        "setAsDefault": "设为默认",
+        "editProfile": "编辑",
+        "deleteProfile": "删除",
+        "backBtn": "返回",
+        "addProfileTitle": "新增配置",
+        "editProfileTitle": "编辑配置",
+        "quickSelectLabel": "快速选择",
+        "saveAndApply": "保存并应用"
     },
     "app": {
         "title": "Regex Batch Renamer",
@@ -307,6 +318,9 @@
         "onboardingGeminiTitle": "需要设置 Google Gemini API Key",
         "onboardingGeminiDesc": "本功能直接通过 Google Gemini 官方 API 互动。请点击下方按钮前往「设置 > AI 助理」填入您的 Google AI Studio API Key。",
         "openSettingsToConfigure": "前往设置 API Key",
-        "geminiThinking": "Gemini 正在分析文件与思考规则..."
+        "geminiThinking": "Gemini 正在分析文件与思考规则...",
+        "onboardingApiKeyTitle": "需要设置 {name} API Key",
+        "onboardingApiKeyDesc": "本功能直接通过 {name} 官方 API 互动。请点击下方按钮前往「设置 > AI 助理」填入您的 API Key。",
+        "thinkingWithModel": "{name} 正在分析文件与思考规则..."
     }
 }

@@ -38,7 +38,7 @@ pub async fn test_gemini_api_connection(profile: &AiApiProfile) -> Result<AiApiT
     };
 
     let model = if profile.model.trim().is_empty() {
-        "gemini-2.5-flash"
+        "gemini-3.6-flash"
     } else {
         profile.model.trim()
     };
@@ -102,7 +102,7 @@ pub async fn run_gemini_api_chat(
     };
 
     let model = if profile.model.trim().is_empty() {
-        "gemini-2.5-flash"
+        "gemini-3.6-flash"
     } else {
         profile.model.trim()
     };

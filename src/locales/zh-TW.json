@@ -47,7 +47,18 @@
         "aiBehavior": "AI 自動化偏好",
         "aiAutoApply": "產生規則時自動套用",
         "aiAutoApplyDesc": "AI 每次產生新規則流程時，自動更新至主畫面更名流程與預覽清單",
-        "aiApiNotice": "自備 API Key（OpenAI / Anthropic / xAI / Ollama 端點）功能正在規劃中，目前可透過本機已登入的 Claude Code CLI、OpenAI Codex CLI 或 xAI Grok CLI 免費調用訂閱額度。"
+        "aiApiNotice": "自備 API Key（OpenAI / Anthropic / xAI / Ollama 端點）功能正在規劃中，目前可透過本機已登入的 Claude Code CLI、OpenAI Codex CLI 或 xAI Grok CLI 免費調用訂閱額度。",
+        "profileListTitle": "AI 配置列表",
+        "addProfileBtn": "新增配置",
+        "profileDefaultBadge": "預設",
+        "setAsDefault": "設為預設",
+        "editProfile": "編輯",
+        "deleteProfile": "刪除",
+        "backBtn": "返回",
+        "addProfileTitle": "新增配置",
+        "editProfileTitle": "編輯配置",
+        "quickSelectLabel": "快速選擇",
+        "saveAndApply": "儲存並套用"
     },
     "app": {
         "title": "Regex Batch Renamer",
@@ -152,14 +163,14 @@
         "bio": "嗨！我是 Junyou。這個專案是為了讓繁瑣的檔案更名工作變得更簡單。如果您覺得這個工具對您有幫助，歡迎贊助我一杯咖啡，這將成為我持續開發與維護的動力！",
         "thanks": "感謝您的支持與鼓勵",
         "version": "版本",
-  "changelog": "更新日誌",
-  "changelogLoading": "正在載入更新日誌...",
-  "changelogError": "無法載入更新日誌",
-  "changelogEmpty": "目前沒有可顯示的更新記錄",
-  "viewOnGithub": "在 GitHub 上查看",
-  "viewVersionRelease": "查看版本頁",
-  "postUpdateTitle": "已成功更新至 v{version}，以下是本次版本內容",
-  "newVersionAvailable": "有新版本可用",
+        "changelog": "更新日誌",
+        "changelogLoading": "正在載入更新日誌...",
+        "changelogError": "無法載入更新日誌",
+        "changelogEmpty": "目前沒有可顯示的更新記錄",
+        "viewOnGithub": "在 GitHub 上查看",
+        "viewVersionRelease": "查看版本頁",
+        "postUpdateTitle": "已成功更新至 v{version}，以下是本次版本內容",
+        "newVersionAvailable": "有新版本可用",
         "installUpdate": "安裝更新",
         "installingUpdate": "安裝中...",
         "downloadUpdate": "前往下載",
@@ -307,6 +318,9 @@
         "geminiThinking": "Gemini 正在分析檔案與思考規則...",
         "inputPlaceholder": "描述您的重新命名需求（例如：把前綴日期移到最後面）...",
         "enterToSend": "按 Enter 發送，Shift + Enter 換行",
-        "send": "發送"
+        "send": "發送",
+        "onboardingApiKeyTitle": "需要設定 {name} API Key",
+        "onboardingApiKeyDesc": "本功能直接透過 {name} 官方 API 互動。請點擊下方按鈕前往「設定 > AI 助理」填入您的 API Key。",
+        "thinkingWithModel": "{name} 正在分析檔案與思考規則..."
     }
 }

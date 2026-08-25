@@ -47,7 +47,18 @@
         "apiProviderLabel": "Provider",
         "defaultModel": "Default Model",
         "modelIdPlaceholder": "Model ID (e.g. gemini-2.5-flash)",
-        "testConnection": "Test Connection"
+        "testConnection": "Test Connection",
+        "profileListTitle": "AI Profile List",
+        "addProfileBtn": "Add Profile",
+        "profileDefaultBadge": "Default",
+        "setAsDefault": "Set as Default",
+        "editProfile": "Edit",
+        "deleteProfile": "Delete",
+        "backBtn": "Back",
+        "addProfileTitle": "Add Configuration",
+        "editProfileTitle": "Edit Configuration",
+        "quickSelectLabel": "Quick select",
+        "saveAndApply": "Save & Apply"
     },
     "app": {
         "title": "Regex Batch Renamer",
@@ -307,6 +318,9 @@
         "onboardingGeminiTitle": "Google Gemini API Key Required",
         "onboardingGeminiDesc": "This feature connects directly to Google Gemini API. Click the button below to go to Settings > AI Assistant and enter your Google AI Studio API Key.",
         "openSettingsToConfigure": "Go to Settings to Configure",
-        "geminiThinking": "Gemini is analyzing files and thinking..."
+        "geminiThinking": "Gemini is analyzing files and thinking...",
+        "onboardingApiKeyTitle": "{name} API Key Required",
+        "onboardingApiKeyDesc": "This feature connects directly to {name} API. Click the button below to go to Settings > AI Assistant and enter your API Key.",
+        "thinkingWithModel": "{name} is analyzing files and thinking..."
     }
 }

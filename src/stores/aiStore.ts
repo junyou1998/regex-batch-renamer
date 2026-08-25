@@ -8,7 +8,7 @@ import type {
   AiChatResponse,
   AiPipelineItem,
   AiProviderType,
-  AiApiProfile,
+  AiProfile,
   AiApiTestResult,
 } from '../services/desktop/types'
 import { useOperationStore } from './operationStore'
@@ -24,59 +24,101 @@ export interface AiMessageItem {
   pipeline?: AiPipelineItem[]
   timestamp: number
   isError?: boolean
-  provider?: AiProviderType
+  provider?: AiProviderType | string
 }
 
-const DEFAULT_GEMINI_PROFILE: AiApiProfile = {
-  id: 'gemini-default',
-  name: 'Gemini 2.5 Flash',
-  provider: 'gemini',
-  apiKey: '',
-  endpoint: 'https://generativelanguage.googleapis.com',
-  model: 'gemini-2.5-flash',
-  temperature: 0.2,
-}
+const DEFAULT_PROFILES: AiProfile[] = [
+  {
+    id: 'claude-cli',
+    name: 'claude code cli',
+    provider: 'claude_cli',
+    type: 'cli',
+    isBuiltin: true,
+  },
+  {
+    id: 'codex-cli',
+    name: 'codex cli',
+    provider: 'codex_cli',
+    type: 'cli',
+    isBuiltin: true,
+  },
+  {
+    id: 'grok-cli',
+    name: 'grok cli',
+    provider: 'grok_cli',
+    type: 'cli',
+    isBuiltin: true,
+  },
+  {
+    id: 'gemini-default',
+    name: 'gemini',
+    provider: 'gemini',
+    type: 'api',
+    apiKey: '',
+    endpoint: 'https://generativelanguage.googleapis.com',
+    model: 'gemini-3.6-flash',
+    temperature: 0.2,
+    isBuiltin: false,
+  },
+]
 
-function loadSavedGeminiProfile(): AiApiProfile {
+function loadSavedProfiles(): AiProfile[] {
   try {
-    const saved = localStorage.getItem('ai_gemini_profile')
+    const saved = localStorage.getItem('ai_profiles_list_v2')
     if (saved) {
-      return { ...DEFAULT_GEMINI_PROFILE, ...JSON.parse(saved) }
+      const parsed = JSON.parse(saved)
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed
+      }
     }
   } catch (e) {
-    console.warn('Failed to parse saved gemini profile', e)
+    console.warn('Failed to parse saved AI profiles', e)
   }
-  return { ...DEFAULT_GEMINI_PROFILE }
+  return DEFAULT_PROFILES
 }
 
 export const useAiStore = defineStore('ai', () => {
   const isOpen = ref(false)
   const isCheckingStatus = ref(false)
-  const selectedProvider = ref<AiProviderType>(
-    (localStorage.getItem('ai_provider') as AiProviderType) || 'claude'
+
+  const profiles = ref<AiProfile[]>(loadSavedProfiles())
+  const activeProfileId = ref<string>(
+    localStorage.getItem('ai_active_profile_id') || 'gemini-default'
   )
+
+  const activeProfile = computed<AiProfile>(() => {
+    return profiles.value.find((p) => p.id === activeProfileId.value) || profiles.value[0]
+  })
+
+  // Selected provider compatibility
+  const selectedProvider = computed<AiProviderType>(() => {
+    if (activeProfile.value.provider === 'codex_cli') return 'codex'
+    if (activeProfile.value.provider === 'grok_cli') return 'grok'
+    if (activeProfile.value.provider === 'claude_cli') return 'claude'
+    return 'gemini_api'
+  })
 
   const claudeStatus = ref<AiCliStatus | null>(null)
   const codexStatus = ref<AiCliStatus | null>(null)
   const grokStatus = ref<AiCliStatus | null>(null)
 
-  const geminiProfile = ref<AiApiProfile>(loadSavedGeminiProfile())
   const isTestingApi = ref(false)
   const apiTestResult = ref<AiApiTestResult | null>(null)
 
   const status = computed<AiCliStatus | null>(() => {
-    if (selectedProvider.value === 'gemini_api') {
-      const hasKey = !!geminiProfile.value.apiKey.trim()
+    const prof = activeProfile.value
+    if (prof.type === 'api') {
+      const hasKey = !!prof.apiKey?.trim()
       return {
         installed: true,
         ready: hasKey,
-        version: geminiProfile.value.model || 'gemini-2.5-flash',
-        provider: 'gemini_api',
-        message: hasKey ? undefined : '尚未設定 Gemini API Key',
+        version: prof.model || 'gemini-3.6-flash',
+        provider: prof.provider,
+        message: hasKey ? undefined : '尚未設定 API Key',
       }
     }
-    if (selectedProvider.value === 'codex') return codexStatus.value
-    if (selectedProvider.value === 'grok') return grokStatus.value
+    if (prof.provider === 'codex_cli') return codexStatus.value
+    if (prof.provider === 'grok_cli') return grokStatus.value
     return claudeStatus.value
   })
 
@@ -89,21 +131,46 @@ export const useAiStore = defineStore('ai', () => {
   const settingsStore = useSettingsStore()
   const toastStore = useToastStore()
 
-  function setProvider(prov: AiProviderType) {
-    selectedProvider.value = prov
-    localStorage.setItem('ai_provider', prov)
-    if (prov !== 'gemini_api' && !status.value) {
-      void checkStatus(prov)
+  function persistProfiles() {
+    localStorage.setItem('ai_profiles_list_v2', JSON.stringify(profiles.value))
+    localStorage.setItem('ai_active_profile_id', activeProfileId.value)
+  }
+
+  function setActiveProfile(id: string) {
+    const target = profiles.value.find((p) => p.id === id)
+    if (target) {
+      activeProfileId.value = id
+      persistProfiles()
+      if (target.type === 'cli') {
+        const cliKey = target.provider === 'codex_cli' ? 'codex' : target.provider === 'grok_cli' ? 'grok' : 'claude'
+        void checkStatus(cliKey)
+      }
     }
   }
 
-  function saveGeminiProfile(partial: Partial<AiApiProfile>) {
-    geminiProfile.value = { ...geminiProfile.value, ...partial }
-    localStorage.setItem('ai_gemini_profile', JSON.stringify(geminiProfile.value))
+  function saveProfile(profile: AiProfile) {
+    const index = profiles.value.findIndex((p) => p.id === profile.id)
+    if (index >= 0) {
+      profiles.value[index] = { ...profile }
+    } else {
+      profiles.value.push({ ...profile })
+    }
+    activeProfileId.value = profile.id
+    persistProfiles()
   }
 
-  async function testGeminiConnection(customProfile?: AiApiProfile): Promise<AiApiTestResult> {
-    const prof = customProfile || geminiProfile.value
+  function deleteProfile(id: string) {
+    const target = profiles.value.find((p) => p.id === id)
+    if (!target || target.isBuiltin) return
+
+    profiles.value = profiles.value.filter((p) => p.id !== id)
+    if (activeProfileId.value === id) {
+      activeProfileId.value = profiles.value[0]?.id || 'claude-cli'
+    }
+    persistProfiles()
+  }
+
+  async function testProfileConnection(profile: AiProfile): Promise<AiApiTestResult> {
     if (!desktop.testAiApiConnection) {
       const res = { success: false, message: '桌面環境不支援 API 測試' }
       apiTestResult.value = res
@@ -113,7 +180,7 @@ export const useAiStore = defineStore('ai', () => {
     isTestingApi.value = true
     apiTestResult.value = null
     try {
-      const res = await desktop.testAiApiConnection(prof)
+      const res = await desktop.testAiApiConnection(profile)
       apiTestResult.value = res
       return res
     } catch (e: any) {
@@ -215,24 +282,19 @@ export const useAiStore = defineStore('ai', () => {
     const trimmed = text.trim()
     if (!trimmed || isLoading.value) return
 
-    const currentProvider = selectedProvider.value
+    const prof = activeProfile.value
 
-    if (currentProvider === 'gemini_api') {
-      if (!geminiProfile.value.apiKey.trim()) {
-        toastStore.addToast('請先至設定填寫 Google Gemini API Key', 'error')
+    if (prof.type === 'api') {
+      if (!prof.apiKey?.trim()) {
+        toastStore.addToast(`請先至設定填寫 ${prof.name || 'API'} 的 API Key`, 'error')
         return
       }
     } else {
       if (!status.value?.ready) {
-        await checkStatus(currentProvider)
+        const cliKey = prof.provider === 'codex_cli' ? 'codex' : prof.provider === 'grok_cli' ? 'grok' : 'claude'
+        await checkStatus(cliKey)
         if (!status.value?.ready) {
-          const provName =
-            currentProvider === 'codex'
-              ? 'OpenAI Codex CLI'
-              : currentProvider === 'grok'
-                ? 'xAI Grok CLI'
-                : 'Claude Code CLI'
-          toastStore.addToast(status.value?.message || `${provName} 未就緒`, 'error')
+          toastStore.addToast(status.value?.message || `${prof.name} 未就緒`, 'error')
           return
         }
       }
@@ -243,7 +305,7 @@ export const useAiStore = defineStore('ai', () => {
       role: 'user',
       content: trimmed,
       timestamp: Date.now(),
-      provider: currentProvider,
+      provider: prof.provider,
     }
     messages.value.push(userMessage)
 
@@ -268,20 +330,21 @@ export const useAiStore = defineStore('ai', () => {
         sampleFilenames,
         currentPipeline,
         processFilenameOnly: settingsStore.processFilenameOnly,
-        provider: currentProvider,
+        provider: prof.provider,
       }
 
       let response: AiChatResponse
-      if (currentProvider === 'gemini_api') {
+      if (prof.type === 'api') {
         if (!desktop.runAiApiChat) {
           throw new Error('AI API Chat bridge is unavailable in this environment')
         }
-        response = await desktop.runAiApiChat(chatRequest, geminiProfile.value)
+        response = await desktop.runAiApiChat(chatRequest, prof)
       } else {
         if (!desktop.runAiChat) {
           throw new Error('AI Chat bridge is unavailable in this environment')
         }
-        response = await desktop.runAiChat(chatRequest)
+        const cliTarget = prof.provider === 'codex_cli' ? 'codex' : prof.provider === 'grok_cli' ? 'grok' : 'claude'
+        response = await desktop.runAiChat({ ...chatRequest, provider: cliTarget })
       }
 
       const assistantMessage: AiMessageItem = {
@@ -291,7 +354,7 @@ export const useAiStore = defineStore('ai', () => {
         explanation: response.explanation,
         pipeline: response.pipeline,
         timestamp: Date.now(),
-        provider: currentProvider,
+        provider: prof.provider,
       }
 
       messages.value.push(assistantMessage)
@@ -308,7 +371,7 @@ export const useAiStore = defineStore('ai', () => {
         content: `執行發生錯誤: ${errorMsg}`,
         timestamp: Date.now(),
         isError: true,
-        provider: currentProvider,
+        provider: prof.provider,
       })
       toastStore.addToast(`AI 生成失敗: ${errorMsg}`, 'error')
     } finally {
@@ -319,20 +382,23 @@ export const useAiStore = defineStore('ai', () => {
   return {
     isOpen,
     isCheckingStatus,
+    profiles,
+    activeProfileId,
+    activeProfile,
     selectedProvider,
     claudeStatus,
     codexStatus,
     grokStatus,
-    geminiProfile,
     isTestingApi,
     apiTestResult,
     status,
     messages,
     isLoading,
     autoApply,
-    setProvider,
-    saveGeminiProfile,
-    testGeminiConnection,
+    setActiveProfile,
+    saveProfile,
+    deleteProfile,
+    testProfileConnection,
     checkStatus,
     checkAllStatuses,
     toggleOpen,

@@ -46,15 +46,32 @@ export type FileDragStateHandler = (isDragging: boolean) => void
 
 export type AiProviderType = 'claude' | 'codex' | 'grok' | 'gemini_api'
 
-export interface AiApiProfile {
+export type AiProviderKind =
+  | 'claude_cli'
+  | 'codex_cli'
+  | 'grok_cli'
+  | 'gemini'
+  | 'claude'
+  | 'openai'
+  | 'deepseek'
+  | 'qwen'
+  | 'minimax'
+  | 'ollama'
+  | 'custom'
+
+export interface AiProfile {
   id: string
   name: string
-  provider: 'gemini' | string
-  apiKey: string
-  endpoint: string
-  model: string
+  provider: AiProviderKind
+  type: 'cli' | 'api'
+  apiKey?: string
+  endpoint?: string
+  model?: string
   temperature?: number
+  isBuiltin?: boolean
 }
+
+export type AiApiProfile = AiProfile
 
 export interface AiApiTestResult {
   success: boolean
