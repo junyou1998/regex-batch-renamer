@@ -269,6 +269,53 @@ pub async fn run_api_chat(
     result
 }
 
+async fn resolve_ollama_model(client: &reqwest::Client, base_endpoint: &str, model_input: &str, api_key: &str) -> String {
+    let tags_url = if base_endpoint.ends_with("/v1") {
+        let root = base_endpoint.trim_end_matches("/v1");
+        format!("{root}/api/tags")
+    } else {
+        format!("{base_endpoint}/api/tags")
+    };
+
+    let mut req = client.get(&tags_url).header("User-Agent", "RegexBatchRenamer/0.6.0");
+    if !api_key.is_empty() {
+        req = req.header("Authorization", format!("Bearer {api_key}"));
+    }
+
+    if let Ok(res) = req.send().await {
+        if res.status().is_success() {
+            if let Ok(body) = res.text().await {
+                if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(&body) {
+                    if let Some(models_arr) = parsed.get("models").and_then(|m| m.as_array()) {
+                        let mut names = Vec::new();
+                        for m in models_arr {
+                            if let Some(name) = m.get("name").and_then(|n| n.as_str()) {
+                                names.push(name.to_string());
+                            }
+                        }
+
+                        if names.iter().any(|n| n == model_input) {
+                            return model_input.to_string();
+                        }
+                        let prefix = format!("{model_input}:");
+                        if let Some(found) = names.iter().find(|n| n.starts_with(&prefix)) {
+                            return found.clone();
+                        }
+                        if let Some(found) = names.iter().find(|n| n.starts_with(model_input)) {
+                            return found.clone();
+                        }
+                        if names.len() == 1 {
+                            return names[0].clone();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    model_input.to_string()
+}
+
 async fn run_ollama_chat_inner(
     request: AiChatRequest,
     profile: AiApiProfile,
@@ -281,19 +328,22 @@ async fn run_ollama_chat_inner(
         raw_endpoint.trim_end_matches('/')
     };
 
-    let model = if profile.model.trim().is_empty() {
+    let raw_model = if profile.model.trim().is_empty() {
         "llama3.1"
     } else {
         profile.model.trim()
     };
 
-    let full_prompt = build_prompt(&request);
-    let temperature = profile.temperature.unwrap_or(0.2);
-
     let client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(180))
         .build()
         .map_err(|e| format!("建立網路連線客戶端失敗: {e}"))?;
+
+    // Auto-resolve model tag (e.g. llama3.1 -> llama3.1:8b)
+    let model = resolve_ollama_model(&client, base_endpoint, raw_model, profile.api_key.trim()).await;
+
+    let full_prompt = build_prompt(&request);
+    let temperature = profile.temperature.unwrap_or(0.2);
 
     let is_v1 = base_endpoint.ends_with("/v1");
     let (url, payload) = if is_v1 {
