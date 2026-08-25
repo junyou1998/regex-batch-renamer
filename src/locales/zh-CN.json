@@ -58,7 +58,9 @@
         "addProfileTitle": "新增配置",
         "editProfileTitle": "编辑配置",
         "quickSelectLabel": "快速选择",
-        "saveAndApply": "保存并应用"
+        "saveAndApply": "保存并应用",
+        "apiKeyPlaceholder": "请输入 API Key",
+        "apiKeyOptionalPlaceholder": "可选（本地 Ollama 默认无需 API Key）"
     },
     "app": {
         "title": "Regex Batch Renamer",

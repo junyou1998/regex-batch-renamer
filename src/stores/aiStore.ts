@@ -109,13 +109,15 @@ export const useAiStore = defineStore('ai', () => {
   const status = computed<AiCliStatus | null>(() => {
     const prof = activeProfile.value
     if (prof.type === 'api') {
+      const isOllama = prof.provider === 'ollama'
       const hasKey = !!prof.apiKey?.trim()
+      const isReady = isOllama || hasKey
       return {
         installed: true,
-        ready: hasKey,
-        version: prof.model || 'gemini-3.6-flash',
+        ready: isReady,
+        version: prof.model || (isOllama ? 'llama3.3' : 'gemini-3.6-flash'),
         provider: prof.provider,
-        message: hasKey ? undefined : '尚未設定 API Key',
+        message: isReady ? undefined : '尚未設定 API Key',
       }
     }
     if (prof.provider === 'codex_cli') return codexStatus.value
@@ -288,7 +290,7 @@ export const useAiStore = defineStore('ai', () => {
     const prof = activeProfile.value
 
     if (prof.type === 'api') {
-      if (!prof.apiKey?.trim()) {
+      if (prof.provider !== 'ollama' && !prof.apiKey?.trim()) {
         toastStore.addToast(`請先至設定填寫 ${prof.name || 'API'} 的 API Key`, 'error')
         return
       }

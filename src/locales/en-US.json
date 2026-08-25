@@ -58,7 +58,9 @@
         "addProfileTitle": "Add Configuration",
         "editProfileTitle": "Edit Configuration",
         "quickSelectLabel": "Quick select",
-        "saveAndApply": "Save & Apply"
+        "saveAndApply": "Save & Apply",
+        "apiKeyPlaceholder": "Enter API Key",
+        "apiKeyOptionalPlaceholder": "Optional (Local Ollama does not require an API key)"
     },
     "app": {
         "title": "Regex Batch Renamer",

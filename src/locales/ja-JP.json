@@ -58,7 +58,9 @@
         "addProfileTitle": "新規設定",
         "editProfileTitle": "設定を編集",
         "quickSelectLabel": "クイック選択",
-        "saveAndApply": "保存して適用"
+        "saveAndApply": "保存して適用",
+        "apiKeyPlaceholder": "API キーを入力",
+        "apiKeyOptionalPlaceholder": "任意（ローカルの Ollama はデフォルトで API キー不要）"
     },
     "app": {
         "title": "Regex Batch Renamer",
