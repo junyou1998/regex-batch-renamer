@@ -3290,7 +3290,7 @@ dependencies = [
 
 [[package]]
 name = "regex-batch-renamer-beta"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "reqwest 0.12.28",
  "serde",
