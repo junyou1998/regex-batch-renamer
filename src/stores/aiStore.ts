@@ -28,9 +28,12 @@ export const useAiStore = defineStore('ai', () => {
 
   const claudeStatus = ref<AiCliStatus | null>(null)
   const codexStatus = ref<AiCliStatus | null>(null)
+  const grokStatus = ref<AiCliStatus | null>(null)
 
   const status = computed(() => {
-    return selectedProvider.value === 'codex' ? codexStatus.value : claudeStatus.value
+    if (selectedProvider.value === 'codex') return codexStatus.value
+    if (selectedProvider.value === 'grok') return grokStatus.value
+    return claudeStatus.value
   })
 
   const messages = ref<AiMessageItem[]>([])
@@ -60,6 +63,7 @@ export const useAiStore = defineStore('ai', () => {
         provider: targetProvider,
       }
       if (targetProvider === 'codex') codexStatus.value = fallback
+      else if (targetProvider === 'grok') grokStatus.value = fallback
       else claudeStatus.value = fallback
       return
     }
@@ -69,6 +73,8 @@ export const useAiStore = defineStore('ai', () => {
       const res = await desktop.checkAiCliStatus(targetProvider)
       if (targetProvider === 'codex') {
         codexStatus.value = res
+      } else if (targetProvider === 'grok') {
+        grokStatus.value = res
       } else {
         claudeStatus.value = res
       }
@@ -81,6 +87,8 @@ export const useAiStore = defineStore('ai', () => {
       }
       if (targetProvider === 'codex') {
         codexStatus.value = fallback
+      } else if (targetProvider === 'grok') {
+        grokStatus.value = fallback
       } else {
         claudeStatus.value = fallback
       }
@@ -95,6 +103,7 @@ export const useAiStore = defineStore('ai', () => {
       await Promise.all([
         checkStatus('claude'),
         checkStatus('codex'),
+        checkStatus('grok'),
       ])
     } finally {
       isCheckingStatus.value = false
@@ -137,7 +146,12 @@ export const useAiStore = defineStore('ai', () => {
     if (!status.value?.ready) {
       await checkStatus(currentProvider)
       if (!status.value?.ready) {
-        const provName = currentProvider === 'codex' ? 'OpenAI Codex CLI' : 'Claude Code CLI'
+        const provName =
+          currentProvider === 'codex'
+            ? 'OpenAI Codex CLI'
+            : currentProvider === 'grok'
+              ? 'xAI Grok CLI'
+              : 'Claude Code CLI'
         toastStore.addToast(status.value?.message || `${provName} 未就緒`, 'error')
         return
       }

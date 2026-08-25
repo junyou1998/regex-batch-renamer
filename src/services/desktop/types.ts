@@ -44,7 +44,7 @@ export type PendingChangesHandler = () => boolean | Promise<boolean>
 export type FileDropHandler = (paths: string[]) => void
 export type FileDragStateHandler = (isDragging: boolean) => void
 
-export type AiProviderType = 'claude' | 'codex'
+export type AiProviderType = 'claude' | 'codex' | 'grok'
 
 export interface AiCliStatus {
   installed: boolean

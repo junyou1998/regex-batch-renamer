@@ -20,6 +20,7 @@ import {
 } from 'lucide-vue-next'
 import ClaudeIcon from './icons/ClaudeIcon.vue'
 import CodexIcon from './icons/CodexIcon.vue'
+import GrokIcon from './icons/GrokIcon.vue'
 
 const props = defineProps<{
   modelValue: boolean
@@ -514,7 +515,45 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                     </div>
                   </div>
 
-                  <!-- Option 3: Custom API (Coming soon) -->
+                  <!-- Option 3: xAI Grok CLI -->
+                  <div
+                    @click="aiStore.setProvider('grok')"
+                    class="p-3.5 rounded-xl transition-all cursor-pointer flex items-start gap-3"
+                    :class="[
+                      aiStore.selectedProvider === 'grok'
+                        ? 'border-2 border-blue-500 bg-blue-50/50 dark:bg-blue-950/30 shadow-xs ring-1 ring-blue-500/30'
+                        : 'border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-900/40',
+                    ]"
+                  >
+                    <div class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 shrink-0 mt-0.5 flex items-center justify-center">
+                      <GrokIcon className="w-5 h-5" />
+                    </div>
+                    <div class="space-y-1 flex-1 min-w-0">
+                      <div class="flex items-center justify-between">
+                        <span class="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                          xAI Grok CLI
+                        </span>
+                        <span
+                          v-if="aiStore.selectedProvider === 'grok'"
+                          class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-md bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 flex items-center gap-1"
+                        >
+                          <Check class="w-3 h-3 stroke-[3]" />
+                          {{ $t('settings.aiActive') }}
+                        </span>
+                        <span
+                          v-else
+                          class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                        >
+                          {{ $t('settings.aiStatusAvailable') }}
+                        </span>
+                      </div>
+                      <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                        {{ $t('settings.aiGrokCliDesc') }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- Option 4: Custom API (Coming soon) -->
                   <div
                     class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100/50 dark:bg-slate-800/40 opacity-70 flex items-start gap-3"
                   >
@@ -524,7 +563,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                     <div class="space-y-1 flex-1 min-w-0">
                       <div class="flex items-center justify-between">
                         <span class="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                          Custom API (OpenAI / Anthropic)
+                          Custom API (OpenAI / Anthropic / xAI)
                         </span>
                         <span
                           class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-md bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-400"
@@ -546,10 +585,17 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
               <div class="space-y-3">
                 <div class="flex items-center justify-between">
                   <h3 class="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide flex items-center gap-1.5">
-                    <CodexIcon v-if="aiStore.selectedProvider === 'codex'" className="w-4 h-4" />
+                    <GrokIcon v-if="aiStore.selectedProvider === 'grok'" className="w-4 h-4" />
+                    <CodexIcon v-else-if="aiStore.selectedProvider === 'codex'" className="w-4 h-4" />
                     <ClaudeIcon v-else className="w-3.5 h-3.5 text-[#D97757]" />
                     <span>
-                      {{ aiStore.selectedProvider === 'codex' ? $t('settings.aiCodexStatusTitle') : $t('settings.aiStatusTitle') }}
+                      {{
+                        aiStore.selectedProvider === 'grok'
+                          ? $t('settings.aiGrokStatusTitle')
+                          : aiStore.selectedProvider === 'codex'
+                            ? $t('settings.aiCodexStatusTitle')
+                            : $t('settings.aiStatusTitle')
+                      }}
                     </span>
                   </h3>
                   <button

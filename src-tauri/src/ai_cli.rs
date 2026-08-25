@@ -132,6 +132,7 @@ pub fn find_cli(binary_name: &str) -> Option<PathBuf> {
         format!("/opt/homebrew/bin/{binary_name}"),
         format!("/usr/local/bin/{binary_name}"),
         format!("/usr/bin/{binary_name}"),
+        format!("~/.grok/bin/{binary_name}"),
         format!("~/.cargo/bin/{binary_name}"),
         format!("~/.npm-global/bin/{binary_name}"),
         format!("~/.local/bin/{binary_name}"),
@@ -146,6 +147,7 @@ pub fn find_cli(binary_name: &str) -> Option<PathBuf> {
             format!("~\\AppData\\Roaming\\npm\\{binary_name}.cmd"),
             format!("~\\AppData\\Local\\Programs\\{binary_name}\\{binary_name}.exe"),
             format!("~\\.cargo\\bin\\{binary_name}.exe"),
+            format!("~\\.grok\\bin\\{binary_name}.exe"),
         ]);
     }
 
@@ -178,8 +180,11 @@ pub fn find_cli(binary_name: &str) -> Option<PathBuf> {
 
 pub fn check_status(provider: Option<&str>) -> AiCliStatus {
     let prov = provider.unwrap_or("claude").to_lowercase();
-    let binary_name = if prov == "codex" { "codex" } else { "claude" };
-    let provider_name = if prov == "codex" { "OpenAI Codex" } else { "Claude Code" };
+    let (binary_name, provider_name) = match prov.as_str() {
+        "codex" => ("codex", "OpenAI Codex"),
+        "grok" => ("grok", "xAI Grok"),
+        _ => ("claude", "Claude Code"),
+    };
 
     let cli_path = match find_cli(binary_name) {
         Some(p) => p,
@@ -346,8 +351,11 @@ fn extract_json_payload(raw: &str) -> Option<&str> {
 
 pub fn run_chat(request: AiChatRequest) -> Result<AiChatResponse, String> {
     let prov = request.provider.as_deref().unwrap_or("claude").to_lowercase();
-    let binary_name = if prov == "codex" { "codex" } else { "claude" };
-    let provider_name = if prov == "codex" { "OpenAI Codex" } else { "Claude Code" };
+    let (binary_name, provider_name) = match prov.as_str() {
+        "codex" => ("codex", "OpenAI Codex"),
+        "grok" => ("grok", "xAI Grok"),
+        _ => ("claude", "Claude Code"),
+    };
 
     let cli_path = find_cli(binary_name)
         .ok_or_else(|| format!("未偵測到 {provider_name} CLI，請確認已安裝並登入。"))?;
