@@ -1,3 +1,5 @@
+mod ai_cli;
+
 use serde::Serialize;
 use std::fs;
 use std::path::PathBuf;
@@ -208,6 +210,18 @@ fn open_devtools(window: WebviewWindow) {
     window.open_devtools();
 }
 
+#[tauri::command]
+fn check_ai_cli_status() -> ai_cli::AiCliStatus {
+    ai_cli::check_status()
+}
+
+#[tauri::command]
+async fn run_ai_chat(request: ai_cli::AiChatRequest) -> Result<ai_cli::AiChatResponse, String> {
+    tauri::async_runtime::spawn_blocking(move || ai_cli::run_chat(request))
+        .await
+        .map_err(|e| e.to_string())?
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -222,7 +236,9 @@ pub fn run() {
             set_zoom_factor,
             exit_app,
             open_devtools,
-            install_app_update
+            install_app_update,
+            check_ai_cli_status,
+            run_ai_chat
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

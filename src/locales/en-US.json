@@ -2,10 +2,13 @@
     "common": {
         "cancel": "Cancel",
         "confirm": "Confirm",
-        "done": "Done"
+        "done": "Done",
+        "copied": "Copied to clipboard"
     },
     "settings": {
         "title": "Settings",
+        "tabGeneral": "General",
+        "tabAi": "AI Assistant",
         "defaults": "Defaults",
         "defaultUseRegex": "Use Regex by Default",
         "defaultUseRegexDesc": "Enable Regex mode when adding new rules",
@@ -15,7 +18,23 @@
         "language": "Language",
         "theme": "Theme",
         "zoomLevel": "Zoom Level",
-        "zoomLevelDesc": "Adjust app interface size (80% - 200%)"
+        "zoomLevelDesc": "Adjust app interface size (80% - 200%)",
+        "aiProvider": "Default AI Engine / Tool",
+        "aiStatusAvailable": "Available",
+        "aiClaudeCliDesc": "Directly interact with local logged-in Claude Code CLI, using subscription without API keys",
+        "aiComingSoon": "Coming Soon",
+        "aiCustomApiDesc": "Custom OpenAI / Anthropic API Keys or connect to local Ollama endpoints",
+        "aiStatusTitle": "Claude Code CLI Status & Info",
+        "aiRecheck": "Recheck",
+        "aiConnection": "Connection",
+        "aiReady": "Ready",
+        "aiNotReady": "Not Ready",
+        "aiVersion": "Detected Version",
+        "aiPath": "Executable Path",
+        "aiBehavior": "AI Automation Preferences",
+        "aiAutoApply": "Auto-apply generated rules",
+        "aiAutoApplyDesc": "Automatically update the rule pipeline and live preview when AI outputs a new workflow",
+        "aiApiNotice": "Custom API Key support (OpenAI / Anthropic / Ollama) is in development. Currently powered by local Claude Code CLI by default."
     },
     "app": {
         "title": "Regex Batch Renamer",
@@ -229,5 +248,37 @@
         "importError": "Import failed: invalid format",
         "enterName": "Enter template name",
         "ops": "{n} rules"
+    },
+    "ai": {
+        "title": "AI Rule Assistant",
+        "assistantBtn": "AI Assistant",
+        "closePanel": "Close AI Panel",
+        "statusChecking": "Checking CLI status...",
+        "statusNotReady": "CLI Not Ready",
+        "refreshStatus": "Recheck CLI Status",
+        "autoApply": "Auto Apply Rules",
+        "autoApplyDesc": "Automatically update the rule pipeline and live preview when AI generates new rules",
+        "clearChat": "Clear Chat History",
+        "onboardingTitle": "Claude Code CLI Setup Required",
+        "onboardingDesc": "This feature directly interfaces with your Claude subscription via the local Claude Code CLI, requiring no separate API key purchase. Please run the following commands in your terminal:",
+        "stepInstallCli": "Install Claude Code CLI",
+        "stepLoginCli": "Log in with your Claude subscription account",
+        "recheck": "I have completed setup, recheck",
+        "welcomeTitle": "AI Batch Renaming Assistant",
+        "welcomeSubtitle": "Describe your renaming goal in natural language, or let AI analyze your loaded filenames to generate regular expression pipelines.",
+        "workspaceContext": "{n} workspace files loaded as context",
+        "suggestedPrompts": "Suggested Prompts",
+        "quickPromptAnalyze": "Analyze current filename patterns and generate standardized renaming rules",
+        "quickPromptExtractDate": "Extract dates in filenames and move them to the front with hyphens",
+        "quickPromptRemoveSpaces": "Remove extra spaces/symbols and replace underscores with hyphens",
+        "quickPromptAddSequence": "Keep the main title and append a two-digit sequence number",
+        "technicalDetails": "Technical Logic & Regex Details",
+        "pipelineCardTitle": "Generated Rule Pipeline ({n} steps)",
+        "applyThisPipeline": "Apply This Pipeline",
+        "pipelineApplied": "AI rule pipeline applied successfully",
+        "thinking": "Claude is analyzing files and formulating rules...",
+        "inputPlaceholder": "Describe your renaming request (e.g., move the prefix date to the end)...",
+        "enterToSend": "Press Enter to send, Shift + Enter for new line",
+        "send": "Send"
     }
 }

@@ -6,12 +6,14 @@ import FilePreviewList from './components/FilePreviewList.vue'
 import ToastNotification from './components/ToastNotification.vue'
 import AboutModal from './components/AboutModal.vue'
 import SettingsModal from './components/SettingsModal.vue'
+import AiAssistantPanel from './components/AiAssistantPanel.vue'
 import { useFileStore } from './stores/fileStore'
 import { useOperationStore } from './stores/operationStore'
 import { useSettingsStore } from './stores/settingsStore'
 import { useToastStore } from './stores/toastStore'
 import { useThemeStore } from './stores/themeStore'
-import { CircleAlert, Info, LoaderCircle, PanelLeft, Settings, X } from 'lucide-vue-next'
+import { useAiStore } from './stores/aiStore'
+import { CircleAlert, Info, LoaderCircle, PanelLeft, Settings, Sparkles, X } from 'lucide-vue-next'
 
 import { getLatestRelease, getReleasePageUrl, isNewerVersion, normalizeReleaseVersion } from './services/updateService'
 import { generateRenamePreview } from './services/renameEngine'
@@ -22,6 +24,7 @@ const fileStore = useFileStore()
 const operationStore = useOperationStore()
 const settingsStore = useSettingsStore()
 const toastStore = useToastStore()
+const aiStore = useAiStore()
 useThemeStore()
 const { t } = useI18n()
 const isProcessing = ref(false)
@@ -522,6 +525,20 @@ async function handleCopyTo() {
         </Transition>
 
         <button
+          @click="aiStore.toggleOpen"
+          :title="aiStore.isOpen ? $t('ai.closePanel') : $t('ai.title')"
+          :class="[
+            'flex items-center gap-1.5 px-2.5 h-6 rounded-md text-xs font-semibold transition-colors cursor-pointer mr-1',
+            aiStore.isOpen
+              ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-200 border border-blue-300 dark:border-blue-700 shadow-2xs'
+              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 hover:text-slate-900 dark:hover:text-slate-100'
+          ]"
+        >
+          <Sparkles class="w-3.5 h-3.5" :class="aiStore.isOpen ? 'text-blue-600 dark:text-blue-400' : ''" />
+          <span class="hidden sm:inline">{{ $t('ai.assistantBtn') }}</span>
+        </button>
+
+        <button
           @click="openAboutModal"
           :title="$t('app.about')"
           class="w-6 h-6 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 hover:text-slate-900 dark:hover:text-slate-100 transition-colors cursor-pointer flex items-center justify-center relative"
@@ -540,9 +557,9 @@ async function handleCopyTo() {
       </div>
     </header>
 
-    <!-- App Body: Sidebar + Main Content -->
+    <!-- App Body: Sidebar + Main Content + Right AI Panel -->
     <div class="flex flex-1 overflow-hidden min-h-0">
-      <!-- Sidebar (完全收合時寬度為 0，展開時 w-80，平滑過渡) -->
+      <!-- Left Sidebar: Operations (完全收合時寬度為 0，展開時 w-80，平滑過渡) -->
       <aside :class="[
         'flex flex-col border-r border-slate-200 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-900/50 backdrop-blur-xl transition-all duration-300 overflow-hidden shrink-0',
         isSidebarCollapsed ? 'w-0 border-r-0' : 'w-80'
@@ -590,6 +607,14 @@ async function handleCopyTo() {
       <main class="flex-1 flex flex-col bg-white dark:bg-slate-950 p-4 sm:p-5 overflow-hidden min-w-0">
         <FilePreviewList :is-file-drag-active="isFileDragActive" />
       </main>
+
+      <!-- Right Sidebar: AI Assistant Panel (完全收合時寬度為 0，展開時 w-96，平滑過渡) -->
+      <aside :class="[
+        'flex flex-col border-l border-slate-200 dark:border-slate-800 bg-slate-100/50 dark:bg-slate-900/50 backdrop-blur-xl transition-all duration-300 overflow-hidden shrink-0',
+        aiStore.isOpen ? 'w-96' : 'w-0 border-l-0'
+      ]">
+        <AiAssistantPanel />
+      </aside>
     </div>
     <ToastNotification />
   <AboutModal
@@ -621,6 +646,7 @@ textarea,
 /* Global scrollbar styling */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -628,11 +654,23 @@ textarea,
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(71, 85, 105, 0.5);
+  background: rgba(71, 85, 105, 0.4);
   border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.8);
+  background: rgba(100, 116, 139, 0.7);
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 </style>
