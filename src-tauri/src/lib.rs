@@ -232,7 +232,7 @@ async fn run_ai_api_chat(
     request: ai_cli::AiChatRequest,
     profile: ai_api::AiApiProfile,
 ) -> Result<ai_cli::AiChatResponse, String> {
-    ai_api::run_gemini_api_chat(request, profile).await
+    ai_api::run_api_chat(request, profile).await
 }
 
 #[tauri::command]
