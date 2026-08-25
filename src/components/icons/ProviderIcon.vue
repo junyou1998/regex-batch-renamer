@@ -31,14 +31,7 @@
 
   <!-- Ollama -->
   <span v-else-if="provider === 'ollama'" :class="wrapperClass">
-    <svg :class="iconClass || 'w-4 h-4 text-slate-700 dark:text-slate-300'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M12 4v4" />
-      <path d="M8 8a4 4 0 0 0 8 0" />
-      <circle cx="9" cy="14" r="1" fill="currentColor" />
-      <circle cx="15" cy="14" r="1" fill="currentColor" />
-      <path d="M10 18h4" />
-      <rect x="5" y="8" width="14" height="12" rx="4" />
-    </svg>
+    <OllamaIcon :class="iconClass || 'w-4 h-4 text-slate-800 dark:text-slate-200'" />
   </span>
 
   <!-- Custom / Fallback -->
@@ -54,6 +47,7 @@ import GrokIcon from './GrokIcon.vue'
 import GeminiIcon from './GeminiIcon.vue'
 import AnthropicIcon from './AnthropicIcon.vue'
 import OpenAiIcon from './OpenAiIcon.vue'
+import OllamaIcon from './OllamaIcon.vue'
 import { SlidersHorizontal } from 'lucide-vue-next'
 import type { AiProviderKind } from '../../services/desktop/types'
 
