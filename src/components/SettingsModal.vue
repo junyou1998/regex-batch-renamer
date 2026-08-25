@@ -580,11 +580,12 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                   <div
                     v-for="profile in aiStore.profiles"
                     :key="profile.id"
-                    class="p-3.5 sm:p-4 rounded-xl border flex items-center justify-between gap-3 transition-all"
+                    @click="aiStore.setActiveProfile(profile.id)"
+                    class="p-3.5 sm:p-4 rounded-xl border flex items-center justify-between gap-3 transition-all cursor-pointer select-none"
                     :class="[
                       profile.id === aiStore.activeProfileId
                         ? 'border-2 border-blue-500 bg-blue-50/40 dark:bg-blue-950/30 shadow-xs ring-1 ring-blue-500/20'
-                        : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900/40',
+                        : 'border-slate-200 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-700/70 hover:bg-slate-50/80 dark:hover:bg-slate-800/40 bg-white dark:bg-slate-900/40',
                     ]"
                   >
                     <!-- Left info -->
@@ -613,16 +614,8 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                     <!-- Right actions -->
                     <div class="flex items-center gap-2.5 sm:gap-3 shrink-0 text-xs font-medium">
                       <button
-                        v-if="profile.id !== aiStore.activeProfileId"
                         type="button"
-                        @click="aiStore.setActiveProfile(profile.id)"
-                        class="text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
-                      >
-                        {{ $t('settings.setAsDefault') }}
-                      </button>
-                      <button
-                        type="button"
-                        @click="startEditProfile(profile)"
+                        @click.stop="startEditProfile(profile)"
                         class="text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
                       >
                         {{ $t('settings.editProfile') }}
@@ -630,7 +623,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                       <button
                         v-if="!profile.isBuiltin"
                         type="button"
-                        @click="aiStore.deleteProfile(profile.id)"
+                        @click.stop="aiStore.deleteProfile(profile.id)"
                         class="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors cursor-pointer font-bold"
                       >
                         {{ $t('settings.deleteProfile') }}
