@@ -24,8 +24,8 @@ import type { AiProfile, AiApiTestResult } from '../services/desktop/types'
 
 const providerOptions = [
   {
-    id: 'claude',
-    name: 'Claude',
+    id: 'anthropic',
+    name: 'Anthropic',
     defaultEndpoint: 'https://api.anthropic.com/v1',
     defaultModel: 'claude-3-7-sonnet-latest',
     models: ['claude-3-7-sonnet-latest', 'claude-3-5-sonnet-latest', 'claude-3-5-haiku-latest'],
@@ -43,27 +43,6 @@ const providerOptions = [
     defaultEndpoint: 'https://generativelanguage.googleapis.com',
     defaultModel: 'gemini-3.6-flash',
     models: ['gemini-3.6-flash', 'gemini-3.6-pro', 'gemini-2.5-flash', 'gemini-1.5-flash'],
-  },
-  {
-    id: 'deepseek',
-    name: 'DeepSeek',
-    defaultEndpoint: 'https://api.deepseek.com/v1',
-    defaultModel: 'deepseek-chat',
-    models: ['deepseek-chat', 'deepseek-reasoner'],
-  },
-  {
-    id: 'qwen',
-    name: 'Qwen',
-    defaultEndpoint: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
-    defaultModel: 'qwen-plus',
-    models: ['qwen-plus', 'qwen-max', 'qwen-turbo'],
-  },
-  {
-    id: 'minimax',
-    name: 'MiniMax',
-    defaultEndpoint: 'https://api.minimax.chat/v1',
-    defaultModel: 'abab6.5s-chat',
-    models: ['abab6.5s-chat', 'abab6.5t-chat'],
   },
   {
     id: 'ollama',

@@ -50,13 +50,11 @@ export type AiProviderKind =
   | 'claude_cli'
   | 'codex_cli'
   | 'grok_cli'
-  | 'gemini'
-  | 'claude'
+  | 'anthropic'
   | 'openai'
-  | 'deepseek'
-  | 'qwen'
-  | 'minimax'
+  | 'gemini'
   | 'ollama'
+  | 'claude'
   | 'custom'
 
 export interface AiProfile {
