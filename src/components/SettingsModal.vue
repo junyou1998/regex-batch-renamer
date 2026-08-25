@@ -49,7 +49,7 @@ const providerOptions = [
     name: 'Ollama',
     defaultEndpoint: 'http://localhost:11434/v1',
     defaultModel: 'llama3.3',
-    models: ['llama3.3', 'qwen2.5', 'deepseek-r1:8b', 'mistral'],
+    models: ['llama3.1:8b', 'llama3.3', 'qwen2.5:7b', 'deepseek-r1:8b', 'mistral'],
   },
 ] as const
 

@@ -52,11 +52,53 @@ pub async fn test_gemini_api_connection(profile: &AiApiProfile) -> Result<AiApiT
 
         match req.send().await {
             Ok(res) if res.status().is_success() => {
-                let model = if profile.model.trim().is_empty() { "llama3.3" } else { profile.model.trim() };
-                Ok(AiApiTestResult {
-                    success: true,
-                    message: format!("連線成功！Ollama 本地服務正常運作，預設模型：`{model}`。"),
-                })
+                let body = res.text().await.unwrap_or_default();
+                let model_input = if profile.model.trim().is_empty() { "llama3.3" } else { profile.model.trim() };
+                
+                let mut installed_models = Vec::new();
+                if let Ok(parsed) = serde_json::from_str::<serde_json::Value>(&body) {
+                    if let Some(models_arr) = parsed.get("models").and_then(|m| m.as_array()) {
+                        for m in models_arr {
+                            if let Some(name) = m.get("name").and_then(|n| n.as_str()) {
+                                installed_models.push(name.to_string());
+                            }
+                        }
+                    } else if let Some(data_arr) = parsed.get("data").and_then(|d| d.as_array()) {
+                        for m in data_arr {
+                            if let Some(id) = m.get("id").and_then(|n| n.as_str()) {
+                                installed_models.push(id.to_string());
+                            }
+                        }
+                    }
+                }
+
+                if installed_models.is_empty() {
+                    Ok(AiApiTestResult {
+                        success: true,
+                        message: format!("連線成功！但本機 Ollama 尚未下載任何模型，請在終端機執行 `ollama pull {model_input}`。"),
+                    })
+                } else {
+                    let has_exact = installed_models.iter().any(|m| m == model_input);
+                    let prefix_match = installed_models.iter().find(|m| m.starts_with(model_input));
+                    
+                    if has_exact {
+                        Ok(AiApiTestResult {
+                            success: true,
+                            message: format!("連線成功！模型 `{model_input}` 已就緒可用。"),
+                        })
+                    } else if let Some(matched) = prefix_match {
+                        Ok(AiApiTestResult {
+                            success: true,
+                            message: format!("連線成功！本機已安裝相符模型 `{matched}`（建議設定模型名稱為完整標籤 `{matched}`）。"),
+                        })
+                    } else {
+                        let list_str = installed_models.join(", ");
+                        Ok(AiApiTestResult {
+                            success: false,
+                            message: format!("連線成功，但本機未安裝模型 `{model_input}`。目前本機已安裝模型：[{list_str}]。請執行 `ollama pull {model_input}` 或填寫已安裝的模型名稱。"),
+                        })
+                    }
+                }
             }
             Ok(res) => {
                 let status = res.status();
@@ -307,6 +349,11 @@ async fn run_ollama_chat_inner(
     let body_text = res.text().await.unwrap_or_default();
 
     if !status.is_success() {
+        if status.as_u16() == 404 && body_text.contains("not found") {
+            return Err(format!(
+                "Ollama 回報模型 `{model}` 不存在。請確認本機是否有下載該模型（例如完整標籤 `{model}:8b` 或 `{model}:latest`），或在終端機執行 `ollama pull {model}`。"
+            ));
+        }
         return Err(format!("Ollama API 回傳錯誤 ({status}): {body_text}"));
     }
 
