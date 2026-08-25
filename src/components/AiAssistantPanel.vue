@@ -216,7 +216,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
       <div class="px-4 pb-2.5 pt-0.5 flex items-center justify-between gap-2">
         <!-- Status Pill -->
         <div
-          class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 text-[11px] min-w-0"
+          class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 text-[11px] min-w-0 shadow-2xs"
         >
           <ProviderIcon :provider="aiStore.activeProfile.provider" class="w-3.5 h-3.5 shrink-0" />
           <span

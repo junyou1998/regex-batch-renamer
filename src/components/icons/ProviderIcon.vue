@@ -1,42 +1,28 @@
 <template>
-  <!-- Gemini API -->
-  <span v-if="provider === 'gemini'" :class="wrapperClass">
-    <GeminiIcon :class="iconClass || 'w-4 h-4 text-purple-600 dark:text-purple-400'" />
-  </span>
+  <span :class="['inline-flex items-center justify-center shrink-0 overflow-hidden', $attrs.class as string, wrapperClass]">
+    <!-- Gemini API -->
+    <GeminiIcon v-if="provider === 'gemini'" :class="iconClass || 'w-full h-full text-purple-600 dark:text-purple-400'" />
 
-  <!-- Anthropic API (Uses official Anthropic mark) -->
-  <span v-else-if="provider === 'anthropic'" :class="wrapperClass">
-    <AnthropicIcon :class="iconClass || 'w-4 h-4 text-slate-800 dark:text-slate-200'" />
-  </span>
+    <!-- Anthropic API (Uses official Anthropic mark) -->
+    <AnthropicIcon v-else-if="provider === 'anthropic'" :class="iconClass || 'w-full h-full text-slate-800 dark:text-slate-200'" />
 
-  <!-- OpenAI API (Uses official ChatGPT rosette knot logo) -->
-  <span v-else-if="provider === 'openai'" :class="wrapperClass">
-    <OpenAiIcon :class="iconClass || 'w-4 h-4 text-slate-800 dark:text-slate-200'" />
-  </span>
+    <!-- OpenAI API (Uses official ChatGPT rosette knot logo) -->
+    <OpenAiIcon v-else-if="provider === 'openai'" :class="iconClass || 'w-full h-full text-slate-800 dark:text-slate-200'" />
 
-  <!-- Claude Code CLI (Uses Claude sunburst icon) -->
-  <span v-else-if="provider === 'claude_cli' || provider === 'claude'" :class="wrapperClass">
-    <ClaudeIcon :class="iconClass || 'w-4 h-4 text-[#D97757]'" />
-  </span>
+    <!-- Claude Code CLI (Uses Claude sunburst icon) -->
+    <ClaudeIcon v-else-if="provider === 'claude_cli' || provider === 'claude'" :class="iconClass || 'w-full h-full text-[#D97757]'" />
 
-  <!-- OpenAI Codex CLI (Uses Codex terminal icon) -->
-  <span v-else-if="provider === 'codex_cli'" :class="wrapperClass">
-    <CodexIcon :class="iconClass || 'w-4 h-4 text-slate-800 dark:text-slate-200'" />
-  </span>
+    <!-- OpenAI Codex CLI (Uses Codex terminal icon) -->
+    <CodexIcon v-else-if="provider === 'codex_cli'" :class="iconClass || 'w-full h-full text-slate-800 dark:text-slate-200'" />
 
-  <!-- xAI Grok CLI (Uses Grok slash icon) -->
-  <span v-else-if="provider === 'grok_cli'" :class="wrapperClass">
-    <GrokIcon :class="iconClass || 'w-4 h-4 text-slate-800 dark:text-slate-200'" />
-  </span>
+    <!-- xAI Grok CLI (Uses Grok slash icon) -->
+    <GrokIcon v-else-if="provider === 'grok_cli'" :class="iconClass || 'w-full h-full text-slate-800 dark:text-slate-200'" />
 
-  <!-- Ollama -->
-  <span v-else-if="provider === 'ollama'" :class="wrapperClass">
-    <OllamaIcon :class="iconClass || 'w-4 h-4 text-slate-800 dark:text-slate-200'" />
-  </span>
+    <!-- Ollama -->
+    <OllamaIcon v-else-if="provider === 'ollama'" :class="iconClass || 'w-full h-full text-slate-800 dark:text-slate-200'" />
 
-  <!-- Custom / Fallback -->
-  <span v-else :class="wrapperClass">
-    <SlidersHorizontal :class="iconClass || 'w-4 h-4 text-slate-600 dark:text-slate-400'" />
+    <!-- Custom / Fallback -->
+    <SlidersHorizontal v-else :class="iconClass || 'w-full h-full text-slate-600 dark:text-slate-400'" />
   </span>
 </template>
 

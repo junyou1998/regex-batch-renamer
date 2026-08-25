@@ -1,12 +1,7 @@
 <script setup lang="ts">
-withDefaults(
-  defineProps<{
-    className?: string
-  }>(),
-  {
-    className: 'w-5 h-5 text-[#D97757]',
-  }
-)
+defineProps<{
+  className?: string
+}>()
 </script>
 
 <template>
@@ -15,7 +10,7 @@ withDefaults(
     viewBox="0 0 24 24"
     fill="currentColor"
     xmlns="http://www.w3.org/2000/svg"
-    :class="className"
+    :class="className || 'w-full h-full text-[#D97757]'"
   >
     <title>Claude</title>
     <path
