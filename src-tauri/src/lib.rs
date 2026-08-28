@@ -245,6 +245,56 @@ fn save_text_file(path: String, content: String) -> Result<(), String> {
     fs::write(&path, content).map_err(|error| format!("無法儲存檔案: {error}"))
 }
 
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct NativeFileMetadata {
+    size: u64,
+    created_at_ms: Option<u64>,
+    modified_at_ms: Option<u64>,
+    is_file: bool,
+    is_dir: bool,
+}
+
+#[tauri::command]
+async fn read_file_binary(path: String, max_bytes: Option<usize>) -> Result<Vec<u8>, String> {
+    use std::io::Read;
+    let file = fs::File::open(&path).map_err(|e| format!("無法開啟檔案: {e}"))?;
+    let mut buffer = Vec::new();
+    if let Some(max) = max_bytes {
+        file.take(max as u64)
+            .read_to_end(&mut buffer)
+            .map_err(|e| format!("讀取檔案失敗: {e}"))?;
+    } else {
+        let mut handle = file;
+        handle
+            .read_to_end(&mut buffer)
+            .map_err(|e| format!("讀取檔案失敗: {e}"))?;
+    }
+    Ok(buffer)
+}
+
+#[tauri::command]
+async fn get_file_metadata(path: String) -> Result<NativeFileMetadata, String> {
+    let metadata = fs::metadata(&path).map_err(|e| format!("取得檔案屬性失敗: {e}"))?;
+    let created_at_ms = metadata
+        .created()
+        .ok()
+        .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+        .map(|d| d.as_millis() as u64);
+    let modified_at_ms = metadata
+        .modified()
+        .ok()
+        .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+        .map(|d| d.as_millis() as u64);
+    Ok(NativeFileMetadata {
+        size: metadata.len(),
+        created_at_ms,
+        modified_at_ms,
+        is_file: metadata.is_file(),
+        is_dir: metadata.is_dir(),
+    })
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -257,6 +307,8 @@ pub fn run() {
             rename_files,
             copy_rename_files,
             save_text_file,
+            read_file_binary,
+            get_file_metadata,
             set_zoom_factor,
             exit_app,
             open_devtools,

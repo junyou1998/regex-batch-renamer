@@ -22,7 +22,8 @@ import {
   ArrowLeft,
   ExternalLink,
   BookOpen,
-  Globe
+  Globe,
+  Folder
 } from 'lucide-vue-next'
 
 const props = defineProps<{
@@ -57,6 +58,7 @@ interface PluginDetailTarget {
   downloadUrl?: string
   isInstalled: boolean
   isEnabled?: boolean
+  isBuiltin?: boolean
 }
 
 const selectedDetailPlugin = ref<PluginDetailTarget | null>(null)
@@ -205,7 +207,8 @@ async function openPluginDetail(plugin: InstalledPlugin | MarketplacePlugin) {
     readmeUrl: !isInstalled ? (plugin as MarketplacePlugin).readmeUrl : undefined,
     downloadUrl: !isInstalled ? (plugin as MarketplacePlugin).downloadUrl : undefined,
     isInstalled,
-    isEnabled: isInstalled ? (plugin as InstalledPlugin).enabled : undefined
+    isEnabled: isInstalled ? (plugin as InstalledPlugin).enabled : undefined,
+    isBuiltin: isInstalled ? (plugin as InstalledPlugin).isBuiltin : false
   }
 
   readmeContent.value = ''
@@ -392,8 +395,9 @@ async function handleOpenUrl(url?: string) {
                   </label>
                 </div>
 
-                <!-- Uninstall Button -->
+                <!-- Uninstall Button (Only for non-builtin plugins) -->
                 <button
+                  v-if="!selectedDetailPlugin.isBuiltin"
                   type="button"
                   @click="handleDeletePlugin(selectedDetailPlugin)"
                   class="flex items-center gap-1 px-3 py-2 rounded-xl bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800/60 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/60 text-xs font-semibold transition-colors cursor-pointer"
@@ -603,8 +607,15 @@ async function handleOpenUrl(url?: string) {
 
                     <!-- Permissions & Features Badges -->
                     <div class="flex flex-wrap items-center gap-1.5 mb-3 text-[10.5px]">
+                      <span v-if="plugin.isBuiltin" class="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60 font-medium">
+                        內建
+                      </span>
                       <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-400 font-mono">
                         {{ plugin.manifest.type }}
+                      </span>
+                      <span v-if="plugin.manifest.permissions?.includes('filesystem')" class="px-2 py-0.5 rounded-md bg-cyan-50 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-300 border border-cyan-200/60 dark:border-cyan-800/60 flex items-center gap-1">
+                        <Folder class="w-3 h-3" />
+                        檔案讀取
                       </span>
                       <span v-if="plugin.manifest.permissions?.includes('network')" class="px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/60 flex items-center gap-1">
                         <ShieldCheck class="w-3 h-3" />
@@ -667,6 +678,7 @@ async function handleOpenUrl(url?: string) {
 
                     <div class="flex items-center gap-1">
                       <button
+                        v-if="!plugin.isBuiltin"
                         type="button"
                         @click="handleDeletePlugin(plugin)"
                         :title="$t('plugins.uninstall')"

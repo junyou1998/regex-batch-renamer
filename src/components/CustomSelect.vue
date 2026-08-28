@@ -83,6 +83,7 @@ onUnmounted(() => {
       type="button"
       @click="toggleDropdown"
       :disabled="disabled"
+      :title="displayLabel"
       class="w-full bg-white dark:bg-slate-900/60 border rounded-lg px-3 text-slate-800 dark:text-slate-100 flex items-center justify-between transition-all cursor-pointer shadow-2xs hover:border-slate-400 dark:hover:border-slate-600 focus:outline-hidden"
       :class="[
         isOpen
@@ -92,7 +93,7 @@ onUnmounted(() => {
         size === 'sm' ? 'py-1.5 text-xs' : 'py-2 text-sm'
       ]"
     >
-      <span class="truncate font-medium" :class="{ 'text-slate-400 dark:text-slate-500': !selectedOption }">
+      <span class="truncate text-xs font-medium" :class="{ 'text-slate-400 dark:text-slate-500': !selectedOption }">
         {{ displayLabel }}
       </span>
       <ChevronDown
@@ -105,13 +106,14 @@ onUnmounted(() => {
     <Transition name="dropdown">
       <div
         v-if="isOpen"
-        class="absolute z-50 left-0 right-0 mt-1.5 py-1 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl max-h-60 overflow-y-auto custom-scrollbar"
+        class="absolute z-50 left-0 right-0 w-full mt-1.5 py-1 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl max-h-60 overflow-y-auto custom-scrollbar"
       >
         <button
           v-for="opt in options"
           :key="opt.value"
           type="button"
           @click="selectOption(opt)"
+          :title="opt.label"
           class="w-full px-3 py-2 text-left text-xs flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors cursor-pointer"
           :class="[
             opt.value === modelValue
@@ -119,13 +121,8 @@ onUnmounted(() => {
               : 'text-slate-700 dark:text-slate-200'
           ]"
         >
-          <div class="min-w-0 pr-2">
-            <div class="truncate">{{ opt.label }}</div>
-            <div v-if="opt.description" class="text-[10px] text-slate-400 dark:text-slate-500 font-normal truncate mt-0.5">
-              {{ opt.description }}
-            </div>
-          </div>
-          <Check v-if="opt.value === modelValue" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0 ml-1.5" />
+          <span class="truncate pr-2">{{ opt.label }}</span>
+          <Check v-if="opt.value === modelValue" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0 ml-1" />
         </button>
       </div>
     </Transition>

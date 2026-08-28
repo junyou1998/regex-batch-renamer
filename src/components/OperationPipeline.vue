@@ -29,7 +29,8 @@ import {
   Sparkles,
   Puzzle,
   AlertCircle,
-  LoaderCircle
+  LoaderCircle,
+  Braces
 } from 'lucide-vue-next'
 
 defineProps<{
@@ -370,6 +371,13 @@ function setInputRef(el: any, id: string) {
   if (el) inputRefs.value[id] = el
 }
 
+function insertOptionVariable(op: Operation, key: string, varName: string) {
+  if (typeof op.params[key] !== 'string') {
+    op.params[key] = ''
+  }
+  op.params[key] += varName
+}
+
 function openHelper(id: string) {
   activeHelperId.value = id
   helperWidth.value = 1
@@ -380,7 +388,20 @@ function closeHelper() {
   activeHelperId.value = null
 }
 
+const activeVarPicker = ref<{ opId: string; key: string } | null>(null)
+
+function toggleVariablePicker(opId: string, key: string) {
+  if (activeVarPicker.value?.opId === opId && activeVarPicker.value?.key === key) {
+    activeVarPicker.value = null
+  } else {
+    activeVarPicker.value = { opId, key }
+  }
+}
+
 function handleKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape' && activeVarPicker.value) {
+    activeVarPicker.value = null
+  }
   if (e.key === 'Escape' && activeHelperId.value) {
     closeHelper()
   }
@@ -453,10 +474,20 @@ function handleDocumentClick(e: MouseEvent | PointerEvent) {
   if (showAddDropdown.value && addDropdownContainerRef.value && target && !addDropdownContainerRef.value.contains(target)) {
     showAddDropdown.value = false
   }
+  if (activeVarPicker.value && target) {
+    const pickerEls = document.querySelectorAll('.var-picker-container')
+    let clickedInside = false
+    pickerEls.forEach(el => {
+      if (el.contains(target)) clickedInside = true
+    })
+    if (!clickedInside) {
+      activeVarPicker.value = null
+    }
+  }
 }
 
-watch([showTemplateDropdown, showAddDropdown], ([isTplOpen, isAddOpen]) => {
-  if (isTplOpen || isAddOpen) {
+watch([showTemplateDropdown, showAddDropdown, activeVarPicker], ([isTplOpen, isAddOpen, varPicker]) => {
+  if (isTplOpen || isAddOpen || varPicker) {
     nextTick(() => {
       window.addEventListener('pointerdown', handleDocumentClick)
     })
@@ -901,14 +932,15 @@ function confirmPrefixSuffix() {
               <div
                 v-for="option in (pluginStore.getPlugin(op.params.pluginId)?.manifest.options || [])"
                 :key="option.key"
-                class="space-y-1"
+                class="space-y-1.5"
               >
-                <div class="flex items-center justify-between text-xs font-medium text-slate-600 dark:text-slate-400 ml-0.5">
+                <div class="flex items-center justify-between text-xs font-medium text-slate-700 dark:text-slate-300 ml-0.5">
                   <span>{{ option.label }}</span>
-                  <span v-if="option.description" class="text-[10.5px] text-slate-400 font-normal truncate max-w-[200px]" :title="option.description">
-                    {{ option.description }}
-                  </span>
                 </div>
+
+                <p v-if="option.description && !option.variables?.length" class="text-[11px] text-slate-500 dark:text-slate-400 ml-0.5 leading-normal">
+                  {{ option.description }}
+                </p>
 
                 <!-- Custom Select Option -->
                 <CustomSelect
@@ -919,7 +951,7 @@ function confirmPrefixSuffix() {
                 />
 
                 <!-- Boolean Option (Checkbox) -->
-                <label v-else-if="option.type === 'boolean'" class="flex items-center gap-2 cursor-pointer pt-1 select-none">
+                <label v-else-if="option.type === 'boolean'" class="flex items-center gap-2 cursor-pointer pt-0.5 select-none">
                   <div class="relative flex items-center justify-center shrink-0">
                     <input type="checkbox" v-model="op.params[option.key]" class="sr-only peer">
                     <div
@@ -927,16 +959,62 @@ function confirmPrefixSuffix() {
                       <Check v-if="op.params[option.key]" class="w-3 h-3 text-white stroke-[3.5]" />
                     </div>
                   </div>
-                  <span class="text-xs text-slate-600 dark:text-slate-300">{{ option.label }}</span>
+                  <span class="text-xs text-slate-700 dark:text-slate-300">{{ option.label }}</span>
                 </label>
 
-                <!-- String Option -->
-                <input
-                  v-else-if="option.type === 'string'"
-                  type="text"
-                  v-model="op.params[option.key]"
-                  class="w-full bg-white dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 font-mono"
-                />
+                <!-- String Option with Inline Variable Picker -->
+                <div v-else-if="option.type === 'string'" class="space-y-1.5 var-picker-container relative">
+                  <div class="relative flex items-center">
+                    <input
+                      type="text"
+                      v-model="op.params[option.key]"
+                      :placeholder="option.default || ''"
+                      class="w-full bg-white dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 font-mono transition-all"
+                      :class="{ 'pr-20': option.variables?.length }"
+                    />
+
+                    <!-- Inline Variable Trigger Button inside Input -->
+                    <button
+                      v-if="option.variables?.length"
+                      type="button"
+                      @click="toggleVariablePicker(op.id, option.key)"
+                      class="absolute right-1.5 px-2 py-1 rounded-md text-[11px] font-medium flex items-center gap-1 transition-colors cursor-pointer shadow-2xs select-none"
+                      :class="[
+                        activeVarPicker?.opId === op.id && activeVarPicker?.key === option.key
+                          ? 'bg-blue-600 text-white shadow-xs'
+                          : 'bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950/70 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 border border-slate-200 dark:border-slate-700'
+                      ]"
+                      title="點擊展開可用變數清單"
+                    >
+                      <Braces class="w-3 h-3" :class="{ 'text-white': activeVarPicker?.opId === op.id && activeVarPicker?.key === option.key, 'text-blue-500': activeVarPicker?.opId !== op.id || activeVarPicker?.key !== option.key }" />
+                      <span>變數</span>
+                      <ChevronDown class="w-2.5 h-2.5 opacity-70 transition-transform duration-150" :class="{ 'rotate-180': activeVarPicker?.opId === op.id && activeVarPicker?.key === option.key }" />
+                    </button>
+                  </div>
+
+                  <!-- Dropdown Menu for Variables -->
+                  <Transition name="dropdown">
+                    <div
+                      v-if="activeVarPicker?.opId === op.id && activeVarPicker?.key === option.key"
+                      class="absolute z-50 left-0 right-0 w-full mt-1 py-1 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl max-h-56 overflow-y-auto custom-scrollbar"
+                    >
+                      <div class="px-3 py-1.5 text-[10.5px] font-medium text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-slate-700/60 flex items-center justify-between select-none">
+                        <span>點選變數直接插入</span>
+                        <span class="font-mono text-[10px]">{{ option.variables?.length }} 個變數</span>
+                      </div>
+                      <button
+                        v-for="v in option.variables"
+                        :key="v.name"
+                        type="button"
+                        @click="insertOptionVariable(op, option.key, v.name)"
+                        class="w-full px-3 py-1.5 text-left text-xs flex items-center justify-between hover:bg-blue-50/80 dark:hover:bg-slate-700/80 transition-colors cursor-pointer group"
+                      >
+                        <span class="font-mono font-semibold text-blue-600 dark:text-blue-400">{{ v.name }}</span>
+                        <span v-if="v.description" class="text-[11px] text-slate-400 dark:text-slate-400 font-sans truncate ml-2">{{ v.description }}</span>
+                      </button>
+                    </div>
+                  </Transition>
+                </div>
 
                 <!-- Number Option -->
                 <input

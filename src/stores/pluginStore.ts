@@ -1,12 +1,19 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import JSZip from 'jszip'
+import { BUILTIN_PLUGINS } from '../services/builtinPlugins'
 
 export type PluginOptionType = 'select' | 'boolean' | 'string' | 'number'
 
 export interface PluginOptionChoice {
   value: string | number
   label: string
+  description?: string
+}
+
+export interface PluginOptionVariable {
+  name: string
+  description?: string
 }
 
 export interface PluginOption {
@@ -16,6 +23,7 @@ export interface PluginOption {
   default?: any
   description?: string
   options?: PluginOptionChoice[] // For 'select' type
+  variables?: PluginOptionVariable[] // Quick insertable variables
   min?: number // For 'number' type
   max?: number // For 'number' type
   step?: number // For 'number' type
@@ -77,7 +85,7 @@ export const usePluginStore = defineStore('plugin', () => {
   const marketplaceError = ref<string | null>(null)
   const healthMap = ref<Record<string, PluginHealthState>>({})
 
-  // Initialize and load saved plugins
+  // Initialize and load saved plugins + ensure builtins are registered
   function initPlugins() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
@@ -86,6 +94,18 @@ export const usePluginStore = defineStore('plugin', () => {
       }
     } catch (e) {
       console.error('Failed to load plugins from storage:', e)
+    }
+
+    // Merge/Register Builtin plugins if not already present or update their manifest/code
+    for (const [id, builtin] of Object.entries(BUILTIN_PLUGINS)) {
+      if (!installedPlugins.value[id]) {
+        installedPlugins.value[id] = { ...builtin }
+      } else {
+        installedPlugins.value[id].manifest = builtin.manifest
+        installedPlugins.value[id].code = builtin.code
+        installedPlugins.value[id].readme = builtin.readme
+        installedPlugins.value[id].isBuiltin = true
+      }
     }
   }
 

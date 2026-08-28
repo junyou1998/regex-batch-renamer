@@ -1,4 +1,15 @@
+import { invoke } from '@tauri-apps/api/core'
 import { usePluginStore, type PluginHealthState } from '../stores/pluginStore'
+
+export interface PluginFileInfo {
+  id?: string
+  path: string
+  originalName: string
+  extension?: string
+  size?: number
+  index: number
+  total?: number
+}
 
 interface CacheEntry {
   value: any
@@ -56,6 +67,21 @@ export function createPluginContext() {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`)
       }
       return await response.json()
+    },
+    async readBinaryFile(path: string, maxBytes?: number): Promise<Uint8Array> {
+      try {
+        const bytes = await invoke<number[]>('read_file_binary', { path, maxBytes })
+        return new Uint8Array(bytes)
+      } catch (err: any) {
+        throw new Error(`讀取二進位檔案失敗 (${path}): ${err?.message || err}`)
+      }
+    },
+    async getFileMetadata(path: string): Promise<{ size: number; createdAtMs?: number; modifiedAtMs?: number; isFile: boolean; isDir: boolean }> {
+      try {
+        return await invoke('get_file_metadata', { path })
+      } catch (err: any) {
+        throw new Error(`取得檔案屬性失敗 (${path}): ${err?.message || err}`)
+      }
     }
   }
 }
@@ -121,7 +147,8 @@ function getPluginInstance(pluginId: string): any {
 export async function runPluginTransform(
   pluginId: string,
   input: string,
-  params: Record<string, any>
+  params: Record<string, any>,
+  fileInfo?: PluginFileInfo
 ): Promise<string> {
   const pluginStore = usePluginStore()
   const instance = getPluginInstance(pluginId)
@@ -132,7 +159,7 @@ export async function runPluginTransform(
   const ctx = createPluginContext()
   pluginStore.setPluginStatus(pluginId, { isBusy: true, lastError: undefined })
   try {
-    const result = await instance.transform(input, params, ctx)
+    const result = await instance.transform(input, params, ctx, fileInfo)
     pluginStore.setPluginStatus(pluginId, { isBusy: false, lastSuccessAt: Date.now() })
     return typeof result === 'string' ? result : input
   } catch (err: any) {
@@ -148,7 +175,8 @@ export async function runPluginTransform(
 export async function runPluginTransformBatch(
   pluginId: string,
   inputs: string[],
-  params: Record<string, any>
+  params: Record<string, any>,
+  fileInfos?: PluginFileInfo[]
 ): Promise<string[]> {
   if (!inputs || inputs.length === 0) return inputs
 
@@ -162,7 +190,7 @@ export async function runPluginTransformBatch(
   // Use transformBatch if implemented
   if (typeof instance.transformBatch === 'function') {
     try {
-      const results = await instance.transformBatch(inputs, params, ctx)
+      const results = await instance.transformBatch(inputs, params, ctx, fileInfos)
       if (Array.isArray(results) && results.length === inputs.length) {
         pluginStore.setPluginStatus(pluginId, { isBusy: false, lastSuccessAt: Date.now() })
         return results
@@ -176,8 +204,8 @@ export async function runPluginTransformBatch(
   // Fallback to transform item-by-item
   if (typeof instance.transform === 'function') {
     try {
-      const promises = inputs.map(input =>
-        instance.transform(input, params, ctx).catch((err: any) => {
+      const promises = inputs.map((input, idx) =>
+        instance.transform(input, params, ctx, fileInfos ? fileInfos[idx] : undefined).catch((err: any) => {
           console.warn(`[Plugin:${pluginId}] transform item error:`, err)
           return input
         })

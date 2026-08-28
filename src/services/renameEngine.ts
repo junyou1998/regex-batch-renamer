@@ -148,10 +148,20 @@ export async function generateRenamePreviewAsync(
   const parsed = files.map(f => splitName(f.originalName, options.processFilenameOnly))
   let currentNames = parsed.map(p => p.base)
 
+  // Construct file info array for plugins
+  const fileInfos = files.map((file, index) => ({
+    id: file.id,
+    path: file.path,
+    originalName: file.originalName,
+    extension: parsed[index].ext,
+    index,
+    total: files.length
+  }))
+
   // Pipeline step-by-step transformation
   for (const op of enabledOps) {
     if (op.type === 'plugin' && op.params.pluginId) {
-      currentNames = await runPluginTransformBatch(op.params.pluginId, currentNames, op.params)
+      currentNames = await runPluginTransformBatch(op.params.pluginId, currentNames, op.params, fileInfos)
     } else {
       currentNames = currentNames.map((name, index) => applyOperation(name, op, { index }))
     }
