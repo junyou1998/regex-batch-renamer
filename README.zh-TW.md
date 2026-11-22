@@ -10,7 +10,7 @@
 
 **繁體中文** · [简体中文](README.zh-CN.md) · [English](README.md)
 
-[官方網站](https://renamer.junyou.tw/) · [下載](https://github.com/junyou1998/regex-batch-renamer/releases/latest) · [外掛](https://github.com/junyou1998/regex-batch-renamer-plugins)
+[官方網站](https://renamix.junyou.tw/) · [下載](https://github.com/junyou1998/regex-batch-renamer/releases/latest) · [外掛](https://github.com/junyou1998/regex-batch-renamer-plugins)
 
 </div>
 

@@ -772,8 +772,8 @@ async function handleCopyTo() {
         <div class="flex flex-col flex-1 min-w-80 h-full min-h-0 overflow-hidden">
           <!-- Sidebar Brand Title (Fixed Header 1) -->
           <div class="p-4 border-b border-slate-200 dark:border-slate-800 shrink-0">
-            <a href="#" @click.prevent="openExternal('https://renamer.junyou.tw')"
-              class="block transition-opacity hover:opacity-80 cursor-pointer" v-tooltip="'https://renamer.junyou.tw'">
+            <a href="#" @click.prevent="openExternal('https://renamix.junyou.tw')"
+              class="block transition-opacity hover:opacity-80 cursor-pointer" v-tooltip="'https://renamix.junyou.tw'">
               <h1
                 class="text-lg font-bold bg-linear-to-r from-blue-600 to-cyan-500 dark:from-blue-400 dark:to-cyan-300 bg-clip-text text-transparent leading-snug">
                 {{ $t('app.title') }}

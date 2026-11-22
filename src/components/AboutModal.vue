@@ -343,14 +343,14 @@ async function openChangelogForTag(tagName: string) {
                         <div v-else class="space-y-6">
                             <!-- Project Info -->
                             <div class="text-center space-y-2">
-                                <a href="#" @click.prevent="openExternal('https://renamer.junyou.tw')"
+                                <a href="#" @click.prevent="openExternal('https://renamix.junyou.tw')"
                                     class="block transition-transform hover:scale-105 active:scale-95 cursor-pointer w-fit mx-auto"
-                                    v-tooltip="'https://renamer.junyou.tw'">
+                                    v-tooltip="'https://renamix.junyou.tw'">
                                     <img src="/icon.png" alt="App Icon" class="w-24 h-24 mx-auto mb-4" />
                                 </a>
-                                <a href="#" @click.prevent="openExternal('https://renamer.junyou.tw')"
+                                <a href="#" @click.prevent="openExternal('https://renamix.junyou.tw')"
                                     class="inline-block hover:underline decoration-slate-400 dark:decoration-slate-600 underline-offset-4 cursor-pointer"
-                                    v-tooltip="'https://renamer.junyou.tw'">
+                                    v-tooltip="'https://renamix.junyou.tw'">
                                     <h4 class="text-xl font-bold text-slate-800 dark:text-white">Renamix
                                     </h4>
                                 </a>
