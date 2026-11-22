@@ -1,13 +1,29 @@
 <script setup lang="ts">
 import { BookOpenText, X } from 'lucide-vue-next'
 
-defineProps<{
+import { modKey } from '../services/helpBus'
+import { useEscapeToClose } from '../composables/useEscapeToClose'
+
+const shortcuts = [
+    { label: 'help.shortcuts.rename', keys: [modKey, 'Enter'] },
+    { label: 'help.shortcuts.undo', keys: [modKey, 'Z'] },
+    { label: 'help.shortcuts.addFiles', keys: [modKey, 'O'] },
+    { label: 'help.shortcuts.help', keys: [modKey, '/'] },
+    { label: 'help.shortcuts.zoomIn', keys: [modKey, '+'] },
+    { label: 'help.shortcuts.zoomOut', keys: [modKey, '−'] },
+    { label: 'help.shortcuts.zoomReset', keys: [modKey, '0'] },
+    { label: 'help.shortcuts.close', keys: ['Esc'] },
+]
+
+const props = defineProps<{
     modelValue: boolean
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
     (e: 'update:modelValue', value: boolean): void
 }>()
+
+useEscapeToClose(() => props.modelValue, () => emit('update:modelValue', false))
 </script>
 
 <template>
@@ -330,6 +346,26 @@ defineEmits<{
                                     </div>
                                 </div>
                             </section>
+                        </section>
+
+                        <hr class="border-slate-200 dark:border-slate-800">
+
+                        <!-- Keyboard shortcuts -->
+                        <section class="space-y-3">
+                            <h4 class="text-base font-bold text-blue-600 dark:text-blue-400 flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                                {{ $t('help.shortcuts.title') }}
+                            </h4>
+                            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                                <div v-for="item in shortcuts" :key="item.label"
+                                    class="flex items-center justify-between gap-3 py-1 border-b border-slate-100 dark:border-slate-800/80">
+                                    <dt class="text-slate-600 dark:text-slate-300">{{ $t(item.label) }}</dt>
+                                    <dd class="flex items-center gap-1 shrink-0">
+                                        <kbd v-for="k in item.keys" :key="k"
+                                            class="min-w-6 text-center px-1.5 py-0.5 rounded-md border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 font-mono text-[11px] text-slate-700 dark:text-slate-200 shadow-2xs">{{ k }}</kbd>
+                                    </dd>
+                                </div>
+                            </dl>
                         </section>
                     </div>
 

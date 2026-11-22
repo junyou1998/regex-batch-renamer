@@ -22,6 +22,7 @@ import PluginModal from './components/PluginModal.vue'
 import { getLatestRelease, getReleasePageUrl, isNewerVersion, normalizeReleaseVersion } from './services/updateService'
 import { generateRenamePreviewAsync, type RenameIssue } from './services/renameEngine'
 import { joinPath, replaceBasename } from './utils/path'
+import { openHelp } from './services/helpBus'
 import { desktop, type DesktopRuntimeInfo } from './services/desktop'
 
 const fileStore = useFileStore()
@@ -249,6 +250,13 @@ function handleGlobalKeydown(e: KeyboardEvent) {
   if (e.key === 'F12' || ((e.metaKey || e.ctrlKey) && (e.altKey || e.shiftKey) && (e.key === 'i' || e.key === 'I'))) {
     e.preventDefault()
     void desktop.openDevTools?.()
+    return
+  }
+
+  // Help & regex guide: F1 or Cmd/Ctrl + /
+  if (e.key === 'F1' || ((e.metaKey || e.ctrlKey) && (e.key === '/' || e.key === '?'))) {
+    e.preventDefault()
+    openHelp()
     return
   }
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { escapeReplacementLiteral } from '../services/renameEngine'
+import { isHelpOpen, modKey } from '../services/helpBus'
 import { ref, onMounted, watch, onUnmounted, nextTick, computed } from 'vue'
 import { useOperationStore, type Operation } from '../stores/operationStore'
 import { useSettingsStore } from '../stores/settingsStore'
@@ -19,7 +20,6 @@ import {
   EyeOff,
   FileText,
   GripVertical,
-  HelpCircle,
   Pencil,
   Plus,
   Save,
@@ -33,7 +33,8 @@ import {
   LoaderCircle,
   Braces,
   Search,
-  CornerDownRight
+  CornerDownRight,
+  BookOpen
 } from 'lucide-vue-next'
 
 defineProps<{
@@ -48,7 +49,8 @@ const { t } = useI18n()
 const operationStore = useOperationStore()
 const settingsStore = useSettingsStore()
 const toastStore = useToastStore()
-const showHelp = ref(false)
+// Shared with the global ⌘/ / F1 shortcut and other help links.
+const showHelp = isHelpOpen
 
 const pluginStore = usePluginStore()
 const showPluginModal = ref(false)
@@ -625,9 +627,10 @@ function confirmPrefixSuffix() {
         {{ $t('operations.title') }}
 
         <button type="button" @click="showHelp = true"
-          class="text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer"
-          v-tooltip="{ title: $t('operations.helpTitle'), placement: 'bottom' }">
-          <HelpCircle class="h-4 w-4" />
+          class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[11px] font-medium text-slate-500 dark:text-slate-400 border border-slate-300/80 dark:border-slate-700 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:border-blue-800 dark:hover:bg-blue-950/40 transition-colors cursor-pointer"
+          v-tooltip="{ title: $t('operations.helpTitle'), shortcut: `${modKey} /`, placement: 'bottom' }">
+          <BookOpen class="h-3.5 w-3.5" />
+          <span>{{ $t('operations.helpButton') }}</span>
         </button>
 
         <button type="button" v-if="canUndo" @click="emit('undo')"
@@ -919,7 +922,7 @@ function confirmPrefixSuffix() {
                     @click="op.params.useRegex = !op.params.useRegex"
                     :aria-pressed="Boolean(op.params.useRegex)"
                     :aria-label="$t('operations.useRegex')"
-                    v-tooltip="{ title: $t('operations.tipRegexTitle'), desc: $t('operations.tipRegexDesc') }"
+                    v-tooltip="{ title: $t('operations.tipRegexTitle'), desc: `${$t('operations.tipRegexDesc')} ${$t('operations.tipRegexHelp', { key: `${modKey} /` })}` }"
                     class="h-6 min-w-6 px-1 rounded-md font-mono text-[11px] font-bold transition-colors cursor-pointer"
                     :class="op.params.useRegex
                       ? 'bg-blue-600 text-white'
@@ -937,6 +940,8 @@ function confirmPrefixSuffix() {
               </div>
               <p v-if="operationStore.ruleErrors[op.id]" class="mt-1 text-[11px] text-red-600 dark:text-red-400 ml-0.5 break-all" role="alert">
                 {{ $t('operations.invalidRegex', { detail: operationStore.ruleErrors[op.id] }) }}
+                <button type="button" @click="showHelp = true"
+                  class="ml-1 font-medium text-blue-600 dark:text-blue-400 hover:underline cursor-pointer whitespace-nowrap">{{ $t('operations.seeSyntaxHelp') }}</button>
               </p>
             </div>
             <div
@@ -1069,9 +1074,13 @@ function confirmPrefixSuffix() {
         </div>
       </div>
 
-      <div v-if="operationStore.operations.length === 0"
-        class="text-center py-8 text-slate-500 dark:text-slate-500 text-sm italic">
-        {{ $t('operations.empty') }}
+      <div v-if="operationStore.operations.length === 0" class="text-center py-8 space-y-2">
+        <p class="text-slate-500 dark:text-slate-500 text-sm italic">{{ $t('operations.empty') }}</p>
+        <button type="button" @click="showHelp = true"
+          class="inline-flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">
+          <BookOpen class="h-3.5 w-3.5" />
+          {{ $t('operations.emptyHelpLink') }}
+        </button>
       </div>
     </div>
 

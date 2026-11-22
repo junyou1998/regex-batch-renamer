@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useEscapeToClose } from '../composables/useEscapeToClose'
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useHistoryStore, type RenameBatchLog, type RenameFileLog } from '../stores/historyStore'
@@ -209,6 +210,8 @@ function handleReapplyRules(batch: RenameBatchLog) {
 function close() {
   emit('update:modelValue', false)
 }
+
+useEscapeToClose(() => props.modelValue, close)
 </script>
 
 <template>
