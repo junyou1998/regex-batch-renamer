@@ -10,7 +10,7 @@
 
 **繁體中文** · [简体中文](README.zh-CN.md) · [English](README.md)
 
-[官方網站](https://renamix.junyou.tw/) · [下載](https://github.com/junyou1998/regex-batch-renamer/releases/latest) · [外掛](https://github.com/junyou1998/regex-batch-renamer-plugins)
+[官方網站](https://renamix.junyou.tw/) · [下載](https://github.com/junyou1998/renamix/releases/latest) · [外掛](https://github.com/junyou1998/regex-batch-renamer-plugins)
 
 </div>
 
@@ -44,7 +44,7 @@ Renamix 能一次更名上百個檔案。把多條「尋找與取代」規則串
 
 ## 📥 下載安裝
 
-到 [GitHub Releases](https://github.com/junyou1998/regex-batch-renamer/releases/latest) 下載最新版本：
+到 [GitHub Releases](https://github.com/junyou1998/renamix/releases/latest) 下載最新版本：
 
 | 平台 | 檔案 |
 | --- | --- |

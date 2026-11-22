@@ -10,7 +10,7 @@
 
 [繁體中文](README.zh-TW.md) · [简体中文](README.zh-CN.md) · **English**
 
-[Website](https://renamix.junyou.tw/) · [Download](https://github.com/junyou1998/regex-batch-renamer/releases/latest) · [Plugins](https://github.com/junyou1998/regex-batch-renamer-plugins)
+[Website](https://renamix.junyou.tw/) · [Download](https://github.com/junyou1998/renamix/releases/latest) · [Plugins](https://github.com/junyou1998/regex-batch-renamer-plugins)
 
 </div>
 
@@ -44,7 +44,7 @@ Renamix renames hundreds of files in one go. Stack find-and-replace rules, see e
 
 ## 📥 Install
 
-Download the latest version from [GitHub Releases](https://github.com/junyou1998/regex-batch-renamer/releases/latest):
+Download the latest version from [GitHub Releases](https://github.com/junyou1998/renamix/releases/latest):
 
 | Platform | File |
 | --- | --- |

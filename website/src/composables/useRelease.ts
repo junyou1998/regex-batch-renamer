@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue'
 
-export const REPO = 'junyou1998/regex-batch-renamer'
+export const REPO = 'junyou1998/renamix'
 export const RELEASES_URL = `https://github.com/${REPO}/releases/latest`
 export const SPONSOR_URL = 'https://www.buymeacoffee.com/junyou'
 

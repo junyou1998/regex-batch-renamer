@@ -1,7 +1,7 @@
 import { desktop } from './desktop'
 
-/** GitHub repository that hosts releases. GitHub redirects the old name after a rename. */
-export const REPO = 'junyou1998/regex-batch-renamer'
+/** GitHub repository that hosts releases (formerly junyou1998/regex-batch-renamer; GitHub redirects the old name). */
+export const REPO = 'junyou1998/renamix'
 export const REPO_URL = `https://github.com/${REPO}`
 
 const CACHE_TTL_MS = 5 * 60 * 1000
