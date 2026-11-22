@@ -653,7 +653,7 @@ async function handleCopyTo() {
       <div class="flex items-center no-drag" :style="{ paddingLeft: macTrafficLightsPadding }">
         <button
           @click="isSidebarCollapsed = !isSidebarCollapsed"
-          :title="isSidebarCollapsed ? $t('app.showSidebar') : $t('app.hideSidebar')"
+          v-tooltip="{ title: isSidebarCollapsed ? $t('app.showSidebar') : $t('app.hideSidebar'), placement: 'bottom' }"
           class="w-6 h-6 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 hover:text-slate-900 dark:hover:text-slate-100 transition-colors cursor-pointer flex items-center justify-center"
         >
           <PanelLeft class="w-3.5 h-3.5" />
@@ -694,7 +694,7 @@ async function handleCopyTo() {
             <button
               @click="updateAvailable = false"
               :aria-label="$t('common.close')"
-              :title="$t('common.close')"
+              v-tooltip="{ title: $t('common.close'), placement: 'bottom' }"
               class="p-0.5 rounded-full hover:bg-blue-500/50 transition-colors opacity-80 hover:opacity-100 cursor-pointer"
             >
               <X class="w-3 h-3" />
@@ -704,7 +704,7 @@ async function handleCopyTo() {
 
         <button
           @click="aiStore.toggleOpen"
-          :title="aiStore.isOpen ? $t('ai.closePanel') : $t('ai.title')"
+          v-tooltip="{ title: aiStore.isOpen ? $t('ai.closePanel') : $t('ai.title'), placement: 'bottom' }"
           :class="[
             'flex items-center gap-1.5 px-2.5 h-6 rounded-md text-xs font-semibold transition-colors cursor-pointer mr-1',
             aiStore.isOpen
@@ -718,7 +718,7 @@ async function handleCopyTo() {
 
         <button
           @click="showPlugins = true"
-          :title="$t('plugins.title')"
+          v-tooltip="{ title: $t('plugins.title'), placement: 'bottom' }"
           class="w-6 h-6 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 hover:text-slate-900 dark:hover:text-slate-100 transition-colors cursor-pointer flex items-center justify-center relative"
         >
           <Puzzle class="w-3.5 h-3.5" />
@@ -726,7 +726,7 @@ async function handleCopyTo() {
 
         <button
           @click="showHistory = true"
-          :title="$t('history.title')"
+          v-tooltip="{ title: $t('history.title'), placement: 'bottom' }"
           class="w-6 h-6 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 hover:text-slate-900 dark:hover:text-slate-100 transition-colors cursor-pointer flex items-center justify-center relative"
         >
           <History class="w-3.5 h-3.5" />
@@ -734,7 +734,7 @@ async function handleCopyTo() {
 
         <button
           @click="openAboutModal"
-          :title="$t('app.about')"
+          v-tooltip="{ title: $t('app.about'), placement: 'bottom' }"
           class="w-6 h-6 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 hover:text-slate-900 dark:hover:text-slate-100 transition-colors cursor-pointer flex items-center justify-center relative"
         >
           <Info class="w-3.5 h-3.5" />
@@ -743,7 +743,7 @@ async function handleCopyTo() {
 
         <button
           @click="showSettings = true"
-          :title="$t('settings.title')"
+          v-tooltip="{ title: $t('settings.title'), placement: 'bottom' }"
           class="w-6 h-6 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 hover:text-slate-900 dark:hover:text-slate-100 transition-colors cursor-pointer flex items-center justify-center"
         >
           <Settings class="w-3.5 h-3.5" />

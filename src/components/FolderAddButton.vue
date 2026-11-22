@@ -87,7 +87,7 @@ const emptyBtn = 'inline-flex items-center gap-1.5 py-1.5 bg-slate-200 hover:bg-
     <button
       type="button"
       @click="pick('contents')"
-      :title="t('preview.addFolderHint')"
+       v-tooltip="{ title: t('preview.addFolder'), desc: t('preview.addFolderHint'), placement: 'bottom' }"
       :aria-label="t('preview.addFolder')"
       :class="[props.variant === 'toolbar' ? toolbarBtn : emptyBtn, props.variant === 'toolbar' ? 'pl-2.5 pr-2 rounded-l-md' : 'pl-3.5 pr-2.5 rounded-l-lg']"
     >
@@ -99,7 +99,7 @@ const emptyBtn = 'inline-flex items-center gap-1.5 py-1.5 bg-slate-200 hover:bg-
       @click="isOpen = !isOpen"
       :aria-expanded="isOpen"
       aria-haspopup="menu"
-      :title="t('preview.folderOptions')"
+       v-tooltip="{ title: t('preview.folderOptions'), placement: 'bottom' }"
       :aria-label="t('preview.folderOptions')"
       :class="[props.variant === 'toolbar' ? toolbarBtn : emptyBtn, props.variant === 'toolbar' ? 'px-1 rounded-r-md border-l-0' : 'px-1.5 rounded-r-lg border-l border-slate-300/70 dark:border-slate-600']"
     >

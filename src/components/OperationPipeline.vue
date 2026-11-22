@@ -792,7 +792,8 @@ function confirmPrefixSuffix() {
               <button type="button"
                 class="drag-handle -ml-1 inline-flex h-7 w-6 shrink-0 items-center justify-center rounded-md text-slate-400 hover:bg-slate-300/70 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-700 dark:hover:text-slate-300 cursor-grab active:cursor-grabbing"
                 @pointerdown.stop="startOperationReorder($event, op.id)"
-                :title="$t('operations.reorder')">
+                :aria-label="$t('operations.reorder')"
+                v-tooltip="{ title: $t('operations.tipReorderTitle'), desc: $t('operations.tipReorderDesc') }">
                 <GripVertical class="h-4 w-4" />
               </button>
               <span class="text-xs font-bold text-slate-500 dark:text-slate-500 shrink-0">#{{ index + 1 }}</span>
@@ -815,13 +816,16 @@ function confirmPrefixSuffix() {
             <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
               <button @click="operationStore.toggleOperation(op.id)"
                 class="p-1 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 rounded hover:bg-slate-300 dark:hover:bg-slate-700 cursor-pointer mr-2"
-                :title="$t('operations.toggleEnable')">
+                :aria-label="$t('operations.toggleEnable')"
+                :aria-pressed="!op.enabled"
+                v-tooltip="{ title: op.enabled ? $t('operations.tipDisable') : $t('operations.tipEnable'), desc: $t('operations.tipToggleDesc') }">
                 <Eye v-if="op.enabled" class="h-4 w-4" />
                 <EyeOff v-else class="h-4 w-4" />
               </button>
               <button @click="operationStore.removeOperation(op.id)"
                 class="p-1 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 rounded hover:bg-red-100 dark:hover:bg-red-900/30 ml-1 cursor-pointer"
-                :title="$t('operations.remove')">
+                :aria-label="$t('operations.remove')"
+                v-tooltip="$t('operations.tipRemove')">
                 <X class="h-4 w-4" />
               </button>
             </div>
@@ -901,7 +905,9 @@ function confirmPrefixSuffix() {
                 :class="operationStore.ruleErrors[op.id]
                   ? 'border-red-400 dark:border-red-600 focus-within:ring-red-500/40'
                   : 'border-slate-300 dark:border-slate-700 focus-within:border-blue-500 focus-within:ring-blue-500/50'">
-                <Search class="w-3.5 h-3.5 ml-2.5 shrink-0 text-slate-400" :title="$t('operations.patternLabel')" aria-hidden="true" />
+                <span class="ml-2.5 shrink-0 flex text-slate-400" v-tooltip="{ title: $t('operations.tipFindTitle'), desc: $t('operations.tipFindDesc') }">
+                  <Search class="w-3.5 h-3.5" aria-hidden="true" />
+                </span>
                 <input v-model="op.params.pattern" type="text"
                   :aria-label="$t('operations.patternLabel')"
                   :placeholder="op.params.useRegex ? $t('operations.placeholderPatternRegex') : $t('operations.placeholderPatternText')"
@@ -912,7 +918,8 @@ function confirmPrefixSuffix() {
                   <button type="button"
                     @click="op.params.useRegex = !op.params.useRegex"
                     :aria-pressed="Boolean(op.params.useRegex)"
-                    :title="$t('operations.useRegex')"
+                    :aria-label="$t('operations.useRegex')"
+                    v-tooltip="{ title: $t('operations.tipRegexTitle'), desc: $t('operations.tipRegexDesc') }"
                     class="h-6 min-w-6 px-1 rounded-md font-mono text-[11px] font-bold transition-colors cursor-pointer"
                     :class="op.params.useRegex
                       ? 'bg-blue-600 text-white'
@@ -920,7 +927,8 @@ function confirmPrefixSuffix() {
                   <button type="button"
                     @click="op.params.caseInsensitive = !op.params.caseInsensitive"
                     :aria-pressed="Boolean(op.params.caseInsensitive)"
-                    :title="$t('operations.caseInsensitiveDesc')"
+                    :aria-label="$t('operations.caseInsensitive')"
+                    v-tooltip="{ title: $t('operations.tipCaseTitle'), desc: $t('operations.tipCaseDesc') }"
                     class="h-6 min-w-6 px-1 rounded-md text-[11px] font-bold transition-colors cursor-pointer"
                     :class="op.params.caseInsensitive
                       ? 'bg-blue-600 text-white'
@@ -933,15 +941,17 @@ function confirmPrefixSuffix() {
             </div>
             <div
               class="flex items-center rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/50 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500/50 transition-all">
-              <CornerDownRight class="w-3.5 h-3.5 ml-2.5 shrink-0 text-slate-400" aria-hidden="true" />
+              <span class="ml-2.5 shrink-0 flex text-slate-400" v-tooltip="{ title: $t('operations.tipReplaceTitle'), desc: $t('operations.tipReplaceDesc') }">
+                <CornerDownRight class="w-3.5 h-3.5" aria-hidden="true" />
+              </span>
               <input :ref="(el) => setInputRef(el, op.id)" v-model="op.params.replacement" type="text"
                 :aria-label="$t('operations.replacementLabel')"
                 :placeholder="$t('operations.placeholderReplacement')"
                 spellcheck="false"
                 class="flex-1 min-w-0 bg-transparent px-2 py-1.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none" />
               <button type="button" @click="openHelper(op.id)"
-                :title="$t('operations.variableHelper')"
                 :aria-label="$t('operations.variableHelper')"
+                v-tooltip="{ title: $t('operations.tipVariableTitle'), desc: $t('operations.tipVariableDesc') }"
                 class="mr-1 h-6 w-6 shrink-0 rounded-md flex items-center justify-center text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 cursor-pointer">
                 <Zap class="h-3.5 w-3.5" />
               </button>
