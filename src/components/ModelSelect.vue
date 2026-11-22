@@ -181,7 +181,7 @@ onUnmounted(detach)
         @focus="open"
         @input="onInput"
         @keydown="onKeydown"
-        class="flex-1 min-w-0 bg-transparent px-3 py-2 text-xs font-mono text-slate-800 dark:text-slate-100 focus:outline-hidden"
+        class="flex-1 min-w-0 bg-transparent px-3 py-2 text-control font-mono text-slate-800 dark:text-slate-100 focus:outline-hidden"
       />
       <button
         type="button"
@@ -195,7 +195,7 @@ onUnmounted(detach)
       </button>
     </div>
 
-    <p v-if="isCustomValue && !isOpen" class="mt-1 text-[10px] text-amber-600 dark:text-amber-400">
+    <p v-if="isCustomValue && !isOpen" class="mt-1 text-meta text-amber-600 dark:text-amber-400">
       {{ $t('settings.modelNotInList') }}
     </p>
 
@@ -215,17 +215,17 @@ onUnmounted(detach)
           role="option"
           :aria-selected="model === modelValue"
           @click="choose(model)"
-          class="w-full px-3 py-1.5 text-left text-xs font-mono flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-700/80 cursor-pointer"
+          class="w-full px-3 py-1.5 text-left text-control font-mono flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-700/80 cursor-pointer"
           :class="model === modelValue ? 'bg-blue-50/80 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 font-semibold' : 'text-slate-700 dark:text-slate-200'"
         >
           <span class="truncate">{{ model }}</span>
           <Check v-if="model === modelValue" class="w-3.5 h-3.5 shrink-0 ml-2" />
         </button>
-        <p v-if="filteredModels.length === 0" class="px-3 py-2 text-[11px] text-slate-500 dark:text-slate-400">
+        <p v-if="filteredModels.length === 0" class="px-3 py-2 text-caption text-slate-500 dark:text-slate-400">
           {{ loading ? $t('settings.modelsLoading') : $t('settings.modelsNoMatch') }}
         </p>
       </div>
-      <div class="flex items-center justify-between gap-2 px-3 py-1.5 border-t border-slate-200 dark:border-slate-700 text-[10px] text-slate-500 dark:text-slate-400">
+      <div class="flex items-center justify-between gap-2 px-3 py-1.5 border-t border-slate-200 dark:border-slate-700 text-meta text-slate-500 dark:text-slate-400">
         <span>{{ live ? $t('settings.modelsLiveCount', { n: models.length }) : $t('settings.modelsSuggested') }}</span>
         <button
           v-if="canLoad"

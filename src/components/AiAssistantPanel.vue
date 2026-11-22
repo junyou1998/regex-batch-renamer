@@ -242,7 +242,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
       <div class="px-4 pb-2.5 pt-0.5 flex items-center justify-between gap-2">
         <!-- Status Pill -->
         <div
-          class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 text-[11px] min-w-0 shadow-2xs"
+          class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 text-caption min-w-0 shadow-2xs"
         >
           <ProviderIcon :provider="aiStore.activeProfile.provider" class="w-3.5 h-3.5 shrink-0" />
           <span
@@ -282,7 +282,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
 
         <!-- Auto Apply Checkbox -->
         <label
-          class="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300 cursor-pointer select-none shrink-0"
+          class="flex items-center gap-1.5 text-control text-slate-600 dark:text-slate-300 cursor-pointer select-none shrink-0"
           v-tooltip="{ title: $t('ai.autoApplyDesc'), placement: 'bottom' }"
         >
           <input
@@ -291,7 +291,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
             @change="aiStore.setAutoApply(($event.target as HTMLInputElement).checked)"
             class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800"
           />
-          <span class="text-[11px] font-medium">{{ $t('ai.autoApply') }}</span>
+          <span class="text-caption font-medium">{{ $t('ai.autoApply') }}</span>
         </label>
       </div>
     </div>
@@ -311,7 +311,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
         <div v-if="aiStore.activeProfile.type === 'api'" class="space-y-3">
           <div class="flex items-start gap-2.5 text-purple-900 dark:text-purple-300">
             <KeyRound class="w-5 h-5 shrink-0 mt-0.5 text-purple-600 dark:text-purple-400" />
-            <div class="space-y-1 text-xs">
+            <div class="space-y-1 text-control">
               <p class="font-semibold text-sm">
                 {{ $t('ai.onboardingApiKeyTitle', { name: aiStore.activeProfile.name }) }}
               </p>
@@ -322,7 +322,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
           </div>
           <button
             @click="emit('open-settings')"
-            class="w-full py-2 px-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-medium text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+            class="w-full py-2 px-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-medium text-control flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-xs"
           >
             <Settings class="w-3.5 h-3.5" />
             {{ $t('ai.openSettingsToConfigure') }}
@@ -333,7 +333,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
         <template v-else>
           <div class="flex items-start gap-2.5 text-amber-800 dark:text-amber-300">
             <AlertTriangle class="w-5 h-5 shrink-0 mt-0.5" />
-            <div class="space-y-1 text-xs">
+            <div class="space-y-1 text-control">
               <p class="font-semibold text-sm">
                 {{
                   aiStore.activeProfile.provider === 'grok_cli'
@@ -356,7 +356,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
           </div>
 
           <!-- Steps with copy buttons -->
-          <div class="space-y-2 pt-1 text-xs">
+          <div class="space-y-2 pt-1 text-control">
             <div class="space-y-1">
               <span class="font-medium text-slate-700 dark:text-slate-300">
                 1. {{
@@ -368,7 +368,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
                 }}
               </span>
               <div
-                class="flex items-center justify-between gap-2 p-2 rounded-lg bg-slate-900 text-slate-100 font-mono text-[11px]"
+                class="flex items-center justify-between gap-2 p-2 rounded-lg bg-slate-900 text-slate-100 font-mono text-caption"
               >
                 <span class="truncate">
                   {{
@@ -409,7 +409,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
                 }}
               </span>
               <div
-                class="flex items-center justify-between gap-2 p-2 rounded-lg bg-slate-900 text-slate-100 font-mono text-[11px]"
+                class="flex items-center justify-between gap-2 p-2 rounded-lg bg-slate-900 text-slate-100 font-mono text-caption"
               >
                 <span class="truncate">
                   {{
@@ -442,7 +442,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
             <button
               type="button"
               @click="aiStore.checkStatus()"
-              class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+              class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-control transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
             >
               <RefreshCw class="w-3.5 h-3.5" :class="{ 'animate-spin': aiStore.isCheckingStatus }" />
               {{ $t('ai.recheck') }}
@@ -454,7 +454,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
       <!-- Privacy notice: what is sent to the AI provider -->
       <div
         v-if="!aiStore.privacyAcknowledged"
-        class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/70 text-xs text-slate-600 dark:text-slate-300 space-y-2"
+        class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/70 text-control text-slate-600 dark:text-slate-300 space-y-2"
         role="note"
       >
         <div class="flex items-start gap-2">
@@ -488,14 +488,14 @@ function handleApplyPipeline(msg: AiMessageItem) {
           <h3 class="font-bold text-base text-slate-800 dark:text-slate-100">
             {{ $t('ai.welcomeTitle') }}
           </h3>
-          <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+          <p class="text-control text-slate-500 dark:text-slate-400 leading-relaxed">
             {{ $t('ai.welcomeSubtitle') }}
           </p>
         </div>
 
         <!-- Workspace Context Info -->
         <div
-          class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 text-xs text-blue-700 dark:text-blue-300 font-medium"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/60 text-control text-blue-700 dark:text-blue-300 font-medium"
         >
           <FolderOpen class="w-3.5 h-3.5" />
           <span>{{ $t('ai.workspaceContext', { n: fileStore.files.length }) }}</span>
@@ -503,7 +503,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
 
         <!-- Quick Suggestions -->
         <div class="w-full space-y-2 pt-2 text-left">
-          <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block ml-1">
+          <span class="text-caption font-semibold text-slate-400 uppercase tracking-wider block ml-1">
             {{ $t('ai.suggestedPrompts') }}
           </span>
           <div class="grid grid-cols-1 gap-2">
@@ -511,7 +511,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
               v-for="(prompt, idx) in quickPrompts"
               :key="idx"
               @click="selectQuickPrompt(prompt)"
-              class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-blue-400 dark:hover:border-blue-500 text-xs text-slate-700 dark:text-slate-300 transition-all text-left flex items-center justify-between group cursor-pointer shadow-2xs"
+              class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-blue-400 dark:hover:border-blue-500 text-control text-slate-700 dark:text-slate-300 transition-all text-left flex items-center justify-between group cursor-pointer shadow-2xs"
             >
               <span class="truncate">{{ prompt }}</span>
               <Zap class="w-3.5 h-3.5 text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 ml-1" />
@@ -541,7 +541,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
             <!-- Cancelled Alert Box with Lucide Icon -->
             <div
               v-if="msg.isCancelled"
-              class="rounded-xl border border-amber-200 dark:border-amber-800/60 bg-amber-50/70 dark:bg-amber-950/30 px-3.5 py-2.5 flex items-center gap-2 text-xs text-amber-800 dark:text-amber-300 font-medium shadow-2xs"
+              class="rounded-xl border border-amber-200 dark:border-amber-800/60 bg-amber-50/70 dark:bg-amber-950/30 px-3.5 py-2.5 flex items-center gap-2 text-control text-amber-800 dark:text-amber-300 font-medium shadow-2xs"
             >
               <CircleSlash class="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400" />
               <span>{{ $t('ai.generationCancelled') }}</span>
@@ -556,11 +556,11 @@ function handleApplyPipeline(msg: AiMessageItem) {
               <!-- Markdown Content -->
               <div
                 v-if="!msg.isError"
-                class="text-xs sm:text-sm text-slate-800 dark:text-slate-200 prose dark:prose-invert prose-xs max-w-none leading-relaxed break-words"
+                class="text-control sm:text-sm text-slate-800 dark:text-slate-200 prose dark:prose-invert prose-xs max-w-none leading-relaxed break-words"
                 v-html="renderMarkdown(msg.content)"
                 @click="handleMarkdownClick"
               ></div>
-              <div v-else class="flex items-start gap-2 text-xs text-red-700 dark:text-red-300 whitespace-pre-wrap break-words">
+              <div v-else class="flex items-start gap-2 text-control text-red-700 dark:text-red-300 whitespace-pre-wrap break-words">
                 <AlertTriangle class="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{{ msg.content }}</span>
               </div>
@@ -568,7 +568,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
               <!-- Technical Explanation -->
               <div
                 v-if="msg.explanation"
-                class="p-2.5 rounded-lg bg-slate-100 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-400 space-y-1"
+                class="p-2.5 rounded-lg bg-slate-100 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 text-caption text-slate-600 dark:text-slate-400 space-y-1"
               >
                 <span class="font-semibold text-blue-600 dark:text-blue-400 block">
                   💡 {{ $t('ai.technicalDetails') }}
@@ -576,7 +576,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
                 <p class="leading-relaxed whitespace-pre-wrap">{{ msg.explanation }}</p>
               </div>
 
-              <p v-if="msg.rejectedSteps" class="text-[11px] text-amber-700 dark:text-amber-400">
+              <p v-if="msg.rejectedSteps" class="text-caption text-amber-700 dark:text-amber-400">
                 {{ $t('ai.rejectedSteps', { n: msg.rejectedSteps }) }}
               </p>
 
@@ -586,19 +586,19 @@ function handleApplyPipeline(msg: AiMessageItem) {
                 class="rounded-xl border border-blue-200 dark:border-blue-800/60 bg-blue-50/40 dark:bg-blue-950/30 p-3 space-y-2"
               >
                 <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
+                  <span class="text-control font-bold text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
                     <Terminal class="w-3.5 h-3.5" />
                     {{ $t('ai.pipelineCardTitle', { n: msg.pipeline.length }) }}
                   </span>
                   <div class="flex items-center gap-1.5">
                     <template v-if="msg.applied">
-                      <span class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                      <span class="text-caption font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                         <Check class="w-3 h-3" />{{ $t('ai.applied') }}
                       </span>
                       <button
                         v-if="msg.previousPipeline"
                         @click="aiStore.revertMessagePipeline(msg.id)"
-                        class="px-2 py-1 rounded-md text-[11px] font-semibold border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer flex items-center gap-1"
+                        class="px-2 py-1 rounded-md text-caption font-semibold border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer flex items-center gap-1"
                       >
                         <RotateCcw class="w-3 h-3" />
                         {{ $t('ai.revert') }}
@@ -607,7 +607,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
                     <button
                       v-else
                       @click="handleApplyPipeline(msg)"
-                      class="px-2 py-1 rounded-md text-[11px] font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
+                      class="px-2 py-1 rounded-md text-caption font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
                     >
                       <Undo2 class="w-3 h-3" />
                       {{ $t('ai.applyThisPipeline') }}
@@ -620,9 +620,9 @@ function handleApplyPipeline(msg: AiMessageItem) {
                   <div
                     v-for="(step, sIdx) in msg.pipeline"
                     :key="sIdx"
-                    class="p-2 rounded-lg bg-white/80 dark:bg-slate-900/80 border border-blue-100 dark:border-blue-900/50 font-mono text-[11px] space-y-0.5"
+                    class="p-2 rounded-lg bg-white/80 dark:bg-slate-900/80 border border-blue-100 dark:border-blue-900/50 font-mono text-caption space-y-0.5"
                   >
-                    <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px]">
+                    <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-meta">
                       <span>#{{ sIdx + 1 }} {{ step.type }}</span>
                       <span v-if="step.type === 'regex' && step.params?.useRegex" class="text-blue-600 dark:text-blue-400 font-bold">Regex</span>
                     </div>
@@ -638,7 +638,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
                 </div>
               </div>
 
-              <div v-if="msg.model || formatTokens(msg)" class="text-[10px] text-slate-400 dark:text-slate-500 flex gap-2">
+              <div v-if="msg.model || formatTokens(msg)" class="text-meta text-slate-400 dark:text-slate-500 flex gap-2">
                 <span v-if="msg.model">{{ msg.model }}</span>
                 <span v-if="formatTokens(msg)">{{ formatTokens(msg) }}</span>
               </div>
@@ -651,7 +651,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
           <div class="flex items-center gap-2 min-w-0">
             <ProviderIcon :provider="(aiStore.currentRunningProfile || aiStore.activeProfile).provider" class="w-3.5 h-3.5 shrink-0" />
             <LoaderCircle class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 animate-spin shrink-0" />
-            <span class="text-xs text-slate-600 dark:text-slate-300 animate-pulse truncate font-medium">
+            <span class="text-control text-slate-600 dark:text-slate-300 animate-pulse truncate font-medium">
               {{
                 (aiStore.currentRunningProfile || aiStore.activeProfile).type === 'api'
                   ? $t('ai.thinkingWithModel', { name: (aiStore.currentRunningProfile || aiStore.activeProfile).name })
@@ -667,7 +667,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
           <button
             type="button"
             @click="aiStore.stopGeneration()"
-            class="px-2 py-0.5 rounded-md text-[11px] font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 border border-red-200 dark:border-red-800/60 transition-colors flex items-center gap-1 cursor-pointer shrink-0 ml-1"
+            class="px-2 py-0.5 rounded-md text-caption font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 border border-red-200 dark:border-red-800/60 transition-colors flex items-center gap-1 cursor-pointer shrink-0 ml-1"
             v-tooltip="$t('ai.stopGenerating')"
           >
             <Square class="w-2.5 h-2.5 fill-current" />
@@ -687,7 +687,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
         v-for="(prompt, idx) in quickPrompts"
         :key="idx"
         @click="selectQuickPrompt(prompt)"
-        class="px-2.5 py-1 rounded-full text-[11px] bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 whitespace-nowrap transition-colors cursor-pointer shadow-2xs shrink-0"
+        class="px-2.5 py-1 rounded-full text-caption bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 whitespace-nowrap transition-colors cursor-pointer shadow-2xs shrink-0"
       >
         {{ prompt }}
       </button>
@@ -709,11 +709,11 @@ function handleApplyPipeline(msg: AiMessageItem) {
           @compositionend="handleCompositionEnd"
           @keydown="handleKeydown"
           :placeholder="$t('ai.inputPlaceholder')"
-          class="w-full bg-transparent resize-none text-xs sm:text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none custom-scrollbar min-h-[38px] max-h-[180px] leading-relaxed transition-[height] duration-75"
+          class="w-full bg-transparent resize-none text-control sm:text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none custom-scrollbar min-h-[38px] max-h-[180px] leading-relaxed transition-[height] duration-75"
         ></textarea>
 
         <div class="flex items-center justify-between">
-          <span class="text-[10px] text-slate-400 dark:text-slate-500 select-none">
+          <span class="text-meta text-slate-400 dark:text-slate-500 select-none">
             {{ $t('ai.enterToSend') }}
           </span>
 
@@ -722,7 +722,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
             v-if="aiStore.isLoading"
             type="button"
             @click="aiStore.stopGeneration()"
-            class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer flex items-center gap-1.5 animate-pulse"
+            class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-control font-semibold shadow-xs transition-all cursor-pointer flex items-center gap-1.5 animate-pulse"
             v-tooltip="$t('ai.stopGenerating')"
           >
             <Square class="w-3.5 h-3.5 fill-current" />
@@ -733,7 +733,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
             type="button"
             @click="handleSend"
             :disabled="!inputText.trim()"
-            class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-xs transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1.5"
+            class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-control font-semibold shadow-xs transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center gap-1.5"
           >
             <Send class="w-3.5 h-3.5" />
             <span>{{ $t('ai.send') }}</span>

@@ -92,10 +92,10 @@ onUnmounted(() => {
           ? 'border-blue-500 ring-2 ring-blue-500/20'
           : 'border-slate-300 dark:border-slate-700',
         disabled ? 'opacity-50 cursor-not-allowed' : '',
-        size === 'sm' ? 'py-1.5 text-xs' : 'py-2 text-sm'
+        size === 'sm' ? 'py-1.5 text-control' : 'py-2 text-sm'
       ]"
     >
-      <span class="truncate text-xs font-medium" :class="{ 'text-slate-400 dark:text-slate-500': !selectedOption }">
+      <span class="truncate text-control font-medium" :class="{ 'text-slate-400 dark:text-slate-500': !selectedOption }">
         {{ displayLabel }}
       </span>
       <ChevronDown
@@ -116,7 +116,7 @@ onUnmounted(() => {
           type="button"
           @click="selectOption(opt)"
           v-tooltip="opt.label"
-          class="w-full px-3 py-2 text-left text-xs flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors cursor-pointer"
+          class="w-full px-3 py-2 text-left text-control flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors cursor-pointer"
           :class="[
             opt.value === modelValue
               ? 'bg-blue-50/80 dark:bg-blue-950/50 font-semibold text-blue-600 dark:text-blue-400'

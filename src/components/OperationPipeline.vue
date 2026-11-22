@@ -627,7 +627,7 @@ function confirmPrefixSuffix() {
         {{ $t('operations.title') }}
 
         <button type="button" @click="showHelp = true"
-          class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[11px] font-medium text-slate-500 dark:text-slate-400 border border-slate-300/80 dark:border-slate-700 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:border-blue-800 dark:hover:bg-blue-950/40 transition-colors cursor-pointer"
+          class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-caption font-medium text-slate-500 dark:text-slate-400 border border-slate-300/80 dark:border-slate-700 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 dark:hover:text-blue-400 dark:hover:border-blue-800 dark:hover:bg-blue-950/40 transition-colors cursor-pointer"
           v-tooltip="{ title: $t('operations.helpTitle'), shortcut: `${modKey} /`, placement: 'bottom' }">
           <BookOpen class="h-3.5 w-3.5" />
           <span>{{ $t('operations.helpButton') }}</span>
@@ -643,7 +643,7 @@ function confirmPrefixSuffix() {
         <!-- Templates Dropdown (built-in + custom) -->
         <div ref="templateContainerRef" class="relative template-dropdown-container">
           <button type="button" @click="toggleTemplateDropdown"
-            class="px-2.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg transition-colors flex items-center gap-1 cursor-pointer">
+            class="px-2.5 py-1.5 text-control font-medium text-slate-700 dark:text-slate-300 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg transition-colors flex items-center gap-1 cursor-pointer">
             <Zap class="h-3.5 w-3.5" />
             {{ $t('operations.quickTemplates') }}
             <ChevronDown class="h-3 w-3 ml-0.5" />
@@ -656,7 +656,7 @@ function confirmPrefixSuffix() {
 
               <!-- Built-in Templates Section -->
               <div
-                class="px-3 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                class="px-3 py-1.5 text-control font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 {{ $t('templates.sectionBuiltIn') }}
               </div>
               <button @click="applyTemplate('replaceAllNumbered')"
@@ -683,7 +683,7 @@ function confirmPrefixSuffix() {
               <!-- Custom Templates Section -->
               <div class="border-t border-slate-200 dark:border-slate-700 my-1"></div>
               <div
-                class="px-3 py-1.5 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                class="px-3 py-1.5 text-control font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 {{ $t('templates.sectionCustom') }}
               </div>
               <template v-if="savedTemplates.length > 0">
@@ -693,12 +693,12 @@ function confirmPrefixSuffix() {
                     <FileText class="h-3.5 w-3.5 shrink-0" />
                     <span class="truncate">{{ tpl.name }}</span>
                   </span>
-                  <span class="text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap">{{ $t('templates.ops', {
+                  <span class="text-control text-slate-400 dark:text-slate-500 whitespace-nowrap">{{ $t('templates.ops', {
                     n: tpl.operations.length
                   }) }}</span>
                 </button>
               </template>
-              <div v-else class="px-4 py-2 text-xs text-slate-400 dark:text-slate-500 italic">
+              <div v-else class="px-4 py-2 text-control text-slate-400 dark:text-slate-500 italic">
                 {{ $t('templates.empty') }}
               </div>
 
@@ -721,7 +721,7 @@ function confirmPrefixSuffix() {
           <button
             type="button"
             @click="showAddDropdown = !showAddDropdown"
-            class="px-2.5 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500 rounded-lg transition-colors flex items-center gap-1 shadow-2xs cursor-pointer"
+            class="px-2.5 py-1.5 text-control font-medium text-white bg-blue-600 hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500 rounded-lg transition-colors flex items-center gap-1 shadow-2xs cursor-pointer"
           >
             <Plus class="h-3.5 w-3.5" />
             <span>{{ $t('operations.add') }}</span>
@@ -732,7 +732,7 @@ function confirmPrefixSuffix() {
           <Transition name="dropdown">
             <div
               v-if="showAddDropdown"
-              class="absolute right-0 top-full mt-1.5 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 py-1.5 z-50 overflow-y-auto max-h-80 custom-scrollbar text-xs select-none"
+              class="absolute right-0 top-full mt-1.5 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 py-1.5 z-50 overflow-y-auto max-h-80 custom-scrollbar text-control select-none"
             >
               <button
                 type="button"
@@ -746,7 +746,7 @@ function confirmPrefixSuffix() {
               <!-- Enabled Plugin Rules -->
               <template v-if="pluginStore.enabledTransformerPlugins.length > 0">
                 <div class="border-t border-slate-200 dark:border-slate-700 my-1"></div>
-                <div class="px-3 py-1 text-[10.5px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1">
+                <div class="px-3 py-1 text-meta font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-1">
                   <Puzzle class="w-3 h-3 text-purple-500" />
                   <span>{{ $t('plugins.title') }}</span>
                 </div>
@@ -759,7 +759,7 @@ function confirmPrefixSuffix() {
                   class="w-full px-3.5 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-purple-50 dark:hover:bg-purple-950/40 hover:text-purple-600 dark:hover:text-purple-300 transition-colors cursor-pointer flex items-center justify-between gap-1.5"
                 >
                   <span class="truncate">{{ plugin.manifest.name }}</span>
-                  <span class="text-[10px] px-1.5 py-0.2 rounded bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 font-mono shrink-0">{{ $t('plugins.pluginBadge') }}</span>
+                  <span class="text-meta px-1.5 py-0.2 rounded bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 font-mono shrink-0">{{ $t('plugins.pluginBadge') }}</span>
                 </button>
               </template>
 
@@ -799,8 +799,8 @@ function confirmPrefixSuffix() {
                 v-tooltip="{ title: $t('operations.tipReorderTitle'), desc: $t('operations.tipReorderDesc') }">
                 <GripVertical class="h-4 w-4" />
               </button>
-              <span class="text-xs font-bold text-slate-500 dark:text-slate-500 shrink-0">#{{ index + 1 }}</span>
-              <span class="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">
+              <span class="text-control font-bold text-slate-500 dark:text-slate-500 shrink-0">#{{ index + 1 }}</span>
+              <span class="text-sm font-medium text-slate-700 dark:text-slate-200 truncate" :class="op.type === 'regex' ? 'shrink-0' : ''">
                 {{
                   op.type === 'regex'
                     ? $t('operations.regex')
@@ -809,12 +809,12 @@ function confirmPrefixSuffix() {
                     : $t('operations.other')
                 }}
               </span>
-              <template v-if="op.type === 'regex'">
+              <span v-if="op.type === 'regex'" class="flex items-center gap-1 min-w-0 overflow-hidden">
                 <span v-for="badge in getBadges(op).filter(b => !b.type.startsWith('mode-'))" :key="badge.type"
-                  class="text-[10px] font-bold px-1.5 py-px rounded-md shrink-0" :class="badge.color">
+                  class="text-meta font-bold px-1.5 py-px rounded-md shrink-0 whitespace-nowrap" :class="badge.color">
                   {{ badge.isLiteral ? badge.label : $t(badge.label) }}
                 </span>
-              </template>
+              </span>
             </div>
             <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
               <button @click="operationStore.toggleOperation(op.id)"
@@ -837,7 +837,7 @@ function confirmPrefixSuffix() {
           <!-- Smart Badges (Type badge first, then features) -->
           <div v-if="op.type === 'plugin' && getBadges(op).length" class="flex flex-wrap items-center gap-1.5 mb-3">
             <span v-for="badge in getBadges(op)" :key="badge.type"
-              class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-md" :class="badge.color">
+              class="text-meta uppercase font-bold px-1.5 py-0.5 rounded-md" :class="badge.color">
               {{ badge.isLiteral ? badge.label : $t(badge.label) }}
             </span>
             <!-- Plugin Health Status Badge with Click to Check -->
@@ -845,7 +845,7 @@ function confirmPrefixSuffix() {
               v-if="op.type === 'plugin' && pluginStore.getPlugin(op.params?.pluginId)?.manifest.permissions?.includes('network')"
               type="button"
               @click.stop="checkHealth(op.params?.pluginId)"
-              class="text-[10px] font-medium px-1.5 py-0.5 rounded-md border flex items-center gap-1 transition-colors cursor-pointer"
+              class="text-meta font-medium px-1.5 py-0.5 rounded-md border flex items-center gap-1 transition-colors cursor-pointer"
               :class="{
                 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60': pluginStore.getPluginHealth(op.params?.pluginId).status === 'healthy',
                 'bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800/60 hover:bg-red-100 dark:hover:bg-red-900/60': pluginStore.getPluginHealth(op.params?.pluginId).status === 'unhealthy',
@@ -884,7 +884,7 @@ function confirmPrefixSuffix() {
 
             <!-- Plugin Running Indicator -->
             <span v-if="op.type === 'plugin' && pluginStore.getPluginStatus(op.params?.pluginId).isBusy"
-              class="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60 flex items-center gap-1">
+              class="text-meta font-medium px-1.5 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60 flex items-center gap-1">
               <LoaderCircle class="w-2.5 h-2.5 animate-spin" />
               <span>{{ $t('plugins.running') }}</span>
             </span>
@@ -892,11 +892,11 @@ function confirmPrefixSuffix() {
 
           <!-- Plugin Execution Error Alert -->
           <div v-if="op.type === 'plugin' && pluginStore.getPluginStatus(op.params?.pluginId).lastError"
-            class="mb-3 p-2.5 rounded-lg border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/40 text-xs text-red-700 dark:text-red-300 flex items-start gap-2">
+            class="mb-3 p-2.5 rounded-lg border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/40 text-control text-red-700 dark:text-red-300 flex items-start gap-2">
             <AlertCircle class="w-4 h-4 shrink-0 mt-0.5 text-red-500" />
             <div class="min-w-0">
-              <div class="font-semibold text-[11.5px]">{{ $t('plugins.runError') }}</div>
-              <div class="text-[11px] opacity-90 break-all font-mono">{{ pluginStore.getPluginStatus(op.params?.pluginId).lastError }}</div>
+              <div class="font-semibold text-caption">{{ $t('plugins.runError') }}</div>
+              <div class="text-caption opacity-90 break-all font-mono">{{ pluginStore.getPluginStatus(op.params?.pluginId).lastError }}</div>
             </div>
           </div>
 
@@ -928,7 +928,7 @@ function confirmPrefixSuffix() {
                       statusOn: Boolean(op.params.useRegex),
                       desc: `${$t('operations.tipRegexDesc')} ${$t('operations.tipRegexHelp', { key: `${modKey} /` })}`
                     }"
-                    class="h-6 min-w-6 px-1 rounded-md font-mono text-[11px] font-bold transition-colors cursor-pointer"
+                    class="h-6 min-w-6 px-1 rounded-md font-mono text-caption font-bold transition-colors cursor-pointer"
                     :class="op.params.useRegex
                       ? 'bg-blue-600 text-white'
                       : 'text-slate-400 hover:text-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 dark:hover:text-slate-200'">.*</button>
@@ -942,13 +942,13 @@ function confirmPrefixSuffix() {
                       statusOn: Boolean(op.params.caseInsensitive),
                       desc: $t('operations.tipCaseDesc')
                     }"
-                    class="h-6 min-w-6 px-1 rounded-md text-[11px] font-bold transition-colors cursor-pointer"
+                    class="h-6 min-w-6 px-1 rounded-md text-caption font-bold transition-colors cursor-pointer"
                     :class="op.params.caseInsensitive
                       ? 'bg-blue-600 text-white'
                       : 'text-slate-400 hover:text-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 dark:hover:text-slate-200'">Aa</button>
                 </div>
               </div>
-              <p v-if="operationStore.ruleErrors[op.id]" class="mt-1 text-[11px] text-red-600 dark:text-red-400 ml-0.5 break-all" role="alert">
+              <p v-if="operationStore.ruleErrors[op.id]" class="mt-1 text-caption text-red-600 dark:text-red-400 ml-0.5 break-all" role="alert">
                 {{ $t('operations.invalidRegex', { detail: operationStore.ruleErrors[op.id] }) }}
                 <button type="button" @click="showHelp = true"
                   class="ml-1 font-medium text-blue-600 dark:text-blue-400 hover:underline cursor-pointer whitespace-nowrap">{{ $t('operations.seeSyntaxHelp') }}</button>
@@ -981,11 +981,11 @@ function confirmPrefixSuffix() {
                 :key="option.key"
                 class="space-y-1.5"
               >
-                <div class="flex items-center justify-between text-xs font-medium text-slate-700 dark:text-slate-300 ml-0.5">
+                <div class="flex items-center justify-between text-control font-medium text-slate-700 dark:text-slate-300 ml-0.5">
                   <span>{{ option.label }}</span>
                 </div>
 
-                <p v-if="option.description && !option.variables?.length" class="text-[11px] text-slate-500 dark:text-slate-400 ml-0.5 leading-normal">
+                <p v-if="option.description && !option.variables?.length" class="text-caption text-slate-500 dark:text-slate-400 ml-0.5 leading-normal">
                   {{ option.description }}
                 </p>
 
@@ -1006,7 +1006,7 @@ function confirmPrefixSuffix() {
                       <Check v-if="op.params[option.key]" class="w-3 h-3 text-white stroke-[3.5]" />
                     </div>
                   </div>
-                  <span class="text-xs text-slate-700 dark:text-slate-300">{{ option.label }}</span>
+                  <span class="text-control text-slate-700 dark:text-slate-300">{{ option.label }}</span>
                 </label>
 
                 <!-- String Option with Inline Variable Picker -->
@@ -1025,7 +1025,7 @@ function confirmPrefixSuffix() {
                       v-if="option.variables?.length"
                       type="button"
                       @click="toggleVariablePicker(op.id, option.key)"
-                      class="absolute right-1.5 px-2 py-1 rounded-md text-[11px] font-medium flex items-center gap-1 transition-colors cursor-pointer shadow-2xs select-none"
+                      class="absolute right-1.5 px-2 py-1 rounded-md text-caption font-medium flex items-center gap-1 transition-colors cursor-pointer shadow-2xs select-none"
                       :class="[
                         activeVarPicker?.opId === op.id && activeVarPicker?.key === option.key
                           ? 'bg-blue-600 text-white shadow-xs'
@@ -1045,19 +1045,19 @@ function confirmPrefixSuffix() {
                       v-if="activeVarPicker?.opId === op.id && activeVarPicker?.key === option.key"
                       class="absolute z-50 left-0 right-0 w-full mt-1 py-1 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl max-h-56 overflow-y-auto custom-scrollbar"
                     >
-                      <div class="px-3 py-1.5 text-[10.5px] font-medium text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-slate-700/60 flex items-center justify-between select-none">
+                      <div class="px-3 py-1.5 text-meta font-medium text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-slate-700/60 flex items-center justify-between select-none">
                         <span>{{ $t('plugins.clickToInsertVariable') }}</span>
-                        <span class="font-mono text-[10px]">{{ $t('plugins.variableCount', { n: option.variables?.length || 0 }) }}</span>
+                        <span class="font-mono text-meta">{{ $t('plugins.variableCount', { n: option.variables?.length || 0 }) }}</span>
                       </div>
                       <button
                         v-for="v in option.variables"
                         :key="v.name"
                         type="button"
                         @click="insertOptionVariable(op, option.key, v.name)"
-                        class="w-full px-3 py-1.5 text-left text-xs flex items-center justify-between hover:bg-blue-50/80 dark:hover:bg-slate-700/80 transition-colors cursor-pointer group"
+                        class="w-full px-3 py-1.5 text-left text-control flex items-center justify-between hover:bg-blue-50/80 dark:hover:bg-slate-700/80 transition-colors cursor-pointer group"
                       >
                         <span class="font-mono font-semibold text-blue-600 dark:text-blue-400">{{ v.name }}</span>
-                        <span v-if="v.description" class="text-[11px] text-slate-400 dark:text-slate-400 font-sans truncate ml-2">{{ v.description }}</span>
+                        <span v-if="v.description" class="text-caption text-slate-400 dark:text-slate-400 font-sans truncate ml-2">{{ v.description }}</span>
                       </button>
                     </div>
                   </Transition>
@@ -1076,7 +1076,7 @@ function confirmPrefixSuffix() {
               </div>
             </template>
 
-            <div v-else class="p-3 rounded-lg border border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/40 text-xs text-amber-700 dark:text-amber-300 flex items-center gap-2">
+            <div v-else class="p-3 rounded-lg border border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/40 text-control text-amber-700 dark:text-amber-300 flex items-center gap-2">
               <AlertCircle class="w-4 h-4 shrink-0" />
               <span>{{ $t('plugins.missingPlugin', { id: op.params.pluginId }) }}</span>
             </div>
@@ -1087,7 +1087,7 @@ function confirmPrefixSuffix() {
       <div v-if="operationStore.operations.length === 0" class="text-center py-8 space-y-2">
         <p class="text-slate-500 dark:text-slate-500 text-sm italic">{{ $t('operations.empty') }}</p>
         <button type="button" @click="showHelp = true"
-          class="inline-flex items-center gap-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">
+          class="inline-flex items-center gap-1 text-control font-medium text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">
           <BookOpen class="h-3.5 w-3.5" />
           {{ $t('operations.emptyHelpLink') }}
         </button>
@@ -1099,7 +1099,7 @@ function confirmPrefixSuffix() {
       <div v-if="operationDragPreview.visible && draggedOperation"
         class="fixed z-[100000] pointer-events-none max-w-xs rounded-lg border border-blue-300 dark:border-blue-500 bg-white/95 dark:bg-slate-900/95 px-3 py-2 shadow-xl ring-1 ring-blue-500/20"
         :style="{ left: `${operationDragPreview.x + 14}px`, top: `${operationDragPreview.y + 14}px` }">
-        <div class="text-xs font-semibold text-blue-600 dark:text-blue-300">#{{ getOperationIndexById(draggedOperation.id)
+        <div class="text-control font-semibold text-blue-600 dark:text-blue-300">#{{ getOperationIndexById(draggedOperation.id)
           + 1 }}</div>
         <div class="truncate text-sm text-slate-800 dark:text-slate-100">
           {{ draggedOperation.type === 'regex' ? $t('operations.regex') : $t('operations.other') }}
@@ -1153,7 +1153,7 @@ function confirmPrefixSuffix() {
 
               <!-- Real-time Preview -->
               <div class="p-3 bg-slate-100/80 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 rounded-lg space-y-1">
-                <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                <div class="text-control text-slate-500 dark:text-slate-400 font-medium">
                   {{ $t('operations.preview') }}
                 </div>
                 <div class="font-mono text-sm font-bold text-blue-600 dark:text-blue-400 tracking-wide select-text">

@@ -358,7 +358,7 @@ onBeforeUnmount(() => {
       <div v-if="(isLocalDragging || isFileDragActive) && fileStore.files.length > 0"
         class="absolute top-12 left-1/2 -translate-x-1/2 z-40 pointer-events-none">
         <div
-          class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-600/95 dark:bg-blue-500/95 text-white shadow-lg shadow-blue-600/30 border border-blue-400/40 text-xs font-semibold backdrop-blur-md select-none">
+          class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-600/95 dark:bg-blue-500/95 text-white shadow-lg shadow-blue-600/30 border border-blue-400/40 text-control font-semibold backdrop-blur-md select-none">
           <FolderPlus class="w-4 h-4" />
           <span>{{ $t('preview.dragActiveTitle') }}</span>
         </div>
@@ -375,13 +375,13 @@ onBeforeUnmount(() => {
       </div>
       <div v-if="fileStore.files.length > 0" class="flex items-center gap-2 shrink-0">
         <button @click="openFileDialog" v-tooltip="{ title: $t('preview.addFiles'), placement: 'bottom' }" :aria-label="$t('preview.addFiles')"
-          class="whitespace-nowrap inline-flex items-center gap-1.5 text-xs font-medium bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 px-2.5 py-1 rounded-md border border-slate-300 dark:border-slate-600 shadow-2xs transition-colors cursor-pointer">
+          class="whitespace-nowrap inline-flex items-center gap-1.5 text-control font-medium bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 px-2.5 py-1 rounded-md border border-slate-300 dark:border-slate-600 shadow-2xs transition-colors cursor-pointer">
           <FilePlus class="w-3.5 h-3.5 text-blue-500" />
           <span class="hidden @xl:inline">{{ $t('preview.addFiles') }}</span>
         </button>
         <FolderAddButton variant="toolbar" @add="addFiles" />
         <button @click="clearList" v-tooltip="{ title: $t('preview.clear'), placement: 'bottom' }" :aria-label="$t('preview.clear')"
-          class="whitespace-nowrap inline-flex items-center gap-1 text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 px-2.5 py-1 rounded-md hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors cursor-pointer">
+          class="whitespace-nowrap inline-flex items-center gap-1 text-control text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 px-2.5 py-1 rounded-md hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors cursor-pointer">
           <Trash2 class="w-3.5 h-3.5" />
           <span class="hidden @xl:inline">{{ $t('preview.clear') }}</span>
         </button>
@@ -392,14 +392,14 @@ onBeforeUnmount(() => {
     <div v-if="fileStore.files.length > 0"
       class="bg-slate-200/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 shrink-0">
       <div class="file-list-row">
-        <div class="px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-500 text-center">#</div>
-        <div class="px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-500 truncate">{{ $t('preview.original')
+        <div class="px-4 py-2 text-control font-medium text-slate-600 dark:text-slate-500 text-center">#</div>
+        <div class="px-4 py-2 text-control font-medium text-slate-600 dark:text-slate-500 truncate">{{ $t('preview.original')
           }}</div>
-        <div class="px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-500 truncate">{{ $t('preview.new') }}
+        <div class="px-4 py-2 text-control font-medium text-slate-600 dark:text-slate-500 truncate">{{ $t('preview.new') }}
         </div>
-        <div class="px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-500 text-center">{{
+        <div class="px-4 py-2 text-control font-medium text-slate-600 dark:text-slate-500 text-center">{{
           $t('preview.status') }}</div>
-        <div class="px-4 py-2 text-xs font-medium text-slate-600 dark:text-slate-500"></div>
+        <div class="px-4 py-2 text-control font-medium text-slate-600 dark:text-slate-500"></div>
       </div>
     </div>
 
@@ -417,7 +417,7 @@ onBeforeUnmount(() => {
             draggedFileId === file.id ? 'opacity-60 ring-1 ring-blue-400 bg-blue-50 dark:bg-blue-950/30' : ''
           ]">
           <!-- Index Column -->
-          <div class="px-4 py-2 text-xs text-slate-500 dark:text-slate-500 text-center font-mono">
+          <div class="px-4 py-2 text-control text-slate-500 dark:text-slate-500 text-center font-mono">
             <div class="flex items-center justify-center">
               <span class="group-hover:hidden">{{ virtualIndex + 1 }}</span>
               <button type="button"
@@ -526,11 +526,11 @@ onBeforeUnmount(() => {
             class="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer font-semibold">{{
               $t('dropZone.action') }}</span>
         </p>
-        <p class="text-xs text-slate-500 dark:text-slate-400 mb-5">{{ $t('dropZone.supports') }}</p>
+        <p class="text-control text-slate-500 dark:text-slate-400 mb-5">{{ $t('dropZone.supports') }}</p>
 
         <div class="flex items-center gap-2.5">
           <button @click="openFileDialog"
-            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-medium shadow-xs transition-colors cursor-pointer">
+            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-control font-medium shadow-xs transition-colors cursor-pointer">
             <FilePlus class="w-3.5 h-3.5" />
             <span>{{ $t('preview.addFiles') }}</span>
           </button>
@@ -544,12 +544,12 @@ onBeforeUnmount(() => {
       <div v-if="dragPreview.visible && draggedFile"
         class="fixed z-[100000] pointer-events-none max-w-sm rounded-lg border border-blue-300 dark:border-blue-500 bg-white/95 dark:bg-slate-900/95 px-3 py-2 shadow-xl ring-1 ring-blue-500/20"
         :style="{ left: `${dragPreview.x + 14}px`, top: `${dragPreview.y + 14}px` }">
-        <div class="text-xs font-semibold text-blue-600 dark:text-blue-300">#{{ getFileIndexById(draggedFile.id) + 1
+        <div class="text-control font-semibold text-blue-600 dark:text-blue-300">#{{ getFileIndexById(draggedFile.id) + 1
         }}</div>
         <div class="truncate text-sm text-slate-800 dark:text-slate-100">{{ draggedFile.originalName }}</div>
       </div>
       <div v-show="tooltip.visible" ref="tooltipRef"
-        class="fixed z-9999 bg-slate-800 dark:bg-slate-900 text-slate-200 dark:text-slate-200 px-3 py-2 rounded-lg shadow-xl text-xs border border-slate-600 dark:border-slate-700 pointer-events-none whitespace-nowrap"
+        class="fixed z-9999 bg-slate-800 dark:bg-slate-900 text-slate-200 dark:text-slate-200 px-3 py-2 rounded-lg shadow-xl text-control border border-slate-600 dark:border-slate-700 pointer-events-none whitespace-nowrap"
         :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }">
         <span v-if="!tooltip.isHtml">{{ tooltip.content }}</span>
         <span v-else v-html="tooltip.content"></span>

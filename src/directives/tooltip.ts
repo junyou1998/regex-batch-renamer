@@ -49,7 +49,7 @@ function ensureTip(): HTMLDivElement {
   tipEl.id = 'app-tooltip'
   tipEl.className =
     'app-tooltip pointer-events-none fixed z-[100001] max-w-[260px] rounded-lg bg-slate-900/95 dark:bg-slate-700/95 ' +
-    'px-2.5 py-1.5 text-[11.5px] leading-snug text-white shadow-xl ring-1 ring-white/10 backdrop-blur-sm [overflow-wrap:anywhere] ' +
+    'px-2.5 py-1.5 text-caption leading-snug text-white shadow-xl ring-1 ring-white/10 backdrop-blur-sm [overflow-wrap:anywhere] ' +
     'opacity-0 transition-opacity duration-100'
   document.body.appendChild(tipEl)
   return tipEl
@@ -62,13 +62,13 @@ function escapeHtml(text: string) {
 function render(options: TooltipOptions) {
   const el = ensureTip()
   const shortcut = options.shortcut
-    ? `<kbd class="ml-2 shrink-0 rounded border border-white/20 bg-white/10 px-1 font-mono text-[10px] text-slate-200">${escapeHtml(options.shortcut)}</kbd>`
+    ? `<kbd class="ml-2 shrink-0 rounded border border-white/20 bg-white/10 px-1 font-mono text-meta text-slate-200">${escapeHtml(options.shortcut)}</kbd>`
     : ''
   const status = options.status
-    ? `<div class="mt-1 flex items-center gap-1.5 text-[11px] font-medium ${options.statusOn ? 'text-sky-300' : 'text-slate-300'}">` +
+    ? `<div class="mt-1 flex items-center gap-1.5 text-caption font-medium ${options.statusOn ? 'text-sky-300' : 'text-slate-300'}">` +
       `<span class="inline-block h-1.5 w-1.5 shrink-0 rounded-full ${options.statusOn ? 'bg-sky-400' : 'bg-slate-500'}"></span>${escapeHtml(options.status)}</div>`
     : ''
-  const desc = options.desc ? `<div class="mt-0.5 text-[11px] text-slate-300">${escapeHtml(options.desc)}</div>` : ''
+  const desc = options.desc ? `<div class="mt-0.5 text-caption text-slate-300">${escapeHtml(options.desc)}</div>` : ''
   el.innerHTML = `<div class="flex items-center justify-between font-semibold"><span>${escapeHtml(options.title)}</span>${shortcut}</div>${status}${desc}`
 }
 

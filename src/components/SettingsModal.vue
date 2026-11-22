@@ -2,6 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { useSettingsStore } from '../stores/settingsStore'
 import { useAiStore, DEFAULT_API_MODELS } from '../stores/aiStore'
+import { useEscapeToClose } from '../composables/useEscapeToClose'
 import { describeAiError } from '../utils/aiErrors'
 import { useI18n } from 'vue-i18n'
 import type { Locale } from '../services/preferences'
@@ -245,15 +246,12 @@ watch(isOpen, (open) => {
   }
 })
 
-function handleKeydown(e: KeyboardEvent) {
-  if (e.key === 'Escape') {
-    if (showLanguageMenu.value) {
-      showLanguageMenu.value = false
-      return
-    }
-    isOpen.value = false
-  }
-}
+// Esc closes an open language menu first, then the editor, then the dialog.
+useEscapeToClose(isOpen, () => {
+  if (showLanguageMenu.value) showLanguageMenu.value = false
+  else if (activeTab.value === 'ai' && aiViewMode.value === 'editor') aiViewMode.value = 'list'
+  else isOpen.value = false
+})
 
 function toggleLanguageMenu() {
   showLanguageMenu.value = !showLanguageMenu.value
@@ -358,7 +356,6 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
       <div
         v-if="isOpen"
         class="fixed inset-0 z-50 flex items-center justify-center p-4 pt-10"
-        @keydown="handleKeydown"
       >
         <!-- Top Titlebar Window Drag Region (Pass-through for macOS window dragging) -->
         <div data-tauri-drag-region class="absolute top-0 left-0 right-0 h-[38px] z-10 pointer-events-auto"></div>
@@ -457,7 +454,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                       {{ $t('settings.defaultUseRegex') }}
                     </span>
                   </div>
-                  <p class="text-xs text-slate-500 dark:text-slate-400 pl-[26px]">
+                  <p class="text-control text-slate-500 dark:text-slate-400 pl-[26px]">
                     {{ $t('settings.defaultUseRegexDesc') }}
                   </p>
                 </label>
@@ -485,7 +482,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                       {{ $t('settings.processFilenameOnly') }}
                     </span>
                   </div>
-                  <p class="text-xs text-slate-500 dark:text-slate-400 pl-[26px]">
+                  <p class="text-control text-slate-500 dark:text-slate-400 pl-[26px]">
                     {{ $t('settings.processFilenameOnlyDesc') }}
                   </p>
                 </label>
@@ -513,7 +510,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                       {{ $t('settings.disableRulesAfterRename') }}
                     </span>
                   </div>
-                  <p class="text-xs text-slate-500 dark:text-slate-400 pl-[26px]">
+                  <p class="text-control text-slate-500 dark:text-slate-400 pl-[26px]">
                     {{ $t('settings.disableRulesAfterRenameDesc') }}
                   </p>
                 </label>
@@ -628,7 +625,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                       {{ settingsStore.zoomLevel }}%
                     </span>
                   </div>
-                  <p class="text-xs text-slate-500 dark:text-slate-400">
+                  <p class="text-control text-slate-500 dark:text-slate-400">
                     {{ $t('settings.zoomLevelDesc') }}
                   </p>
                 </div>
@@ -647,7 +644,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                   <button
                     type="button"
                     @click="startCreateProfile"
-                    class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                    class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-control font-semibold transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
                   >
                     <Plus class="w-3.5 h-3.5" />
                     {{ $t('settings.addProfileBtn') }}
@@ -679,19 +676,19 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                           </span>
                           <span
                             v-if="profile.id === aiStore.activeProfileId"
-                            class="px-2 py-0.5 rounded-full bg-blue-600 text-white dark:bg-blue-500 text-[10px] font-bold shrink-0 tracking-wide"
+                            class="px-2 py-0.5 rounded-full bg-blue-600 text-white dark:bg-blue-500 text-meta font-bold shrink-0 tracking-wide"
                           >
                             {{ $t('settings.profileDefaultBadge') }}
                           </span>
                         </div>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 capitalize truncate">
+                        <p class="text-control text-slate-500 dark:text-slate-400 capitalize truncate">
                           {{ getProviderDisplayName(profile) }}
                         </p>
                       </div>
                     </div>
 
                     <!-- Right actions -->
-                    <div class="flex items-center gap-2.5 sm:gap-3 shrink-0 text-xs font-medium">
+                    <div class="flex items-center gap-2.5 sm:gap-3 shrink-0 text-control font-medium">
                       <button
                         type="button"
                         @click.stop="startEditProfile(profile)"
@@ -743,7 +740,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                         {{ $t('settings.aiAutoApply') }}
                       </span>
                     </div>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 pl-[26px]">
+                    <p class="text-control text-slate-500 dark:text-slate-400 pl-[26px]">
                       {{ $t('settings.aiAutoApplyDesc') }}
                     </p>
                   </label>
@@ -757,7 +754,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                   <button
                     type="button"
                     @click="aiViewMode = 'list'"
-                    class="text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5 cursor-pointer py-1"
+                    class="text-control font-semibold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5 cursor-pointer py-1"
                   >
                     <ArrowLeft class="w-4 h-4" />
                     <span>{{ $t('settings.backBtn') }}</span>
@@ -768,7 +765,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                 </div>
 
                 <!-- Form Fields -->
-                <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 space-y-3.5 text-xs shadow-2xs">
+                <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 space-y-3.5 text-control shadow-2xs">
                   <!-- 1. 配置名稱 -->
                   <div class="grid grid-cols-1 sm:grid-cols-4 items-center gap-2">
                     <label class="font-medium text-slate-700 dark:text-slate-300">{{ $t('settings.profileName') }}</label>
@@ -777,7 +774,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                         type="text"
                         v-model="editingProfile.name"
                         :placeholder="$t('settings.profileNamePlaceholder')"
-                        class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
+                        class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 text-control focus:ring-2 focus:ring-blue-500 focus:outline-hidden"
                       />
                     </div>
                   </div>
@@ -790,7 +787,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                         v-if="!editingProfile.isBuiltin"
                         type="button"
                         @click="showProviderDropdown = !showProviderDropdown"
-                        class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 text-xs flex items-center justify-between cursor-pointer focus:ring-2 focus:ring-blue-500"
+                        class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 text-control flex items-center justify-between cursor-pointer focus:ring-2 focus:ring-blue-500"
                       >
                         <div class="flex items-center gap-2">
                           <ProviderIcon :provider="editingProfile.provider" class="w-4 h-4" />
@@ -801,7 +798,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
 
                       <div
                         v-else
-                        class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium"
+                        class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-control font-medium"
                       >
                         <ProviderIcon :provider="editingProfile.provider" class="w-4 h-4" />
                         <span>{{ getProviderDisplayName(editingProfile) }} (CLI)</span>
@@ -816,7 +813,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                           v-for="opt in providerOptions"
                           :key="opt.id"
                           @click="selectProvider(opt.id)"
-                          class="px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
+                          class="px-3 py-2 text-control flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
                           :class="{ 'bg-slate-50 dark:bg-slate-800/80 font-bold text-blue-600 dark:text-blue-400': editingProfile.provider === opt.id }"
                         >
                           <div class="flex items-center gap-2.5">
@@ -838,7 +835,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                         v-model="editingProfile.apiKey"
                         autocomplete="off"
                         :placeholder="editingProfile.hasSavedKey ? $t('settings.apiKeySavedPlaceholder') : editingProfile.provider === 'ollama' ? $t('settings.apiKeyOptionalPlaceholder') : $t('settings.apiKeyPlaceholder')"
-                        class="w-full pl-3 pr-9 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-hidden font-mono"
+                        class="w-full pl-3 pr-9 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 text-control focus:ring-2 focus:ring-blue-500 focus:outline-hidden font-mono"
                       />
                       <button
                         type="button"
@@ -850,7 +847,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                         <EyeOff v-if="showApiKey" class="w-4 h-4" />
                         <Eye v-else class="w-4 h-4" />
                       </button>
-                      <p class="mt-1 text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                      <p class="mt-1 text-meta text-slate-500 dark:text-slate-400 flex items-center gap-2">
                         <span>{{ editingProfile.hasSavedKey ? $t('settings.apiKeySavedHint') : $t('settings.apiKeyStorageHint') }}</span>
                         <button
                           v-if="editingProfile.hasSavedKey"
@@ -870,7 +867,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                         type="text"
                         v-model="editingProfile.endpoint"
                         placeholder="https://..."
-                        class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-hidden font-mono text-[11px]"
+                        class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 text-control focus:ring-2 focus:ring-blue-500 focus:outline-hidden font-mono text-caption"
                       />
                     </div>
                   </div>
@@ -894,9 +891,9 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                           type="text"
                           v-model="editingProfile.model"
                           :placeholder="$t('settings.cliModelPlaceholder')"
-                          class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-hidden font-mono"
+                          class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 text-control focus:ring-2 focus:ring-blue-500 focus:outline-hidden font-mono"
                         />
-                        <p class="text-[10px] text-slate-500 dark:text-slate-400">
+                        <p class="text-meta text-slate-500 dark:text-slate-400">
                           {{ $t('settings.cliModelHint') }}
                         </p>
                       </template>
@@ -906,7 +903,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                   <!-- Test Result Alert -->
                   <div
                     v-if="apiTestResult"
-                    class="p-2.5 rounded-lg text-xs flex items-start gap-2"
+                    class="p-2.5 rounded-lg text-control flex items-start gap-2"
                     :class="apiTestResult.success ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300' : 'bg-red-50 dark:bg-red-950/40 text-red-800 dark:text-red-300'"
                   >
                     <Check v-if="apiTestResult.success" class="w-4 h-4 shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
@@ -921,7 +918,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                       type="button"
                       @click="handleTestConnection"
                       :disabled="isTestingApi || !canTestConnection"
-                      class="px-3.5 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 cursor-pointer"
+                      class="px-3.5 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-control font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 cursor-pointer"
                     >
                       <RefreshCw class="w-3.5 h-3.5" :class="{ 'animate-spin': isTestingApi }" />
                       {{ $t('settings.testConnection') }}
@@ -930,7 +927,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                       type="button"
                       @click="saveCurrentProfile"
                       :disabled="isSaving"
-                      class="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition-colors cursor-pointer shadow-xs"
+                      class="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-control font-semibold transition-colors cursor-pointer shadow-xs"
                     >
                       {{ $t('settings.saveAndApply') }}
                     </button>

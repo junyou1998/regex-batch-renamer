@@ -684,17 +684,17 @@ async function handleCopyTo() {
         >
           <div
             v-if="updateAvailable"
-            class="flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-blue-600/90 dark:bg-blue-600/85 backdrop-blur-md text-white shadow-xs border border-blue-400/30 text-xs font-medium mr-1"
+            class="flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-blue-600/90 dark:bg-blue-600/85 backdrop-blur-md text-white shadow-xs border border-blue-400/30 text-control font-medium mr-1"
           >
             <span class="flex h-2 w-2 relative">
               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-300 opacity-75"></span>
               <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-400"></span>
             </span>
-            <span class="text-[11px] font-bold">v{{ latestVersion }}</span>
+            <span class="text-caption font-bold">v{{ latestVersion }}</span>
             <button
               @click="openReleasePage"
               :disabled="isInstallingUpdate"
-              class="bg-white text-blue-700 hover:bg-blue-50 px-2 py-0.5 rounded-full text-[11px] font-semibold shadow-2xs transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-1"
+              class="bg-white text-blue-700 hover:bg-blue-50 px-2 py-0.5 rounded-full text-caption font-semibold shadow-2xs transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-1"
             >
               <LoaderCircle v-if="isInstallingUpdate" class="w-3 h-3 animate-spin" />
               {{ isInstallingUpdate ? $t('app.processing') : $t('app.download') }}
@@ -714,7 +714,7 @@ async function handleCopyTo() {
           @click="aiStore.toggleOpen"
           v-tooltip="{ title: aiStore.isOpen ? $t('ai.closePanel') : $t('ai.title'), placement: 'bottom' }"
           :class="[
-            'flex items-center gap-1.5 px-2.5 h-6 rounded-md text-xs font-semibold transition-colors cursor-pointer mr-1',
+            'flex items-center gap-1.5 px-2.5 h-6 rounded-md text-control font-semibold transition-colors cursor-pointer mr-1',
             aiStore.isOpen
               ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-200 border border-blue-300 dark:border-blue-700 shadow-2xs'
               : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 hover:text-slate-900 dark:hover:text-slate-100'
@@ -776,7 +776,7 @@ async function handleCopyTo() {
                 {{ $t('app.title') }}
               </h1>
             </a>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{{ $t('app.subtitle') }}</p>
+            <p class="text-control text-slate-500 dark:text-slate-400 mt-0.5">{{ $t('app.subtitle') }}</p>
           </div>
 
           <!-- Operation Pipeline (Fixed Header 2 + Scrollable Rule List) -->
@@ -786,7 +786,7 @@ async function handleCopyTo() {
           <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-100/80 dark:bg-slate-900/80 space-y-3 shrink-0">
             <!-- Conflict Warning -->
             <div v-if="hasConflicts"
-              class="text-xs text-red-600 dark:text-red-400 font-medium flex items-center gap-1 animate-pulse">
+              class="text-control text-red-600 dark:text-red-400 font-medium flex items-center gap-1 animate-pulse">
               <CircleAlert class="w-4 h-4" />
               {{ conflictMessage }}
             </div>

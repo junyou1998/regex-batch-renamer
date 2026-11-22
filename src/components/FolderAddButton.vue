@@ -78,8 +78,8 @@ onUnmounted(() => {
   window.removeEventListener('resize', position)
 })
 
-const toolbarBtn = 'inline-flex items-center gap-1.5 text-xs font-medium bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 py-1 border border-slate-300 dark:border-slate-600 shadow-2xs transition-colors cursor-pointer whitespace-nowrap'
-const emptyBtn = 'inline-flex items-center gap-1.5 py-1.5 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-medium transition-colors cursor-pointer whitespace-nowrap'
+const toolbarBtn = 'inline-flex items-center gap-1.5 text-control font-medium bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 py-1 border border-slate-300 dark:border-slate-600 shadow-2xs transition-colors cursor-pointer whitespace-nowrap'
+const emptyBtn = 'inline-flex items-center gap-1.5 py-1.5 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-control font-medium transition-colors cursor-pointer whitespace-nowrap'
 </script>
 
 <template>
@@ -118,16 +118,16 @@ const emptyBtn = 'inline-flex items-center gap-1.5 py-1.5 bg-slate-200 hover:bg-
           class="w-full px-3 py-2 text-left flex items-start gap-2.5 hover:bg-slate-100 dark:hover:bg-slate-700/80 cursor-pointer">
           <FolderPlus class="w-4 h-4 mt-0.5 shrink-0 text-blue-500" />
           <span class="min-w-0">
-            <span class="block text-xs font-medium text-slate-800 dark:text-slate-100">{{ t('preview.addFolderFiles') }}</span>
-            <span class="block text-[11px] text-slate-500 dark:text-slate-400">{{ t('preview.addFolderFilesDesc') }}</span>
+            <span class="block text-control font-medium text-slate-800 dark:text-slate-100">{{ t('preview.addFolderFiles') }}</span>
+            <span class="block text-caption text-slate-500 dark:text-slate-400">{{ t('preview.addFolderFilesDesc') }}</span>
           </span>
         </button>
         <button type="button" role="menuitem" @click="pick('recursive')"
           class="w-full px-3 py-2 text-left flex items-start gap-2.5 hover:bg-slate-100 dark:hover:bg-slate-700/80 cursor-pointer">
           <FolderTree class="w-4 h-4 mt-0.5 shrink-0 text-blue-500" />
           <span class="min-w-0">
-            <span class="block text-xs font-medium text-slate-800 dark:text-slate-100">{{ t('preview.addFolderRecursive') }}</span>
-            <span class="block text-[11px] text-slate-500 dark:text-slate-400">{{ t('preview.addFolderRecursiveDesc') }}</span>
+            <span class="block text-control font-medium text-slate-800 dark:text-slate-100">{{ t('preview.addFolderRecursive') }}</span>
+            <span class="block text-caption text-slate-500 dark:text-slate-400">{{ t('preview.addFolderRecursiveDesc') }}</span>
           </span>
         </button>
         <div class="my-1 border-t border-slate-200 dark:border-slate-700"></div>
@@ -135,8 +135,8 @@ const emptyBtn = 'inline-flex items-center gap-1.5 py-1.5 bg-slate-200 hover:bg-
           class="w-full px-3 py-2 text-left flex items-start gap-2.5 hover:bg-slate-100 dark:hover:bg-slate-700/80 cursor-pointer">
           <FolderPen class="w-4 h-4 mt-0.5 shrink-0 text-amber-500" />
           <span class="min-w-0">
-            <span class="block text-xs font-medium text-slate-800 dark:text-slate-100">{{ t('preview.addFolderItself') }}</span>
-            <span class="block text-[11px] text-slate-500 dark:text-slate-400">{{ t('preview.addFolderItselfDesc') }}</span>
+            <span class="block text-control font-medium text-slate-800 dark:text-slate-100">{{ t('preview.addFolderItself') }}</span>
+            <span class="block text-caption text-slate-500 dark:text-slate-400">{{ t('preview.addFolderItselfDesc') }}</span>
           </span>
         </button>
       </div>

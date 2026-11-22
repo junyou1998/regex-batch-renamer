@@ -67,6 +67,6 @@ async function openFileDialog() {
         class="text-blue-600 dark:text-blue-400 underline decoration-blue-400/30 group-hover:decoration-blue-500 dark:group-hover:decoration-blue-400">{{
           $t('dropZone.action') }}</span>
     </p>
-    <p class="text-xs text-slate-500 dark:text-slate-500 mt-1">{{ $t('dropZone.supports') }}</p>
+    <p class="text-control text-slate-500 dark:text-slate-500 mt-1">{{ $t('dropZone.supports') }}</p>
   </div>
 </template>

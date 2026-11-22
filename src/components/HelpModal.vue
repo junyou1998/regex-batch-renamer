@@ -109,7 +109,7 @@ function askAi(prompt: string) {
                                 <li>{{ $t('help.pipeline.point1') }}</li>
                                 <li>{{ $t('help.pipeline.point2') }}</li>
                             </ul>
-                            <div class="p-3 bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200/60 dark:border-indigo-800/50 rounded-xl text-xs text-indigo-800 dark:text-indigo-300">
+                            <div class="p-3 bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200/60 dark:border-indigo-800/50 rounded-xl text-control text-indigo-800 dark:text-indigo-300">
                                 {{ $t('help.pipeline.tip') }}
                             </div>
                         </section>
@@ -125,7 +125,7 @@ function askAi(prompt: string) {
                                     {{ $t('help.regex.title') }}
                                 </h4>
                                 <span
-                                    class="text-xs px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded">{{
+                                    class="text-control px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded">{{
                                         $t('help.regex.advanced') }}</span>
                             </div>
 
@@ -208,7 +208,7 @@ function askAi(prompt: string) {
                                     <!-- Example 1 -->
                                     <div
                                         class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
-                                        <div class="text-xs font-semibold text-slate-500 mb-1">{{
+                                        <div class="text-control font-semibold text-slate-500 mb-1">{{
                                             $t('help.regex.examples.ex1.title') }}</div>
                                         <div class="flex items-center gap-2 text-sm font-mono">
                                             <CopyCode code="\s+" tone="pink" />
@@ -221,7 +221,7 @@ function askAi(prompt: string) {
                                     <!-- Example 2 -->
                                     <div
                                         class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
-                                        <div class="text-xs font-semibold text-slate-500 mb-1">{{
+                                        <div class="text-control font-semibold text-slate-500 mb-1">{{
                                             $t('help.regex.examples.ex2.title') }}</div>
                                         <div class="flex flex-col gap-1">
                                             <div class="flex items-center gap-2 text-sm font-mono">
@@ -240,7 +240,7 @@ function askAi(prompt: string) {
                                     <!-- Example 3 -->
                                     <div
                                         class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
-                                        <div class="text-xs font-semibold text-slate-500 mb-1">{{
+                                        <div class="text-control font-semibold text-slate-500 mb-1">{{
                                             $t('help.regex.examples.ex3.title') }}</div>
                                         <div class="flex items-center gap-2 text-sm font-mono">
                                             <CopyCode code="\s*\([^)]*\)" tone="pink" />
@@ -316,14 +316,14 @@ function askAi(prompt: string) {
 
                                 <div
                                     class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-slate-700">
-                                    <div class="text-xs font-semibold text-slate-500 mb-1">{{
+                                    <div class="text-control font-semibold text-slate-500 mb-1">{{
                                         $t('help.numbering.example.title') }}</div>
                                     <div class="flex flex-col gap-1">
                                         <div class="flex items-center gap-2 text-sm font-mono">
                                             <span class="text-slate-500 w-12">{{ $t('help.numbering.example.find')
                                             }}</span>
                                             <CopyCode code="^.*" tone="pink" />
-                                            <span class="text-xs text-slate-400">{{
+                                            <span class="text-control text-slate-400">{{
                                                 $t('help.numbering.example.selectAll') }}</span>
                                         </div>
                                         <div class="flex items-center gap-2 text-sm font-mono">
@@ -346,7 +346,7 @@ function askAi(prompt: string) {
                                     {{ $t('help.ai.title') }}
                                 </h4>
                                 <button type="button" @click="openAiPanel"
-                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-sky-600 hover:bg-sky-700 text-white cursor-pointer shadow-2xs">
+                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-control font-semibold bg-sky-600 hover:bg-sky-700 text-white cursor-pointer shadow-2xs">
                                     <Sparkles class="w-3.5 h-3.5" />
                                     {{ $t('help.ai.openPanel') }}
                                 </button>
@@ -355,18 +355,18 @@ function askAi(prompt: string) {
 
                             <div class="grid sm:grid-cols-2 gap-3">
                                 <div class="p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-                                    <div class="text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">{{ $t('help.ai.cliTitle') }}</div>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{{ $t('help.ai.cliDesc') }}</p>
+                                    <div class="text-control font-bold text-slate-700 dark:text-slate-200 mb-1">{{ $t('help.ai.cliTitle') }}</div>
+                                    <p class="text-control text-slate-500 dark:text-slate-400 leading-relaxed">{{ $t('help.ai.cliDesc') }}</p>
                                 </div>
                                 <div class="p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-                                    <div class="text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">{{ $t('help.ai.apiTitle') }}</div>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{{ $t('help.ai.apiDesc') }}</p>
+                                    <div class="text-control font-bold text-slate-700 dark:text-slate-200 mb-1">{{ $t('help.ai.apiTitle') }}</div>
+                                    <p class="text-control text-slate-500 dark:text-slate-400 leading-relaxed">{{ $t('help.ai.apiDesc') }}</p>
                                 </div>
                             </div>
 
                             <div>
-                                <div class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">{{ $t('help.ai.flowTitle') }}</div>
-                                <ol class="flex flex-wrap items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300">
+                                <div class="text-control font-bold text-slate-700 dark:text-slate-300 mb-1.5">{{ $t('help.ai.flowTitle') }}</div>
+                                <ol class="flex flex-wrap items-center gap-1.5 text-control text-slate-600 dark:text-slate-300">
                                     <template v-for="(step, i) in aiSteps" :key="step">
                                         <li class="px-2 py-1 rounded-md bg-sky-50 dark:bg-sky-950/40 border border-sky-200/70 dark:border-sky-900/60">
                                             {{ i + 1 }}. {{ $t(step) }}
@@ -377,18 +377,18 @@ function askAi(prompt: string) {
                             </div>
 
                             <div>
-                                <div class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">{{ $t('help.ai.examplesTitle') }}</div>
+                                <div class="text-control font-bold text-slate-700 dark:text-slate-300 mb-1.5">{{ $t('help.ai.examplesTitle') }}</div>
                                 <div class="flex flex-col gap-1.5">
                                     <button v-for="example in aiExamples" :key="example" type="button" @click="askAi($t(example))"
                                         v-tooltip="$t('help.ai.askThis')"
-                                        class="text-left text-xs px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/60 text-slate-700 dark:text-slate-200 hover:border-sky-400 dark:hover:border-sky-600 hover:bg-sky-50/60 dark:hover:bg-sky-950/30 cursor-pointer transition-colors">
+                                        class="text-left text-control px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/60 text-slate-700 dark:text-slate-200 hover:border-sky-400 dark:hover:border-sky-600 hover:bg-sky-50/60 dark:hover:bg-sky-950/30 cursor-pointer transition-colors">
                                         “{{ $t(example) }}”
                                     </button>
                                 </div>
-                                <p class="mt-1.5 text-[11px] text-slate-500 dark:text-slate-400">{{ $t('help.ai.examplesTip') }}</p>
+                                <p class="mt-1.5 text-caption text-slate-500 dark:text-slate-400">{{ $t('help.ai.examplesTip') }}</p>
                             </div>
 
-                            <p class="text-[11px] text-slate-500 dark:text-slate-400 flex items-start gap-1.5">
+                            <p class="text-caption text-slate-500 dark:text-slate-400 flex items-start gap-1.5">
                                 <ShieldCheck class="w-3.5 h-3.5 shrink-0 mt-px text-slate-400" />
                                 <span>{{ $t('help.ai.privacy') }}</span>
                             </p>
@@ -408,7 +408,7 @@ function askAi(prompt: string) {
                                     <dt class="text-slate-600 dark:text-slate-300">{{ $t(item.label) }}</dt>
                                     <dd class="flex items-center gap-1 shrink-0">
                                         <kbd v-for="k in item.keys" :key="k"
-                                            class="min-w-6 text-center px-1.5 py-0.5 rounded-md border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 font-mono text-[11px] text-slate-700 dark:text-slate-200 shadow-2xs">{{ k }}</kbd>
+                                            class="min-w-6 text-center px-1.5 py-0.5 rounded-md border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 font-mono text-caption text-slate-700 dark:text-slate-200 shadow-2xs">{{ k }}</kbd>
                                     </dd>
                                 </div>
                             </dl>

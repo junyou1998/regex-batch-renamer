@@ -304,11 +304,11 @@ async function openChangelogForTag(tagName: string) {
                                         <div class="space-y-2">
                                             <div class="flex items-center gap-2">
                                                 <span
-                                                    class="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                                                    class="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-2.5 py-0.5 text-control font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
                                                     {{ release.tagName }}
                                                 </span>
                                                 <span
-                                                    class="inline-flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
+                                                    class="inline-flex items-center gap-1 text-control text-slate-500 dark:text-slate-400">
                                                     <CalendarDays class="h-3.5 w-3.5" />
                                                     {{ formatReleaseDate(release.publishedAt) }}
                                                 </span>
@@ -319,7 +319,7 @@ async function openChangelogForTag(tagName: string) {
                                             </button>
                                         </div>
                                         <button @click="openReleaseTag(release.tagName)"
-                                            class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer">
+                                            class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-control font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer">
                                             <ExternalLink class="h-3.5 w-3.5" />
                                             {{ $t('about.viewVersionRelease') }}
                                         </button>
@@ -355,7 +355,7 @@ async function openChangelogForTag(tagName: string) {
                                     </h4>
                                 </a>
                                 <div
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 mb-2 ml-2 relative">
+                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-control font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 mb-2 ml-2 relative">
                                     v{{ currentVersion || '...' }}
                                     <span v-if="hasUpdate" class="absolute -top-1 -right-1 flex h-2.5 w-2.5">
                                         <span
@@ -364,7 +364,7 @@ async function openChangelogForTag(tagName: string) {
                                     </span>
                                 </div>
                                 <div v-if="hasUpdate"
-                                    class="text-xs text-amber-600 dark:text-amber-400 font-medium animate-pulse">
+                                    class="text-control text-amber-600 dark:text-amber-400 font-medium animate-pulse">
                                     {{ $t('about.newVersionAvailable') }}: v{{ latestVersion }}
                                 </div>
                                 <p class="text-sm text-slate-500 dark:text-slate-400">
@@ -412,7 +412,7 @@ async function openChangelogForTag(tagName: string) {
                                     <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
                                         alt="Buy Me A Coffee" style="height: 60px !important; width: 217px !important;">
                                 </a>
-                                <p class="text-xs text-center text-slate-400 dark:text-slate-500 mt-3">
+                                <p class="text-control text-center text-slate-400 dark:text-slate-500 mt-3">
                                     {{ $t('about.thanks') }}
                                 </p>
                             </div>

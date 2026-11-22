@@ -330,7 +330,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
               v-if="selectedDetailPlugin"
               type="button"
               @click="closeDetail"
-              class="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer mr-1 flex items-center gap-1 text-xs font-semibold"
+              class="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer mr-1 flex items-center gap-1 text-control font-semibold"
               v-tooltip="{ title: $t('plugins.backToList'), placement: 'bottom' }"
             >
               <ArrowLeft class="w-4 h-4" />
@@ -342,10 +342,10 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
             <div>
               <h2 class="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                 {{ selectedDetailPlugin ? selectedDetailPlugin.name : $t('plugins.title') }}
-                <span v-if="!selectedDetailPlugin" class="text-xs font-normal px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+                <span v-if="!selectedDetailPlugin" class="text-control font-normal px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
                   {{ pluginStore.pluginList.length }} {{ $t('plugins.installedCount') }}
                 </span>
-                <span v-else class="text-xs font-mono font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                <span v-else class="text-control font-mono font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                   v{{ selectedDetailPlugin.version }}
                 </span>
               </h2>
@@ -378,12 +378,12 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
               <div class="min-w-0">
                 <div class="flex items-center gap-2 flex-wrap">
                   <h2 class="text-base font-bold text-slate-900 dark:text-slate-100">{{ selectedDetailPlugin.name }}</h2>
-                  <span class="text-xs font-mono text-slate-500 dark:text-slate-400 font-semibold">v{{ selectedDetailPlugin.version }}</span>
-                  <span class="px-2 py-0.5 rounded-md text-[11px] font-mono bg-slate-200/60 dark:bg-slate-700/60 text-slate-700 dark:text-slate-300">
+                  <span class="text-control font-mono text-slate-500 dark:text-slate-400 font-semibold">v{{ selectedDetailPlugin.version }}</span>
+                  <span class="px-2 py-0.5 rounded-md text-caption font-mono bg-slate-200/60 dark:bg-slate-700/60 text-slate-700 dark:text-slate-300">
                     {{ selectedDetailPlugin.id }}
                   </span>
                 </div>
-                <div class="flex items-center gap-3 mt-1.5 text-xs text-slate-500 dark:text-slate-400 flex-wrap">
+                <div class="flex items-center gap-3 mt-1.5 text-control text-slate-500 dark:text-slate-400 flex-wrap">
                   <span v-if="selectedDetailPlugin.author">{{ $t('plugins.authorLabel') }}<span class="font-medium text-slate-700 dark:text-slate-300">{{ selectedDetailPlugin.author }}</span></span>
                   <button
                     v-if="selectedDetailPlugin.homepage"
@@ -403,7 +403,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
             <div class="flex items-center gap-2.5 shrink-0">
               <template v-if="pluginStore.getPlugin(selectedDetailPlugin.id)">
                 <!-- Toggle enable switch -->
-                <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs">
+                <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-control">
                   <span class="text-slate-600 dark:text-slate-300 font-medium">{{ $t('plugins.enabledState') }}</span>
                   <label class="relative inline-flex items-center cursor-pointer shrink-0">
                     <input
@@ -421,7 +421,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
                   v-if="!selectedDetailPlugin.isBuiltin"
                   type="button"
                   @click="handleDeletePlugin(selectedDetailPlugin)"
-                  class="flex items-center gap-1 px-3 py-2 rounded-xl bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800/60 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/60 text-xs font-semibold transition-colors cursor-pointer"
+                  class="flex items-center gap-1 px-3 py-2 rounded-xl bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800/60 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/60 text-control font-semibold transition-colors cursor-pointer"
                 >
                   <Trash2 class="w-3.5 h-3.5" />
                   <span>{{ $t('plugins.uninstall') }}</span>
@@ -433,7 +433,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
                   type="button"
                   @click="handleInstallMarketplace(selectedDetailPlugin)"
                   :disabled="installingMap[selectedDetailPlugin.id]"
-                  class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold transition-colors cursor-pointer shadow-xs"
+                  class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-control font-semibold transition-colors cursor-pointer shadow-xs"
                 >
                   <LoaderCircle v-if="installingMap[selectedDetailPlugin.id]" class="w-3.5 h-3.5 animate-spin" />
                   <Download v-else class="w-3.5 h-3.5" />
@@ -444,7 +444,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
           </div>
 
           <!-- Description / Badges Strip -->
-          <div class="flex flex-wrap items-center gap-2 text-xs">
+          <div class="flex flex-wrap items-center gap-2 text-control">
             <span v-if="selectedDetailPlugin.permissions?.includes('network')" class="px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/60 flex items-center gap-1 font-medium">
               <ShieldCheck class="w-3.5 h-3.5" />
               <span>{{ $t('plugins.needsNetwork') }}</span>
@@ -463,18 +463,18 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
           <div class="border-t border-slate-200 dark:border-slate-800 pt-5">
             <div v-if="isLoadingReadme" class="flex flex-col items-center justify-center py-12 text-slate-400">
               <LoaderCircle class="w-7 h-7 animate-spin mb-3 text-blue-500" />
-              <p class="text-xs">{{ $t('plugins.loadingReadme') }}</p>
+              <p class="text-control">{{ $t('plugins.loadingReadme') }}</p>
             </div>
 
             <div
               v-else-if="renderedReadmeHtml"
-              class="plugin-markdown-content text-slate-800 dark:text-slate-200 leading-relaxed text-xs space-y-4"
+              class="plugin-markdown-content text-slate-800 dark:text-slate-200 leading-relaxed text-control space-y-4"
               v-html="renderedReadmeHtml"
               @click="handleReadmeClick"
             ></div>
 
             <!-- Fallback if no README available -->
-            <div v-else class="space-y-4 text-xs text-slate-600 dark:text-slate-300">
+            <div v-else class="space-y-4 text-control text-slate-600 dark:text-slate-300">
               <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
                 <h4 class="font-bold text-sm mb-1 text-slate-900 dark:text-slate-100">{{ $t('plugins.intro') }}</h4>
                 <p>{{ selectedDetailPlugin.description || $t('plugins.noDescription') }}</p>
@@ -482,7 +482,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
 
               <div v-if="selectedDetailPlugin.options?.length" class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
                 <h4 class="font-bold text-sm mb-2 text-slate-900 dark:text-slate-100">{{ $t('plugins.optionsTitle') }}</h4>
-                <ul class="list-disc pl-5 space-y-1.5 font-mono text-[11.5px]">
+                <ul class="list-disc pl-5 space-y-1.5 font-mono text-caption">
                   <li v-for="opt in selectedDetailPlugin.options" :key="opt.key">
                     <strong>{{ opt.label }} ({{ opt.key }})</strong>: {{ opt.description || $t('plugins.optionType', { type: opt.type }) }}
                   </li>
@@ -497,7 +497,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
           <!-- Subheader: Navigation Tabs & Search -->
           <div class="px-5 py-2.5 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-slate-50/40 dark:bg-slate-900/30 shrink-0">
             <!-- Tabs -->
-            <div class="flex items-center gap-1 p-0.5 rounded-xl bg-slate-200/70 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs">
+            <div class="flex items-center gap-1 p-0.5 rounded-xl bg-slate-200/70 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-control">
               <button
                 type="button"
                 @click="activeTab = 'installed'"
@@ -535,7 +535,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
                   v-model="searchQuery"
                   type="text"
                   :placeholder="$t('plugins.searchPlaceholder')"
-                  class="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                  class="w-full pl-8 pr-3 py-1.5 text-control rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -565,7 +565,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
                   <Puzzle class="w-7 h-7" />
                 </div>
                 <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">{{ $t('plugins.emptyInstalled') }}</h3>
-                <p class="text-xs text-slate-400 max-w-sm">{{ $t('plugins.emptyInstalledDesc') }}</p>
+                <p class="text-control text-slate-400 max-w-sm">{{ $t('plugins.emptyInstalledDesc') }}</p>
               </div>
 
               <!-- Plugin Cards Grid -->
@@ -596,11 +596,11 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
                             <h4 class="text-sm font-bold text-slate-900 dark:text-slate-100 truncate hover:text-blue-600 dark:hover:text-blue-400 transition-colors" v-tooltip="plugin.manifest.name">
                               {{ plugin.manifest.name }}
                             </h4>
-                            <span v-if="plugin.isBuiltin" class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 shrink-0">
+                            <span v-if="plugin.isBuiltin" class="px-1.5 py-0.2 rounded text-meta font-bold bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 shrink-0">
                               {{ $t('plugins.builtin') }}
                             </span>
                           </div>
-                          <p class="text-[11px] text-slate-400 font-mono">
+                          <p class="text-caption text-slate-400 font-mono">
                             v{{ plugin.manifest.version }}
                             <span v-if="plugin.manifest.author">• by {{ plugin.manifest.author }}</span>
                           </p>
@@ -622,13 +622,13 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
                     <!-- Description -->
                     <p
                       @click="openPluginDetail(plugin)"
-                      class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-3 line-clamp-2 cursor-pointer hover:text-slate-900 dark:hover:text-slate-100"
+                      class="text-control text-slate-600 dark:text-slate-300 leading-relaxed mb-3 line-clamp-2 cursor-pointer hover:text-slate-900 dark:hover:text-slate-100"
                     >
                       {{ plugin.manifest.description || $t('plugins.noDescription') }}
                     </p>
 
                     <!-- Permissions & Features Badges -->
-                    <div class="flex flex-wrap items-center gap-1.5 mb-3 text-[10.5px]">
+                    <div class="flex flex-wrap items-center gap-1.5 mb-3 text-meta">
                       <span v-if="plugin.isBuiltin" class="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60 font-medium">
                         {{ $t('plugins.builtin') }}
                       </span>
@@ -651,8 +651,8 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
                   </div>
 
                   <!-- Card Bottom: Actions -->
-                  <div class="pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
-                    <div class="flex items-center gap-2 text-slate-400 text-[11px]">
+                  <div class="pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-control">
+                    <div class="flex items-center gap-2 text-slate-400 text-caption">
                       <button
                         type="button"
                         @click="openPluginDetail(plugin)"
@@ -669,7 +669,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
                         type="button"
                         @click.stop="handleCheckHealth(plugin.manifest.id)"
                         :disabled="pluginStore.getPluginHealth(plugin.manifest.id).status === 'checking'"
-                        class="px-1.5 py-0.5 rounded border text-[10px] font-medium flex items-center gap-1 transition-colors cursor-pointer"
+                        class="px-1.5 py-0.5 rounded border text-meta font-medium flex items-center gap-1 transition-colors cursor-pointer"
                         :class="{
                           'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60': pluginStore.getPluginHealth(plugin.manifest.id).status === 'healthy',
                           'bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800/60 hover:bg-red-100 dark:hover:bg-red-900/60': pluginStore.getPluginHealth(plugin.manifest.id).status === 'unhealthy',
@@ -738,7 +738,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
                           <h4 class="text-sm font-bold text-slate-900 dark:text-slate-100 truncate hover:text-blue-600 dark:hover:text-blue-400 transition-colors" v-tooltip="item.name">
                             {{ item.name }}
                           </h4>
-                          <p class="text-[11px] text-slate-400 font-mono">
+                          <p class="text-caption text-slate-400 font-mono">
                             v{{ item.version }}
                             <span v-if="item.author">• by {{ item.author }}</span>
                           </p>
@@ -749,13 +749,13 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
                     <!-- Description -->
                     <p
                       @click="openPluginDetail(item)"
-                      class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-3 line-clamp-2 cursor-pointer hover:text-slate-900 dark:hover:text-slate-100"
+                      class="text-control text-slate-600 dark:text-slate-300 leading-relaxed mb-3 line-clamp-2 cursor-pointer hover:text-slate-900 dark:hover:text-slate-100"
                     >
                       {{ item.description || $t('plugins.noDescription') }}
                     </p>
 
                     <!-- Permissions & Features Badges -->
-                    <div class="flex flex-wrap items-center gap-1.5 mb-3 text-[10.5px]">
+                    <div class="flex flex-wrap items-center gap-1.5 mb-3 text-meta">
                       <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-400 font-mono">
                         {{ item.type }}
                       </span>
@@ -771,11 +771,11 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
                   </div>
 
                   <!-- Card Bottom: Actions -->
-                  <div class="pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
+                  <div class="pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-control">
                     <button
                       type="button"
                       @click="openPluginDetail(item)"
-                      class="text-slate-400 hover:text-blue-500 text-[11px] font-mono flex items-center gap-1 cursor-pointer transition-colors"
+                      class="text-slate-400 hover:text-blue-500 text-caption font-mono flex items-center gap-1 cursor-pointer transition-colors"
                       v-tooltip="$t('plugins.viewDetails')"
                     >
                       <BookOpen class="w-3 h-3" />
@@ -787,7 +787,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
                         v-if="installingMap[item.id]"
                         type="button"
                         disabled
-                        class="px-3 py-1.5 rounded-lg bg-blue-500/80 text-white text-xs font-medium flex items-center gap-1.5 cursor-not-allowed"
+                        class="px-3 py-1.5 rounded-lg bg-blue-500/80 text-white text-control font-medium flex items-center gap-1.5 cursor-not-allowed"
                       >
                         <LoaderCircle class="w-3.5 h-3.5 animate-spin" />
                         <span>{{ $t('plugins.installing') }}</span>
@@ -797,7 +797,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
                         v-else-if="pluginStore.getPlugin(item.id)"
                         type="button"
                         @click="openPluginDetail(item)"
-                        class="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 text-xs font-medium flex items-center gap-1 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-colors cursor-pointer"
+                        class="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 text-control font-medium flex items-center gap-1 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-colors cursor-pointer"
                         v-tooltip="$t('plugins.viewDetails')"
                       >
                         <Check class="w-3.5 h-3.5 text-emerald-600" />
@@ -808,7 +808,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
                         v-else
                         type="button"
                         @click="handleInstallMarketplace(item)"
-                        class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium cursor-pointer transition-colors shadow-xs flex items-center gap-1"
+                        class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-control font-medium cursor-pointer transition-colors shadow-xs flex items-center gap-1"
                       >
                         <Download class="w-3.5 h-3.5" />
                         <span>{{ $t('plugins.install') }}</span>
@@ -825,7 +825,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
                 <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">
                   {{ $t('plugins.storeComingSoon') }}
                 </h3>
-                <p class="text-xs text-slate-400 max-w-md leading-relaxed">
+                <p class="text-control text-slate-400 max-w-md leading-relaxed">
                   {{ $t('plugins.storeComingSoonDesc') }}
                 </p>
               </div>
@@ -834,7 +834,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
         </template>
 
         <!-- Modal Footer Note -->
-        <footer class="px-5 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 shrink-0">
+        <footer class="px-5 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 flex items-center justify-between text-control text-slate-500 dark:text-slate-400 shrink-0">
           <div class="flex items-center gap-1.5">
             <ShieldCheck class="w-4 h-4 text-emerald-500" />
             <span>{{ $t('plugins.securityNotice') }}</span>
@@ -842,7 +842,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
           <button
             type="button"
             @click="close"
-            class="px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs font-medium cursor-pointer"
+            class="px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 text-control font-medium cursor-pointer"
           >
             {{ $t('plugins.close') }}
           </button>

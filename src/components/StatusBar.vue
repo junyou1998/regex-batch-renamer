@@ -72,7 +72,7 @@ function toggleProcessFilenameOnly() {
 
 <template>
   <footer
-    class="h-6.5 bg-slate-100/95 dark:bg-slate-900/95 border-t border-slate-200 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-400 px-2 flex items-center justify-between shrink-0 select-none z-20 overflow-hidden font-mono"
+    class="h-6.5 bg-slate-100/95 dark:bg-slate-900/95 border-t border-slate-200 dark:border-slate-800 text-caption text-slate-600 dark:text-slate-400 px-2 flex items-center justify-between shrink-0 select-none z-20 overflow-hidden font-mono"
   >
     <!-- Left Section: Workspace & Stats -->
     <div class="flex items-center gap-1 sm:gap-1.5 min-w-0 overflow-hidden">
@@ -97,14 +97,14 @@ function toggleProcessFilenameOnly() {
         <Files class="w-3 h-3 text-slate-400 dark:text-slate-500 shrink-0" />
         <span>{{ $t('statusBar.filesCount', { n: fileCount }) }}</span>
         <template v-if="folderCount > 1">
-          <span class="text-slate-400 dark:text-slate-600 text-[10px]">(<Folder class="w-2.5 h-2.5 inline -mt-0.5" /> {{ folderCount }})</span>
+          <span class="text-slate-400 dark:text-slate-600 text-meta">(<Folder class="w-2.5 h-2.5 inline -mt-0.5" /> {{ folderCount }})</span>
         </template>
       </div>
 
       <!-- Changed Count Badge -->
       <div
         v-if="fileCount > 0"
-        class="flex items-center gap-1 px-1.5 py-0.5 rounded font-sans text-[11px] shrink-0"
+        class="flex items-center gap-1 px-1.5 py-0.5 rounded font-sans text-caption shrink-0"
         :class="changedCount > 0 ? 'text-blue-700 dark:text-blue-300 font-medium' : 'text-slate-400 dark:text-slate-500'"
       >
         <span
@@ -142,7 +142,7 @@ function toggleProcessFilenameOnly() {
         type="button"
         @click="emit('undo')"
         v-tooltip="$t('statusBar.undoAvailable')"
-        class="flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-100/80 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-300/80 dark:border-amber-800/50 hover:bg-amber-200 dark:hover:bg-amber-900/60 transition-colors cursor-pointer text-[10.5px] font-medium"
+        class="flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-100/80 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-300/80 dark:border-amber-800/50 hover:bg-amber-200 dark:hover:bg-amber-900/60 transition-colors cursor-pointer text-meta font-medium"
       >
         <RotateCcw class="w-2.5 h-2.5" />
         <span>{{ $t('statusBar.undoAvailable') }}</span>
@@ -153,7 +153,7 @@ function toggleProcessFilenameOnly() {
         type="button"
         @click="emit('openHistory')"
         v-tooltip="$t('history.title')"
-        class="flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-slate-200/80 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 transition-colors cursor-pointer text-slate-600 dark:text-slate-400 text-[10.5px]"
+        class="flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-slate-200/80 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 transition-colors cursor-pointer text-slate-600 dark:text-slate-400 text-meta"
       >
         <History class="w-2.5 h-2.5 opacity-70" />
         <span>{{ $t('statusBar.history', { n: historyStore.batches.length }) }}</span>
@@ -164,7 +164,7 @@ function toggleProcessFilenameOnly() {
         type="button"
         @click="emit('openPlugins')"
         v-tooltip="$t('plugins.title')"
-        class="flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-slate-200/80 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 transition-colors cursor-pointer text-slate-600 dark:text-slate-400 text-[10.5px]"
+        class="flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-slate-200/80 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 transition-colors cursor-pointer text-slate-600 dark:text-slate-400 text-meta"
         :class="{ 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40': pluginStore.isAnyPluginBusy }"
       >
         <Puzzle class="w-2.5 h-2.5 opacity-70" :class="{ 'animate-spin text-blue-500': pluginStore.isAnyPluginBusy }" />
@@ -177,7 +177,7 @@ function toggleProcessFilenameOnly() {
         type="button"
         @click="toggleProcessFilenameOnly"
         v-tooltip="$t('statusBar.scopeTooltip')"
-        class="flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-slate-200/80 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 transition-colors cursor-pointer text-slate-600 dark:text-slate-400 text-[10.5px]"
+        class="flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-slate-200/80 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 transition-colors cursor-pointer text-slate-600 dark:text-slate-400 text-meta"
       >
         <Tag class="w-2.5 h-2.5 opacity-70" />
         <span>{{ settingsStore.processFilenameOnly ? $t('statusBar.scopeFilename') : $t('statusBar.scopeFull') }}</span>
@@ -190,7 +190,7 @@ function toggleProcessFilenameOnly() {
         type="button"
         @click="aiStore.toggleOpen"
         v-tooltip="aiStore.isOpen ? $t('ai.closePanel') : $t('ai.title')"
-        class="flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-slate-200/80 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 transition-colors cursor-pointer text-[10.5px]"
+        class="flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-slate-200/80 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 transition-colors cursor-pointer text-meta"
         :class="{ 'bg-blue-100/60 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium': aiStore.isOpen }"
       >
         <ProviderIcon :provider="aiStore.activeProfile.provider" class="w-3 h-3 shrink-0" />
@@ -208,7 +208,7 @@ function toggleProcessFilenameOnly() {
       <!-- App Version -->
       <span
         v-if="version"
-        class="hidden lg:inline text-slate-400 dark:text-slate-500 font-mono text-[10px] pl-1"
+        class="hidden lg:inline text-slate-400 dark:text-slate-500 font-mono text-meta pl-1"
       >
         v{{ version }}
       </span>

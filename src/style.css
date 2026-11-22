@@ -1,6 +1,28 @@
 @import "tailwindcss";
 @variant dark (&:where(.dark, .dark *));
 
+/*
+ * Type scale — use only these sizes in components.
+ *
+ *   text-meta     11px  smallest text: status bar, versions, badges, keyboard keys
+ *   text-caption  12px  secondary text: hints, descriptions, tooltips, helper copy
+ *   text-control  13px  buttons, toolbars, menus, form labels, small inputs
+ *   text-sm       14px  body text, inputs, file list
+ *   text-base     16px  section titles
+ *   text-lg+      18px+ dialog and page titles
+ *
+ * Don't use arbitrary sizes like text-[11px] or Tailwind's text-xs; change a
+ * token here instead so the whole app stays consistent.
+ */
+@theme {
+    --text-meta: 11px;
+    --text-meta--line-height: 1.45;
+    --text-caption: 12px;
+    --text-caption--line-height: 1.5;
+    --text-control: 13px;
+    --text-control--line-height: 1.45;
+}
+
 html,
 body,
 #app {

@@ -252,7 +252,7 @@ useEscapeToClose(() => props.modelValue, close)
             <div>
               <h2 class="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                 {{ $t('history.title') }}
-                <span v-if="historyStore.batches.length > 0" class="text-xs font-normal text-slate-400">
+                <span v-if="historyStore.batches.length > 0" class="text-control font-normal text-slate-400">
                   ({{ historyStore.batches.length }} {{ $t('history.batches') }})
                 </span>
               </h2>
@@ -271,7 +271,7 @@ useEscapeToClose(() => props.modelValue, close)
                   type="button"
                   @click.stop="showExportAllMenu = !showExportAllMenu"
                   v-tooltip="{ title: $t('history.exportAll'), placement: 'bottom' }"
-                  class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs font-medium text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+                  class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-control font-medium text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
                 >
                   <Download class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                   <span>{{ $t('history.exportAll') }}</span>
@@ -281,7 +281,7 @@ useEscapeToClose(() => props.modelValue, close)
                 <!-- Dropdown Menu -->
                 <div
                   v-if="showExportAllMenu"
-                  class="absolute right-0 top-full mt-1.5 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl py-1 z-50 animate-fade-in text-xs select-none"
+                  class="absolute right-0 top-full mt-1.5 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl py-1 z-50 animate-fade-in text-control select-none"
                 >
                   <button
                     type="button"
@@ -307,7 +307,7 @@ useEscapeToClose(() => props.modelValue, close)
                 type="button"
                 @click="handleClearAllHistory"
                 v-tooltip="{ title: $t('history.clearAll'), placement: 'bottom' }"
-                class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-red-200 dark:border-red-900/60 bg-red-50/60 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 text-xs font-medium text-red-600 dark:text-red-400 transition-colors cursor-pointer"
+                class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-red-200 dark:border-red-900/60 bg-red-50/60 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 text-control font-medium text-red-600 dark:text-red-400 transition-colors cursor-pointer"
               >
                 <Trash2 class="w-3.5 h-3.5" />
                 <span class="hidden sm:inline">{{ $t('history.clearAll') }}</span>
@@ -356,7 +356,7 @@ useEscapeToClose(() => props.modelValue, close)
           <div v-else class="flex-1 flex overflow-hidden min-h-0 divide-x divide-slate-200 dark:divide-slate-800">
             <!-- Left Sidebar: Batches Timeline List -->
             <div class="w-72 sm:w-80 flex flex-col shrink-0 bg-slate-50/60 dark:bg-slate-900/40 overflow-hidden">
-              <div class="p-3 border-b border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between text-xs font-semibold text-slate-500">
+              <div class="p-3 border-b border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between text-control font-semibold text-slate-500">
                 <span>{{ $t('history.batches') }}</span>
                 <span>{{ historyStore.batches.length }}</span>
               </div>
@@ -376,7 +376,7 @@ useEscapeToClose(() => props.modelValue, close)
                 >
                   <div class="flex items-center justify-between gap-1.5 mb-1.5">
                     <span
-                      class="px-2 py-0.5 rounded-full text-[10.5px] font-bold"
+                      class="px-2 py-0.5 rounded-full text-meta font-bold"
                       :class="{
                         'bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-300': batch.action === 'rename',
                         'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/60 dark:text-emerald-300': batch.action === 'copy',
@@ -391,17 +391,17 @@ useEscapeToClose(() => props.modelValue, close)
                           : $t('history.actionUndo')
                       }}
                     </span>
-                    <span class="text-[11px] text-slate-400 font-mono">
+                    <span class="text-caption text-slate-400 font-mono">
                       {{ formatDate(batch.timestamp).split(' ')[1] }}
                     </span>
                   </div>
 
-                  <div class="text-[11px] text-slate-600 dark:text-slate-400 font-mono mb-2">
+                  <div class="text-caption text-slate-600 dark:text-slate-400 font-mono mb-2">
                     {{ formatDate(batch.timestamp).split(' ')[0] }}
                   </div>
 
                   <!-- Count & Status chips -->
-                  <div class="flex items-center gap-1.5 text-[10.5px]">
+                  <div class="flex items-center gap-1.5 text-meta">
                     <span class="text-slate-600 dark:text-slate-300 font-medium">
                       {{ $t('history.fileCount', { n: batch.totalFiles }) }}
                     </span>
@@ -433,15 +433,15 @@ useEscapeToClose(() => props.modelValue, close)
                       <button
                         type="button"
                         @click="handleCopyBatchId(selectedBatch.id)"
-                        class="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center gap-1 p-0.5 rounded cursor-pointer"
+                        class="text-control text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center gap-1 p-0.5 rounded cursor-pointer"
                         v-tooltip="`ID: ${selectedBatch.id}`"
                       >
                         <Check v-if="copiedBatchId" class="w-3 h-3 text-emerald-500" />
                         <Copy v-else class="w-3 h-3" />
                       </button>
                     </div>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                      Batch ID: <span class="font-mono text-[11px]">{{ selectedBatch.id.slice(0, 8) }}...</span>
+                    <p class="text-control text-slate-500 dark:text-slate-400 mt-0.5">
+                      Batch ID: <span class="font-mono text-caption">{{ selectedBatch.id.slice(0, 8) }}...</span>
                     </p>
                   </div>
 
@@ -452,7 +452,7 @@ useEscapeToClose(() => props.modelValue, close)
                       v-if="selectedBatch.rulesSnapshot && selectedBatch.rulesSnapshot.length > 0"
                       type="button"
                       @click="handleReapplyRules(selectedBatch)"
-                      class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors text-xs font-semibold cursor-pointer shadow-2xs"
+                      class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors text-control font-semibold cursor-pointer shadow-2xs"
                     >
                       <Layers class="w-3.5 h-3.5" />
                       <span>{{ $t('history.reapplyRules') }} ({{ selectedBatch.rulesSnapshot.length }})</span>
@@ -464,7 +464,7 @@ useEscapeToClose(() => props.modelValue, close)
                         type="button"
                         @click.stop="showBatchExportMenu = !showBatchExportMenu"
                         v-tooltip="$t('history.exportBatch')"
-                        class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs font-medium text-slate-700 dark:text-slate-300 transition-colors cursor-pointer shadow-2xs"
+                        class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-control font-medium text-slate-700 dark:text-slate-300 transition-colors cursor-pointer shadow-2xs"
                       >
                         <Download class="w-3.5 h-3.5 text-slate-600 dark:text-slate-300" />
                         <span>{{ $t('history.exportBatch') }}</span>
@@ -474,7 +474,7 @@ useEscapeToClose(() => props.modelValue, close)
                       <!-- Batch Export Dropdown Menu -->
                       <div
                         v-if="showBatchExportMenu"
-                        class="absolute right-0 top-full mt-1.5 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl py-1 z-50 animate-fade-in text-xs select-none"
+                        class="absolute right-0 top-full mt-1.5 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl py-1 z-50 animate-fade-in text-control select-none"
                       >
                         <button
                           type="button"
@@ -500,7 +500,7 @@ useEscapeToClose(() => props.modelValue, close)
                       type="button"
                       @click="handleDeleteBatch(selectedBatch.id)"
                       v-tooltip="$t('history.deleteBatch')"
-                      class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-red-200 dark:border-red-900/60 bg-white dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-950/50 text-xs font-medium text-red-600 dark:text-red-400 transition-colors cursor-pointer shadow-2xs"
+                      class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-red-200 dark:border-red-900/60 bg-white dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-950/50 text-control font-medium text-red-600 dark:text-red-400 transition-colors cursor-pointer shadow-2xs"
                     >
                       <Trash2 class="w-3.5 h-3.5" />
                       <span>{{ $t('history.deleteBatch') }}</span>
@@ -509,7 +509,7 @@ useEscapeToClose(() => props.modelValue, close)
                 </div>
 
                 <!-- Rules Snapshot Accordion -->
-                <div v-if="selectedBatch.rulesSnapshot && selectedBatch.rulesSnapshot.length > 0" class="border border-slate-200 dark:border-slate-800 rounded-lg p-2 bg-white dark:bg-slate-950/60 text-xs">
+                <div v-if="selectedBatch.rulesSnapshot && selectedBatch.rulesSnapshot.length > 0" class="border border-slate-200 dark:border-slate-800 rounded-lg p-2 bg-white dark:bg-slate-950/60 text-control">
                   <button
                     type="button"
                     @click="showRulesSnapshot = !showRulesSnapshot"
@@ -519,16 +519,16 @@ useEscapeToClose(() => props.modelValue, close)
                       <Layers class="w-3.5 h-3.5 text-blue-500" />
                       {{ $t('history.rulesUsed') }} ({{ selectedBatch.rulesSnapshot.length }})
                     </span>
-                    <span class="text-slate-400 text-[11px]">{{ showRulesSnapshot ? '▲ ' + $t('history.collapse') : '▼ ' + $t('history.expand') }}</span>
+                    <span class="text-slate-400 text-caption">{{ showRulesSnapshot ? '▲ ' + $t('history.collapse') : '▼ ' + $t('history.expand') }}</span>
                   </button>
 
                   <div v-if="showRulesSnapshot" class="mt-2 space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
                     <div
                       v-for="(rule, idx) in selectedBatch.rulesSnapshot"
                       :key="idx"
-                      class="flex items-center gap-2 p-1.5 rounded bg-slate-50 dark:bg-slate-900 font-mono text-[11px]"
+                      class="flex items-center gap-2 p-1.5 rounded bg-slate-50 dark:bg-slate-900 font-mono text-caption"
                     >
-                      <span class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 font-bold text-[10px]">
+                      <span class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 font-bold text-meta">
                         #{{ idx + 1 }} {{ rule.type }}
                       </span>
                       <span class="text-slate-600 dark:text-slate-400 truncate">
@@ -548,7 +548,7 @@ useEscapeToClose(() => props.modelValue, close)
                     v-model="searchQuery"
                     type="text"
                     :placeholder="$t('history.searchPlaceholder')"
-                    class="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
+                    class="w-full pl-8 pr-3 py-1.5 text-control rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                   />
                   <button
                     v-if="searchQuery"
@@ -560,7 +560,7 @@ useEscapeToClose(() => props.modelValue, close)
                 </div>
 
                 <!-- Status Filter Pills -->
-                <div class="flex items-center gap-1 p-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 text-xs">
+                <div class="flex items-center gap-1 p-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 text-control">
                   <button
                     type="button"
                     @click="statusFilter = 'all'"
@@ -604,7 +604,7 @@ useEscapeToClose(() => props.modelValue, close)
               <div class="p-3.5 flex-1 flex flex-col min-h-0 overflow-hidden">
                 <div class="flex-1 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-slate-50/30 dark:bg-slate-900/30 flex flex-col min-h-0 shadow-2xs">
                   <div class="flex-1 overflow-auto custom-scrollbar">
-                    <table class="w-full text-left text-xs border-collapse">
+                    <table class="w-full text-left text-control border-collapse">
                       <thead class="sticky top-0 z-10 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-700 select-none">
                         <tr>
                           <th class="py-2.5 px-3.5 w-12 text-center">{{ $t('history.status') }}</th>
@@ -651,10 +651,10 @@ useEscapeToClose(() => props.modelValue, close)
                           <!-- Name Diff -->
                           <td class="py-3 px-3.5 align-top">
                             <div class="space-y-1 font-sans">
-                              <div class="text-slate-500 dark:text-slate-400 line-through text-[11.5px] truncate" v-tooltip="file.originalName">
+                              <div class="text-slate-500 dark:text-slate-400 line-through text-caption truncate" v-tooltip="file.originalName">
                                 {{ file.originalName }}
                               </div>
-                              <div class="text-slate-900 dark:text-slate-100 font-semibold text-xs flex items-center gap-1.5 truncate" v-tooltip="file.newName">
+                              <div class="text-slate-900 dark:text-slate-100 font-semibold text-control flex items-center gap-1.5 truncate" v-tooltip="file.newName">
                                 <ArrowRight class="w-3 h-3 text-blue-500 shrink-0 inline" />
                                 <span :class="file.status === 'success' ? 'text-emerald-700 dark:text-emerald-300' : ''">
                                   {{ file.newName }}
@@ -668,14 +668,14 @@ useEscapeToClose(() => props.modelValue, close)
                             <div class="space-y-1.5">
                               <!-- When it is a Copy operation -->
                               <template v-if="selectedBatch.action === 'copy'">
-                                <div class="text-slate-500 dark:text-slate-400 text-[10.5px] truncate flex items-center gap-1.5" v-tooltip="file.oldPath">
-                                  <span class="px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 text-[10px] font-sans shrink-0 font-medium">
+                                <div class="text-slate-500 dark:text-slate-400 text-meta truncate flex items-center gap-1.5" v-tooltip="file.oldPath">
+                                  <span class="px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 text-meta font-sans shrink-0 font-medium">
                                     {{ $t('history.sourceLabel') }}
                                   </span>
                                   <span class="truncate">{{ file.oldPath }}</span>
                                 </div>
-                                <div class="text-slate-700 dark:text-slate-300 text-[10.5px] font-medium truncate flex items-center gap-1.5" v-tooltip="file.newPath">
-                                  <span class="px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[10px] font-sans shrink-0 font-medium flex items-center gap-0.5">
+                                <div class="text-slate-700 dark:text-slate-300 text-meta font-medium truncate flex items-center gap-1.5" v-tooltip="file.newPath">
+                                  <span class="px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-meta font-sans shrink-0 font-medium flex items-center gap-0.5">
                                     <FolderSymlink class="w-2.5 h-2.5 inline" />
                                     {{ $t('history.targetLabel') }}
                                   </span>
@@ -685,7 +685,7 @@ useEscapeToClose(() => props.modelValue, close)
 
                               <!-- Standard Rename operation -->
                               <template v-else>
-                                <div class="text-slate-500 dark:text-slate-400 text-[11px] truncate" v-tooltip="file.newPath || file.oldPath">
+                                <div class="text-slate-500 dark:text-slate-400 text-caption truncate" v-tooltip="file.newPath || file.oldPath">
                                   {{ file.newPath || file.oldPath }}
                                 </div>
                               </template>
@@ -693,7 +693,7 @@ useEscapeToClose(() => props.modelValue, close)
                               <!-- Error details if failed or conflict -->
                               <div
                                 v-if="file.error"
-                                class="text-[11px] text-red-600 dark:text-red-400 font-medium bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800/60 px-2 py-0.5 rounded inline-block"
+                                class="text-caption text-red-600 dark:text-red-400 font-medium bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800/60 px-2 py-0.5 rounded inline-block"
                               >
                                 {{ file.error }}
                               </div>
