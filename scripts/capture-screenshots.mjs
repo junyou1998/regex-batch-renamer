@@ -6,12 +6,12 @@
  *   node scripts/capture-screenshots.mjs [--lang zh-TW,en-US] [--scene hero,ai]
  *
  * Uses a local Google Chrome / Chromium in headless mode at 2x scale, encodes
- * WebP with `cwebp` (2000px wide) and writes the same file to
- *   assets/screenshots/<lang>/<scene>.webp           (README)
- *   website/public/screenshots/<lang>/<scene>.webp (website)
+ * WebP with `cwebp` (2000px wide) and writes
+ *   assets/screenshots/<lang>/<scene>.webp           (README: window on a gradient)
+ *   website/public/screenshots/<lang>/<scene>.webp (website: bare window, the page adds the frame)
  */
 import { execFileSync } from 'node:child_process'
-import { copyFileSync, existsSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 
@@ -72,29 +72,33 @@ for (const lang of langs) {
   for (const name of scenes) {
     const config = SCENES[name]
     if (!config) throw new Error(`Unknown scene: ${name}`)
-    const url = `${BASE_URL}/?scene=${config.scene || name}&lang=${lang}&theme=${config.theme}&frame=1`
-    const out = path.join(outDir, `${name}.webp`)
-    const profile = mkdtempSync(path.join(tmpdir(), 'renamix-shot-'))
-    const raw = path.join(profile, 'raw.png')
-    try {
-      execFileSync(chrome, [
-        '--headless=new',
-        '--disable-gpu',
-        '--hide-scrollbars',
-        '--no-first-run',
-        '--no-default-browser-check',
-        `--user-data-dir=${profile}`,
-        `--window-size=${WIDTH},${HEIGHT}`,
-        '--force-device-scale-factor=2',
-        '--virtual-time-budget=15000',
-        `--screenshot=${raw}`,
-        url,
-      ], { stdio: 'pipe' })
-      execFileSync('cwebp', ['-quiet', '-q', '85', '-resize', '2000', '0', raw, '-o', out])
-      copyFileSync(out, path.join(siteDir, `${name}.webp`))
-      console.log(`✓ ${lang}/${name}`)
-    } finally {
-      rmSync(profile, { recursive: true, force: true })
+    const shots = [
+      { frame: '1', out: path.join(outDir, `${name}.webp`) },
+      { frame: 'bare', out: path.join(siteDir, `${name}.webp`) },
+    ]
+    for (const shot of shots) {
+      const url = `${BASE_URL}/?scene=${config.scene || name}&lang=${lang}&theme=${config.theme}&frame=${shot.frame}`
+      const profile = mkdtempSync(path.join(tmpdir(), 'renamix-shot-'))
+      const raw = path.join(profile, 'raw.png')
+      try {
+        execFileSync(chrome, [
+          '--headless=new',
+          '--disable-gpu',
+          '--hide-scrollbars',
+          '--no-first-run',
+          '--no-default-browser-check',
+          `--user-data-dir=${profile}`,
+          `--window-size=${WIDTH},${HEIGHT}`,
+          '--force-device-scale-factor=2',
+          '--virtual-time-budget=15000',
+          `--screenshot=${raw}`,
+          url,
+        ], { stdio: 'pipe' })
+        execFileSync('cwebp', ['-quiet', '-q', '85', '-resize', '2000', '0', raw, '-o', shot.out])
+      } finally {
+        rmSync(profile, { recursive: true, force: true })
+      }
     }
+    console.log(`✓ ${lang}/${name}`)
   }
 }

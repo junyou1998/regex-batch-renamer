@@ -5,7 +5,7 @@
  *
  * Each scene loads demo files, rules and UI state so README and website
  * screenshots can be regenerated with one command (see scripts/capture-screenshots.mjs).
- * `frame=1` draws a macOS-style window around the app.
+ * `frame=1` draws a macOS-style window on a gradient; `frame=bare` keeps only the window.
  */
 import { DEMO_FILE_SETS } from './demoBridge'
 
@@ -57,11 +57,16 @@ export function prepareDemoScene() {
   } catch {
     /* storage unavailable: scene still renders with defaults */
   }
-  if (params.has('frame')) installWindowFrame()
+  if (params.has('frame')) installWindowFrame(params.get('frame') === 'bare')
 }
 
-function installWindowFrame() {
+/**
+ * frame=1    window on a soft gradient, for README images
+ * frame=bare just the window edge to edge; the website adds its own corners and shadow
+ */
+function installWindowFrame(bare: boolean) {
   document.documentElement.classList.add('demo-frame')
+  if (bare) document.documentElement.classList.add('demo-frame-bare')
   const style = document.createElement('style')
   style.textContent = `
     html.demo-frame body {
@@ -86,6 +91,9 @@ function installWindowFrame() {
       border-radius: 12px;
       overflow: hidden;
     }
+    html.demo-frame-bare body { padding: 0; background: none; }
+    html.demo-frame-bare #app { border-radius: 0; box-shadow: none; }
+    html.demo-frame-bare body > .fixed.inset-0 { top: 0; left: 0; right: 0; bottom: 0; border-radius: 0; }
     html.demo-frame #app::before {
       content: '';
       position: absolute;
