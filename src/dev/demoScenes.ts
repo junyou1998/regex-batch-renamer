@@ -80,6 +80,12 @@ function installWindowFrame() {
       box-shadow: 0 30px 60px -20px rgba(15, 23, 42, .45), 0 0 0 1px rgba(15, 23, 42, .12);
     }
     html.demo-frame #app > div { height: 100% !important; }
+    /* Teleported dialogs cover the viewport; keep their overlay inside the window. */
+    html.demo-frame body > .fixed.inset-0 {
+      top: 28px; left: 32px; right: 32px; bottom: 36px;
+      border-radius: 12px;
+      overflow: hidden;
+    }
     html.demo-frame #app::before {
       content: '';
       position: absolute;
