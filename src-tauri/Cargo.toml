@@ -1,6 +1,6 @@
 [package]
 name = "regex-batch-renamer-beta"
-version = "0.8.0"
+version = "0.8.1"
 description = "Renamix — batch file renamer with regex, plugins and AI"
 authors = ["junyou"]
 edition = "2021"
