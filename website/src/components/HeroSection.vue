@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { screenshotLang } from '../i18n'
 import { useRelease } from '../composables/useRelease'
 import HeroTitle from './HeroTitle.vue'
+import ZoomableShot from './ZoomableShot.vue'
 
 const { t, locale } = useI18n()
 const { version, platform, primaryUrl } = useRelease()
@@ -18,9 +19,9 @@ const shots = computed(() => {
 </script>
 
 <template>
-  <section id="top" class="hero relative isolate mx-auto max-w-6xl px-5 pb-20 pt-10 sm:px-8 lg:pt-16">
+  <section id="top" class="hero relative isolate mx-auto flex max-w-6xl items-center px-5 pb-20 pt-10 sm:px-8 lg:min-h-[calc(100svh-4rem)] lg:pb-24 lg:pt-8">
     <div class="hero-glow" aria-hidden="true"><span /><span /></div>
-    <div class="grid items-center gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+    <div class="grid w-full items-center gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-14">
       <div>
         <HeroTitle ref="titleRef" class="text-[2.5rem] sm:text-[3.15rem]" />
         <button type="button" @click="titleRef?.play()"
@@ -43,14 +44,14 @@ const shots = computed(() => {
         </p>
       </div>
 
-      <figure class="hero-figure relative lg:-mr-12 xl:-mr-28">
-        <div v-tilt="3" class="relative rounded-2xl shadow-[0_40px_80px_-30px_rgba(14,26,43,.45)] ring-1 ring-ink/5">
+      <figure class="hero-figure relative">
+        <ZoomableShot :src="theme === 'dark' ? shots.dark : shots.light" :alt="$t('hero.screenshotAlt')" :tilt="3">
           <!-- Both themes are stacked and cross-faded so switching feels instant. -->
           <img :src="shots.light" :alt="$t('hero.screenshotAlt')" width="2000" height="1250" fetchpriority="high"
-            class="block w-full rounded-2xl transition-opacity duration-500" :class="theme === 'light' ? 'opacity-100' : 'opacity-0'" />
+            class="block w-full transition-opacity duration-500" :class="theme === 'light' ? 'opacity-100' : 'opacity-0'" />
           <img :src="shots.dark" alt="" aria-hidden="true" width="2000" height="1250" loading="lazy"
-            class="absolute inset-0 block w-full rounded-2xl transition-opacity duration-500" :class="theme === 'dark' ? 'opacity-100' : 'opacity-0'" />
-        </div>
+            class="absolute inset-0 block w-full transition-opacity duration-500" :class="theme === 'dark' ? 'opacity-100' : 'opacity-0'" />
+        </ZoomableShot>
         <figcaption class="mt-5 flex justify-end">
           <div class="relative inline-grid grid-cols-2 rounded-full border border-line bg-white p-1 text-sm" role="group" :aria-label="$t('hero.themeLabel')">
             <span class="absolute inset-y-1 left-1 w-[calc(50%-4px)] rounded-full bg-ink transition-transform duration-300 ease-out"
@@ -111,6 +112,17 @@ const shots = computed(() => {
 
 .hero-figure {
   animation: rise 0.9s 0.2s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/*
+ * On wide screens the screenshot runs past the content column toward the
+ * viewport edge (keeping a 2rem margin), so the product gets the room.
+ * 72rem = max-w-6xl.
+ */
+@media (min-width: 1024px) {
+  .hero-figure {
+    margin-right: min(-2rem, calc((72rem - 100vw) / 2 + 2rem));
+  }
 }
 
 @keyframes rise {

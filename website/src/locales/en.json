@@ -167,5 +167,10 @@
         "title": "Renamix is free and always will be",
         "body": "It's built and maintained in spare time. If it saves you an afternoon of renaming, a coffee helps keep it going.",
         "cta": "Buy me a coffee"
+    },
+    "lightbox": {
+        "hint": "Click to enlarge",
+        "open": "Enlarge screenshot: {name}",
+        "close": "Close"
     }
 }

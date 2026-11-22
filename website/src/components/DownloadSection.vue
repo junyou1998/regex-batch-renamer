@@ -70,7 +70,9 @@ const PLATFORMS = [
     <!-- Support: visible, friendly, not pushy -->
     <div v-reveal class="support mt-6 flex flex-col gap-4 rounded-2xl p-6 sm:flex-row sm:items-center sm:justify-between">
       <div class="flex items-start gap-4">
-        <span class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-xl shadow-sm" aria-hidden="true">☕</span>
+        <span class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-rose-500 shadow-sm" aria-hidden="true">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9Z" /><path d="M17 11h1.5a2.5 2.5 0 0 1 0 5H17" /><path d="M8 3.5c0 1 .8 1.5.8 2.5S8 7 8 7M12 3.5c0 1 .8 1.5.8 2.5S12 7 12 7" /></svg>
+        </span>
         <div>
           <h3 class="font-semibold">{{ $t('support.title') }}</h3>
           <p class="mt-1 max-w-[52ch] text-[15px] leading-relaxed text-slate">{{ $t('support.body') }}</p>

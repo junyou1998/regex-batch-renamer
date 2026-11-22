@@ -7,6 +7,7 @@ import StepsSection from './components/StepsSection.vue'
 import DownloadSection from './components/DownloadSection.vue'
 import FaqSection from './components/FaqSection.vue'
 import SiteFooter from './components/SiteFooter.vue'
+import ImageLightbox from './components/ImageLightbox.vue'
 </script>
 
 <template>
@@ -21,4 +22,5 @@ import SiteFooter from './components/SiteFooter.vue'
     <FaqSection />
   </main>
   <SiteFooter />
+  <ImageLightbox />
 </template>

@@ -68,6 +68,18 @@ html:lang(zh-CN) .hero-title {
 }
 body { overflow-x: clip; }
 
+/* App screenshots: a window with macOS-like corners, a hairline edge and a deep soft shadow. */
+.window-shot {
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow:
+        0 0 0 1px rgba(14, 26, 43, 0.1),
+        0 2px 4px rgba(14, 26, 43, 0.04),
+        0 24px 48px -16px rgba(14, 26, 43, 0.22),
+        0 60px 100px -40px rgba(37, 99, 235, 0.25);
+}
+
 /* ---- Motion helpers (see src/directives/motion.ts) ---- */
 .reveal {
     opacity: 0;

@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { screenshotLang } from '../i18n'
+import ZoomableShot from './ZoomableShot.vue'
 
 const { locale } = useI18n()
 
@@ -34,8 +35,7 @@ const dir = computed(() => screenshotLang(locale.value))
           </ul>
         </div>
         <div v-reveal="150" class="lg:col-span-7" :class="i % 2 === 1 ? 'lg:order-1 lg:col-start-1' : ''">
-          <img v-tilt="4" :src="`/screenshots/${dir}/${row.shot}.webp`" :alt="$t(`features.${row.key}.alt`)" loading="lazy"
-            width="2000" height="1250" class="w-full rounded-2xl shadow-[0_30px_60px_-30px_rgba(14,26,43,.4)] ring-1 ring-ink/5" />
+          <ZoomableShot :src="`/screenshots/${dir}/${row.shot}.webp`" :alt="$t(`features.${row.key}.alt`)" />
         </div>
       </article>
     </div>
