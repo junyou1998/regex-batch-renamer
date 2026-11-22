@@ -7,7 +7,7 @@ pub const USER_AGENT: &str = concat!("RegexBatchRenamer/", env!("CARGO_PKG_VERSI
 
 pub const DEFAULT_ANTHROPIC_MODEL: &str = "claude-opus-5-5";
 pub const DEFAULT_OPENAI_MODEL: &str = "gpt-5.5";
-pub const DEFAULT_GEMINI_MODEL: &str = "gemini-3.8-flash";
+pub const DEFAULT_GEMINI_MODEL: &str = "gemini-flash-latest";
 pub const DEFAULT_OLLAMA_MODEL: &str = "llama3.3";
 
 const ANTHROPIC_ENDPOINT: &str = "https://api.anthropic.com/v1";
@@ -184,15 +184,7 @@ async fn fetch_models(r: &Resolved) -> Result<Vec<String>, String> {
 
     let mut models: Vec<String> = match r.provider {
         Provider::Anthropic => collect_strings(&parsed, "data", "id"),
-        Provider::OpenAi => collect_strings(&parsed, "data", "id")
-            .into_iter()
-            .filter(|id| {
-                let lower = id.to_lowercase();
-                !["embedding", "whisper", "tts", "dall-e", "image", "audio", "realtime", "moderation", "transcribe", "search"]
-                    .iter()
-                    .any(|skip| lower.contains(skip))
-            })
-            .collect(),
+        Provider::OpenAi => collect_strings(&parsed, "data", "id"),
         Provider::Gemini => parsed
             .get("models")
             .and_then(Value::as_array)
@@ -211,12 +203,23 @@ async fn fetch_models(r: &Resolved) -> Result<Vec<String>, String> {
             .unwrap_or_default(),
         Provider::Ollama => collect_strings(&parsed, "models", "name"),
     };
-    if r.provider == Provider::OpenAi {
-        models.sort();
-        models.reverse();
-    }
+    // Keep only models that can write a text reply; drop speech, image, video,
+    // embedding and other special-purpose variants.
+    models.retain(|id| is_text_chat_model(id));
+    models.sort();
     models.dedup();
     Ok(models)
+}
+
+const NON_CHAT_MARKERS: &[&str] = &[
+    "embedding", "embed", "whisper", "tts", "dall-e", "image", "audio", "realtime", "moderation",
+    "transcribe", "search", "omni", "banana", "veo", "imagen", "aqa", "customtools", "live",
+    "robotics", "computer-use", "codex-mini",
+];
+
+fn is_text_chat_model(id: &str) -> bool {
+    let lower = id.to_lowercase();
+    !NON_CHAT_MARKERS.iter().any(|marker| lower.contains(marker))
 }
 
 fn collect_strings(value: &Value, array_key: &str, field: &str) -> Vec<String> {
@@ -493,4 +496,19 @@ async fn ollama_chat(prompt: &str, r: &Resolved) -> Result<AiChatResponse, Strin
         output_tokens: parsed.get("eval_count").and_then(Value::as_u64),
     };
     finish(text, Some(usage), Some(model))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::is_text_chat_model;
+
+    #[test]
+    fn filters_special_purpose_models() {
+        for keep in ["gemini-3.6-flash", "gemini-flash-latest", "gemma-4-31b-it", "claude-opus-5-5", "gpt-5.5"] {
+            assert!(is_text_chat_model(keep), "{keep}");
+        }
+        for drop in ["gemini-2.5-flash-preview-tts", "gemini-3-pro-image", "gemini-omni-1.2-flash", "nano-banana-pro-preview", "gemini-3.5-transcribe", "text-embedding-3-large", "gemini-3.1-pro-preview-customtools"] {
+            assert!(!is_text_chat_model(drop), "{drop}");
+        }
+    }
 }

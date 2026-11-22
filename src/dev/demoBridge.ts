@@ -192,7 +192,13 @@ export const demoDesktopBridge: DesktopBridge = {
   async testAiApiConnection(profile) {
     return { success: true, message: `AI_TEST_OK|${profile.model || 'claude-opus-5-5'}`, models: ['claude-opus-5-5', 'claude-sonnet-5-5', 'claude-haiku-5-5'] }
   },
-  async listAiModels() {
+  async listAiModels(profile) {
+    await sleep(400)
+    if (profile.provider === 'gemini') {
+      return ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.5-flash-lite', 'gemini-3-flash-preview', 'gemini-3.1-pro-preview',
+        'gemini-3.1-flash-lite', 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.6-flash', 'gemini-flash-latest',
+        'gemini-flash-lite-latest', 'gemini-pro-latest', 'gemma-4-31b-it', 'gemma-4-26b-a4b-it']
+    }
     return ['claude-opus-5-5', 'claude-sonnet-5-5', 'claude-haiku-5-5']
   },
   async cancelAiChat() {

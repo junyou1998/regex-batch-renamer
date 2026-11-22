@@ -48,7 +48,7 @@
         "profileNamePlaceholder": "Enter profile name",
         "apiProviderLabel": "Provider",
         "defaultModel": "Default Model",
-        "modelIdPlaceholder": "Model ID (e.g. gemini-2.5-flash)",
+        "modelIdPlaceholder": "Model ID (e.g. gemini-flash-latest)",
         "testConnection": "Test Connection",
         "profileListTitle": "AI Profile List",
         "addProfileBtn": "Add Profile",
@@ -73,7 +73,14 @@
         "hideApiKey": "Hide API key",
         "loadModels": "Load available models",
         "cliModelPlaceholder": "Leave empty to use the CLI's current default",
-        "cliModelHint": "By default the CLI uses whatever model you configured in it. Fill this in only to override (e.g. claude-sonnet-5-5, gpt-5.5)."
+        "cliModelHint": "By default the CLI uses whatever model you configured in it. Fill this in only to override (e.g. claude-sonnet-5-5, gpt-5.5).",
+        "modelPickerToggle": "Show models",
+        "modelNotInList": "This model isn't in your account's list — check the ID",
+        "modelsLoading": "Loading models...",
+        "modelsNoMatch": "No match — you can type a custom model ID",
+        "modelsLiveCount": "{n} models available to your account",
+        "modelsSuggested": "Suggestions — load to see what your account offers",
+        "reloadModels": "Reload"
     },
     "app": {
         "title": "Regex Batch Renamer",

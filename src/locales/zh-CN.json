@@ -48,7 +48,7 @@
         "profileNamePlaceholder": "请输入配置名称",
         "apiProviderLabel": "供应商",
         "defaultModel": "默认模型",
-        "modelIdPlaceholder": "模型 ID (例如: gemini-2.5-flash)",
+        "modelIdPlaceholder": "模型 ID（例如：gemini-flash-latest）",
         "testConnection": "测试连接",
         "profileListTitle": "AI 配置列表",
         "addProfileBtn": "新增配置",
@@ -73,7 +73,14 @@
         "hideApiKey": "隐藏 API Key",
         "loadModels": "加载可用模型",
         "cliModelPlaceholder": "留空 = 使用 CLI 当前的默认模型",
-        "cliModelHint": "CLI 默认使用你在该 CLI 中设置的模型；仅在需要时填写以覆盖（例如 claude-sonnet-5-5、gpt-5.5）"
+        "cliModelHint": "CLI 默认使用你在该 CLI 中设置的模型；仅在需要时填写以覆盖（例如 claude-sonnet-5-5、gpt-5.5）",
+        "modelPickerToggle": "展开模型列表",
+        "modelNotInList": "此模型不在你账号的可用列表中，请确认名称是否正确",
+        "modelsLoading": "正在加载模型...",
+        "modelsNoMatch": "没有匹配的模型，可直接输入自定义 ID",
+        "modelsLiveCount": "你的账号可用 {n} 个模型",
+        "modelsSuggested": "推荐模型（加载后显示账号实际可用列表）",
+        "reloadModels": "重新加载"
     },
     "app": {
         "title": "Regex Batch Renamer",

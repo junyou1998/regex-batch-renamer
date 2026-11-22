@@ -45,7 +45,8 @@ export interface AiMessageItem {
 export const DEFAULT_API_MODELS: Record<string, string> = {
   anthropic: 'claude-opus-5-5',
   openai: 'gpt-5.5',
-  gemini: 'gemini-3.8-flash',
+  // Google's alias for its current Flash model, so the default never goes stale.
+  gemini: 'gemini-flash-latest',
   ollama: 'llama3.3',
 }
 
@@ -74,11 +75,17 @@ const STALE_MODEL_IDS: Record<string, string> = {
   'claude-4-6-sonnet': DEFAULT_API_MODELS.anthropic,
   'claude-3-7-sonnet-latest': DEFAULT_API_MODELS.anthropic,
   'gemini-1.5-flash': DEFAULT_API_MODELS.gemini,
-  'gemini-3.6-flash': DEFAULT_API_MODELS.gemini,
   'gpt-4.5-preview': DEFAULT_API_MODELS.openai,
 }
 
 const ALLOWED_STEP_TYPES: OperationType[] = ['regex', 'plugin']
+
+// One-time fix for a default that a pre-release build wrote but that Google's
+// API doesn't offer. Runs once, so a real future model of that name is left alone.
+const ONE_TIME_MODEL_FIXES_KEY = 'ai_model_fixes_v1'
+const ONE_TIME_MODEL_FIXES: Record<string, string> = {
+  'gemini-3.8-flash': 'gemini-flash-latest',
+}
 
 function loadSavedProfiles(): AiProfile[] {
   try {
@@ -86,10 +93,13 @@ function loadSavedProfiles(): AiProfile[] {
     if (saved) {
       const parsed = JSON.parse(saved)
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed.map((p: AiProfile) => ({
-          ...p,
-          model: p.model && STALE_MODEL_IDS[p.model] ? STALE_MODEL_IDS[p.model] : p.model,
-        }))
+        const applyOneTime = localStorage.getItem(ONE_TIME_MODEL_FIXES_KEY) !== 'done'
+        localStorage.setItem(ONE_TIME_MODEL_FIXES_KEY, 'done')
+        return parsed.map((p: AiProfile) => {
+          let model = p.model && STALE_MODEL_IDS[p.model] ? STALE_MODEL_IDS[p.model] : p.model
+          if (applyOneTime && model && ONE_TIME_MODEL_FIXES[model]) model = ONE_TIME_MODEL_FIXES[model]
+          return { ...p, model }
+        })
       }
     }
   } catch (e) {

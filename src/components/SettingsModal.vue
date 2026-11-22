@@ -21,6 +21,7 @@ import {
   X,
 } from 'lucide-vue-next'
 import ProviderIcon from './icons/ProviderIcon.vue'
+import ModelSelect from './ModelSelect.vue'
 import type { AiProfile, AiApiTestResult } from '../services/desktop/types'
 
 // Suggestions only; the live list from "Load models" (the provider's /models
@@ -45,7 +46,7 @@ const providerOptions = [
     name: 'Gemini',
     defaultEndpoint: 'https://generativelanguage.googleapis.com',
     defaultModel: DEFAULT_API_MODELS.gemini,
-    models: ['gemini-3.8-flash', 'gemini-3.5-flash-lite'],
+    models: ['gemini-flash-latest', 'gemini-flash-lite-latest', 'gemini-pro-latest'],
   },
   {
     id: 'ollama',
@@ -77,7 +78,7 @@ const isTestingApi = ref(false)
 const apiTestResult = ref<AiApiTestResult | null>(null)
 
 const currentProviderModels = computed<readonly string[]>(() => {
-  if (liveModels.value.length > 0) return liveModels.value.slice(0, 30)
+  if (liveModels.value.length > 0) return liveModels.value
   const found = providerOptions.find((p) => p.id === editingProfile.value.provider)
   return found ? found.models : []
 })
@@ -161,10 +162,6 @@ function selectProvider(provId: string) {
     liveModels.value = []
   }
   showProviderDropdown.value = false
-}
-
-function selectModel(modelName: string) {
-  editingProfile.value.model = modelName
 }
 
 async function saveCurrentProfile() {
@@ -882,36 +879,27 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                   <div class="grid grid-cols-1 sm:grid-cols-4 items-center gap-2">
                     <label class="font-medium text-slate-700 dark:text-slate-300">{{ $t('settings.defaultModel') }}</label>
                     <div class="sm:col-span-3 space-y-1.5">
-                      <input
-                        type="text"
+                      <ModelSelect
+                        v-if="editingProfile.type === 'api'"
                         v-model="editingProfile.model"
-                        :placeholder="editingProfile.type === 'cli' ? $t('settings.cliModelPlaceholder') : $t('settings.modelIdPlaceholder')"
-                        class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-hidden font-mono"
+                        :models="currentProviderModels"
+                        :live="liveModels.length > 0"
+                        :loading="isLoadingModels"
+                        :can-load="canTestConnection"
+                        :placeholder="$t('settings.modelIdPlaceholder')"
+                        @load="loadLiveModels"
                       />
-                      <p v-if="editingProfile.type === 'cli'" class="text-[10px] text-slate-500 dark:text-slate-400">
-                        {{ $t('settings.cliModelHint') }}
-                      </p>
-                      <div v-if="editingProfile.type === 'api'" class="flex items-center gap-1.5 flex-wrap pt-0.5">
-                        <span class="text-[10px] text-slate-400">{{ $t('settings.quickSelectLabel') }}:</span>
-                        <button
-                          type="button"
-                          @click="loadLiveModels"
-                          :disabled="isLoadingModels || !canTestConnection"
-                          class="px-1.5 py-0.5 rounded text-[10px] text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/40 disabled:opacity-50 cursor-pointer flex items-center gap-1"
-                        >
-                          <RefreshCw class="w-2.5 h-2.5" :class="{ 'animate-spin': isLoadingModels }" />
-                          {{ $t('settings.loadModels') }}
-                        </button>
-                        <button
-                          v-for="m in currentProviderModels"
-                          :key="m"
-                          type="button"
-                          @click="selectModel(m)"
-                          class="px-1.5 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer border border-slate-200/80 dark:border-slate-700"
-                        >
-                          {{ m }}
-                        </button>
-                      </div>
+                      <template v-else>
+                        <input
+                          type="text"
+                          v-model="editingProfile.model"
+                          :placeholder="$t('settings.cliModelPlaceholder')"
+                          class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-hidden font-mono"
+                        />
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400">
+                          {{ $t('settings.cliModelHint') }}
+                        </p>
+                      </template>
                     </div>
                   </div>
 
