@@ -20,9 +20,38 @@
         "hiddenTitle": true,
         "titleBarStyle": "Overlay",
         "acceptFirstMouse": true,
-        "devtools": true
+        "minWidth": 1024,
+        "minHeight": 600
       }
-    ]
+    ],
+    "security": {
+      "csp": {
+        "default-src": "'self'",
+        "script-src": "'self'",
+        "style-src": "'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "img-src": "'self' data: blob: https:",
+        "font-src": "'self' data: https://fonts.gstatic.com",
+        "connect-src": "ipc: http://ipc.localhost https://api.github.com",
+        "worker-src": "'self' blob:",
+        "object-src": "'none'",
+        "base-uri": "'none'",
+        "frame-src": "'none'",
+        "form-action": "'none'"
+      },
+      "devCsp": {
+        "default-src": "'self'",
+        "script-src": "'self'",
+        "style-src": "'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "img-src": "'self' data: blob: https:",
+        "font-src": "'self' data: https://fonts.gstatic.com",
+        "connect-src": "ipc: http://ipc.localhost https://api.github.com ws://localhost:1420 http://localhost:1420",
+        "worker-src": "'self' blob:",
+        "object-src": "'none'",
+        "base-uri": "'none'",
+        "frame-src": "'none'",
+        "form-action": "'none'"
+      }
+    }
   },
   "plugins": {
     "updater": {

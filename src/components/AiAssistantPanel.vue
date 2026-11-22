@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { marked } from 'marked'
+import { renderSafeMarkdown } from '../utils/markdown'
+import { desktop } from '../services/desktop'
 import {
   AlertTriangle,
   Bot,
@@ -12,7 +13,9 @@ import {
   KeyRound,
   LoaderCircle,
   RefreshCw,
+  RotateCcw,
   Send,
+  ShieldCheck,
   Settings,
   Sparkles,
   Square,
@@ -47,7 +50,30 @@ const quickPrompts = computed(() => [
   t('ai.quickPromptExtractDate'),
   t('ai.quickPromptRemoveSpaces'),
   t('ai.quickPromptAddSequence'),
+  t('ai.quickPromptExplain'),
+  t('ai.quickPromptInfer'),
 ])
+
+function handleMarkdownClick(event: MouseEvent) {
+  const link = (event.target as HTMLElement).closest('a[href]') as HTMLAnchorElement | null
+  if (!link) return
+  event.preventDefault()
+  if (/^https?:\/\//i.test(link.href)) void desktop.openExternal(link.href)
+}
+
+function formatTokens(msg: AiMessageItem) {
+  const input = msg.usage?.inputTokens
+  const output = msg.usage?.outputTokens
+  if (input == null && output == null) return ''
+  return t('ai.tokenUsage', { input: input ?? '–', output: output ?? '–' })
+}
+
+function stepSummary(step: { type: string; params: Record<string, any> }) {
+  if (step.type === 'plugin') {
+    return step.params?.pluginId || 'plugin'
+  }
+  return ''
+}
 
 function scrollToBottom() {
   nextTick(() => {
@@ -161,15 +187,15 @@ async function copyToClipboard(text: string, key: string) {
 
 function renderMarkdown(content: string): string {
   try {
-    return marked.parse(content, { breaks: true, gfm: true }) as string
+    return renderSafeMarkdown(content)
   } catch {
-    return content
+    return ''
   }
 }
 
 function handleApplyPipeline(msg: AiMessageItem) {
   if (msg.pipeline) {
-    aiStore.applyPipeline(msg.pipeline)
+    aiStore.applyMessagePipeline(msg.id)
     toastStore.addToast(t('ai.pipelineApplied'), 'success', 2500)
   }
 }
@@ -261,7 +287,8 @@ function handleApplyPipeline(msg: AiMessageItem) {
         >
           <input
             type="checkbox"
-            v-model="aiStore.autoApply"
+            :checked="aiStore.autoApply"
+            @change="aiStore.setAutoApply(($event.target as HTMLInputElement).checked)"
             class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800"
           />
           <span class="text-[11px] font-medium">{{ $t('ai.autoApply') }}</span>
@@ -424,6 +451,28 @@ function handleApplyPipeline(msg: AiMessageItem) {
         </template>
       </div>
 
+      <!-- Privacy notice: what is sent to the AI provider -->
+      <div
+        v-if="!aiStore.privacyAcknowledged"
+        class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/70 text-xs text-slate-600 dark:text-slate-300 space-y-2"
+        role="note"
+      >
+        <div class="flex items-start gap-2">
+          <ShieldCheck class="w-4 h-4 shrink-0 mt-0.5 text-blue-600 dark:text-blue-400" />
+          <div class="space-y-1">
+            <p class="font-semibold text-slate-800 dark:text-slate-100">{{ $t('ai.privacyTitle') }}</p>
+            <p class="leading-relaxed">{{ $t('ai.privacyBody') }}</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          @click="aiStore.acknowledgePrivacy()"
+          class="w-full py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 font-medium transition-colors cursor-pointer"
+        >
+          {{ $t('ai.privacyAck') }}
+        </button>
+      </div>
+
       <!-- Empty State / Welcome Hero -->
       <div
         v-if="aiStore.messages.length === 0"
@@ -506,9 +555,15 @@ function handleApplyPipeline(msg: AiMessageItem) {
             >
               <!-- Markdown Content -->
               <div
+                v-if="!msg.isError"
                 class="text-xs sm:text-sm text-slate-800 dark:text-slate-200 prose dark:prose-invert prose-xs max-w-none leading-relaxed break-words"
                 v-html="renderMarkdown(msg.content)"
+                @click="handleMarkdownClick"
               ></div>
+              <div v-else class="flex items-start gap-2 text-xs text-red-700 dark:text-red-300 whitespace-pre-wrap break-words">
+                <AlertTriangle class="w-4 h-4 shrink-0 mt-0.5" />
+                <span>{{ msg.content }}</span>
+              </div>
 
               <!-- Technical Explanation -->
               <div
@@ -518,8 +573,12 @@ function handleApplyPipeline(msg: AiMessageItem) {
                 <span class="font-semibold text-blue-600 dark:text-blue-400 block">
                   💡 {{ $t('ai.technicalDetails') }}
                 </span>
-                <p class="leading-relaxed">{{ msg.explanation }}</p>
+                <p class="leading-relaxed whitespace-pre-wrap">{{ msg.explanation }}</p>
               </div>
+
+              <p v-if="msg.rejectedSteps" class="text-[11px] text-amber-700 dark:text-amber-400">
+                {{ $t('ai.rejectedSteps', { n: msg.rejectedSteps }) }}
+              </p>
 
               <!-- Generated Rule Pipeline Snapshot Card -->
               <div
@@ -531,13 +590,29 @@ function handleApplyPipeline(msg: AiMessageItem) {
                     <Terminal class="w-3.5 h-3.5" />
                     {{ $t('ai.pipelineCardTitle', { n: msg.pipeline.length }) }}
                   </span>
-                  <button
-                    @click="handleApplyPipeline(msg)"
-                    class="px-2 py-1 rounded-md text-[11px] font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
-                  >
-                    <Undo2 class="w-3 h-3" />
-                    {{ $t('ai.applyThisPipeline') }}
-                  </button>
+                  <div class="flex items-center gap-1.5">
+                    <template v-if="msg.applied">
+                      <span class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                        <Check class="w-3 h-3" />{{ $t('ai.applied') }}
+                      </span>
+                      <button
+                        v-if="msg.previousPipeline"
+                        @click="aiStore.revertMessagePipeline(msg.id)"
+                        class="px-2 py-1 rounded-md text-[11px] font-semibold border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer flex items-center gap-1"
+                      >
+                        <RotateCcw class="w-3 h-3" />
+                        {{ $t('ai.revert') }}
+                      </button>
+                    </template>
+                    <button
+                      v-else
+                      @click="handleApplyPipeline(msg)"
+                      class="px-2 py-1 rounded-md text-[11px] font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
+                    >
+                      <Undo2 class="w-3 h-3" />
+                      {{ $t('ai.applyThisPipeline') }}
+                    </button>
+                  </div>
                 </div>
 
                 <!-- Steps Preview -->
@@ -549,15 +624,23 @@ function handleApplyPipeline(msg: AiMessageItem) {
                   >
                     <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px]">
                       <span>#{{ sIdx + 1 }} {{ step.type }}</span>
-                      <span v-if="step.params?.useRegex" class="text-blue-600 dark:text-blue-400 font-bold">Regex</span>
+                      <span v-if="step.type === 'regex' && step.params?.useRegex" class="text-blue-600 dark:text-blue-400 font-bold">Regex</span>
                     </div>
-                    <div class="text-slate-800 dark:text-slate-200 truncate">
+                    <div v-if="step.type === 'plugin'" class="text-slate-800 dark:text-slate-200 truncate">
+                      🧩 {{ stepSummary(step) }}
+                    </div>
+                    <div v-else class="text-slate-800 dark:text-slate-200 truncate">
                       <span class="text-red-500 dark:text-red-400">/{{ step.params?.pattern }}/</span>
                       <span class="mx-1 text-slate-400">→</span>
                       <span class="text-emerald-600 dark:text-emerald-400">"{{ step.params?.replacement }}"</span>
                     </div>
                   </div>
                 </div>
+              </div>
+
+              <div v-if="msg.model || formatTokens(msg)" class="text-[10px] text-slate-400 dark:text-slate-500 flex gap-2">
+                <span v-if="msg.model">{{ msg.model }}</span>
+                <span v-if="formatTokens(msg)">{{ formatTokens(msg) }}</span>
               </div>
             </div>
           </div>

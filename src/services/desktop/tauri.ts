@@ -1,6 +1,7 @@
 import { invoke } from '@tauri-apps/api/core'
+import { listen } from '@tauri-apps/api/event'
 import { getCurrentWindow } from '@tauri-apps/api/window'
-import { confirm, open, save } from '@tauri-apps/plugin-dialog'
+import { confirm } from '@tauri-apps/plugin-dialog'
 import { openUrl } from '@tauri-apps/plugin-opener'
 import { check } from '@tauri-apps/plugin-updater'
 import type {
@@ -10,23 +11,36 @@ import type {
   AiChatRequest,
   AiChatResponse,
   AppUpdateInfo,
+  CopyConflictPolicy,
   DesktopBridge,
+  DesktopErrorCode,
   DesktopRuntimeInfo,
   FileDropHandler,
   FileDragStateHandler,
   FileOperationRequest,
   FileOperationResult,
+  HttpProxyResponse,
+  NativeFileMetadata,
   PendingChangesHandler,
   PendingChangesOptions,
 } from './types'
 
 let closeUnlisten: null | (() => void) = null
 
+const KNOWN_ERROR_CODES: DesktopErrorCode[] = [
+  'FILE_EXISTS',
+  'DUPLICATE_TARGET',
+  'PERMISSION_DENIED',
+  'INVALID_PATH',
+  'NOT_ALLOWED',
+  'NOT_FOUND',
+  'ROLLED_BACK',
+  'IS_DIRECTORY',
+]
+
 function normalizeErrorCode(error?: string): FileOperationResult['code'] {
-  if (error === 'FILE_EXISTS') return 'FILE_EXISTS'
-  if (error === 'PERMISSION_DENIED') return 'PERMISSION_DENIED'
-  if (error === 'INVALID_PATH') return 'INVALID_PATH'
-  return error ? 'UNKNOWN' : undefined
+  if (!error) return undefined
+  return (KNOWN_ERROR_CODES as string[]).includes(error) ? (error as DesktopErrorCode) : 'UNKNOWN'
 }
 
 function mapResults(results: FileOperationResult[]) {
@@ -36,39 +50,60 @@ function mapResults(results: FileOperationResult[]) {
   }))
 }
 
-async function runtimeInfo(): Promise<DesktopRuntimeInfo> {
-  return invoke<DesktopRuntimeInfo>('runtime_info')
+/** Never send a saved key back to Rust; only a key the user is typing right now. */
+function profileForBackend(profile: AiApiProfile, includeTypedKey = false) {
+  return {
+    id: profile.id,
+    name: profile.name,
+    provider: profile.provider,
+    apiKey: includeTypedKey ? profile.apiKey?.trim() || '' : '',
+    endpoint: profile.endpoint || '',
+    model: profile.model || '',
+    temperature: profile.temperature,
+  }
 }
 
 export const tauriDesktopBridge: DesktopBridge = {
   async selectFiles() {
-    const selected = await open({
-      multiple: true,
-      directory: false,
-    })
-
-    if (!selected) return []
-    return Array.isArray(selected) ? selected.map(String) : [String(selected)]
+    return invoke<string[]>('select_files')
   },
-  async selectDirectory() {
-    const selected = await open({
-      directory: true,
-      multiple: false,
-    })
-
-    if (!selected) return undefined
-    return Array.isArray(selected) ? String(selected[0]) : String(selected)
+  async selectDirectory(purpose) {
+    const selected = await invoke<string[] | null>('select_directory', { purpose })
+    return selected?.[0]
   },
-  async renameFiles(files: FileOperationRequest[], options?: { failOnExist?: boolean }) {
-    const results = await invoke<FileOperationResult[]>('rename_files', {
-      files,
-      failOnExist: options?.failOnExist ?? false,
-    })
-    return mapResults(results)
+  async selectFolderContents() {
+    return (await invoke<string[] | null>('select_directory', { purpose: 'contents' })) ?? []
   },
-  async copyRenameFiles(files: FileOperationRequest[]) {
-    const results = await invoke<FileOperationResult[]>('copy_rename_files', { files })
-    return mapResults(results)
+  async renameFiles(files: FileOperationRequest[]) {
+    return mapResults(await invoke<FileOperationResult[]>('rename_files', { files }))
+  },
+  async copyRenameFiles(files: FileOperationRequest[], onConflict: CopyConflictPolicy = 'skip') {
+    return mapResults(await invoke<FileOperationResult[]>('copy_rename_files', { files, onConflict }))
+  },
+  async readFileBinary(path: string, maxBytes?: number) {
+    const buffer = await invoke<ArrayBuffer>('read_file_binary', { path, maxBytes })
+    return new Uint8Array(buffer)
+  },
+  async getFileMetadata(path: string) {
+    return invoke<NativeFileMetadata>('get_file_metadata', { path })
+  },
+  async pluginHttpRequest(request) {
+    return invoke<HttpProxyResponse>('plugin_http_request', { request })
+  },
+  async fetchRemoteText(url: string) {
+    return invoke<string>('fetch_remote_text', { url })
+  },
+  async fetchRemoteBytes(url: string) {
+    const buffer = await invoke<ArrayBuffer>('fetch_remote_bytes', { url })
+    return new Uint8Array(buffer)
+  },
+  async confirmDialog(message, options) {
+    return confirm(message, {
+      title: options?.title,
+      okLabel: options?.okLabel,
+      cancelLabel: options?.cancelLabel,
+      kind: options?.kind ?? 'warning',
+    })
   },
   async openExternal(url: string) {
     await openUrl(url)
@@ -77,7 +112,7 @@ export const tauriDesktopBridge: DesktopBridge = {
     await invoke('set_zoom_factor', { factor })
   },
   async getRuntimeInfo() {
-    return runtimeInfo()
+    return invoke<DesktopRuntimeInfo>('runtime_info')
   },
   async setPendingChangesHandler(handler: PendingChangesHandler, options?: PendingChangesOptions) {
     if (closeUnlisten) {
@@ -88,23 +123,19 @@ export const tauriDesktopBridge: DesktopBridge = {
     try {
       closeUnlisten = await getCurrentWindow().onCloseRequested(async (event) => {
         const hasPending = await handler()
-        if (hasPending) {
-          event.preventDefault()
-          const confirmed = await confirm(
-            options?.message || '清單中尚有未套用的檔名變更，確定要關閉視窗並結束應用程式嗎？',
-            {
-              title: options?.title || '確認退出',
-              kind: 'warning',
-              okLabel: options?.okLabel || '退出',
-              cancelLabel: options?.cancelLabel || '取消',
-            }
-          )
-          if (confirmed) {
-            try {
-              await invoke('exit_app')
-            } catch {
-              await getCurrentWindow().destroy()
-            }
+        if (!hasPending) return
+        event.preventDefault()
+        const confirmed = await confirm(options?.message || '', {
+          title: options?.title,
+          kind: 'warning',
+          okLabel: options?.okLabel,
+          cancelLabel: options?.cancelLabel,
+        })
+        if (confirmed) {
+          try {
+            await invoke('exit_app')
+          } catch {
+            await getCurrentWindow().destroy()
           }
         }
       })
@@ -119,9 +150,10 @@ export const tauriDesktopBridge: DesktopBridge = {
     }
   },
   async onFilesDropped(handler: FileDropHandler) {
-    return getCurrentWindow().onDragDropEvent((event) => {
-      if (event.payload.type !== 'drop') return
-      const paths = event.payload.paths.map(String).filter(Boolean)
+    // Rust registers dropped paths in its filesystem scope first, then emits
+    // this event, so the paths are always usable by the time we get them.
+    return listen<string[]>('app://files-dropped', (event) => {
+      const paths = (event.payload || []).map(String).filter(Boolean)
       if (paths.length > 0) handler(paths)
     })
   },
@@ -137,14 +169,8 @@ export const tauriDesktopBridge: DesktopBridge = {
   async checkForAppUpdate(): Promise<AppUpdateInfo | null> {
     try {
       const update = await check()
-      if (!update) {
-        return { available: false }
-      }
-
-      return {
-        available: true,
-        version: update.version,
-      }
+      if (!update) return { available: false }
+      return { available: true, version: update.version }
     } catch (error) {
       console.warn('Tauri updater check is unavailable', error)
       return null
@@ -169,21 +195,31 @@ export const tauriDesktopBridge: DesktopBridge = {
     return invoke<AiChatResponse>('run_ai_chat', { request })
   },
   async testAiApiConnection(profile: AiApiProfile): Promise<AiApiTestResult> {
-    return invoke<AiApiTestResult>('test_ai_api_connection', { profile })
+    return invoke<AiApiTestResult>('test_ai_api_connection', { profile: profileForBackend(profile, true) })
+  },
+  async listAiModels(profile: AiApiProfile): Promise<string[]> {
+    return invoke<string[]>('list_ai_models', { profile: profileForBackend(profile, true) })
   },
   async runAiApiChat(request: AiChatRequest, profile: AiApiProfile): Promise<AiChatResponse> {
-    return invoke<AiChatResponse>('run_ai_api_chat', { request, profile })
+    return invoke<AiChatResponse>('run_ai_api_chat', { request, profile: profileForBackend(profile) })
   },
   async cancelAiChat(taskId: string): Promise<boolean> {
     return invoke<boolean>('cancel_ai_chat', { taskId })
   },
+  async setAiSecret(profileId: string, apiKey: string) {
+    await invoke('set_ai_secret', { profileId, apiKey })
+  },
+  async deleteAiSecret(profileId: string) {
+    await invoke('delete_ai_secret', { profileId })
+  },
+  async listAiSecretIds() {
+    return invoke<string[]>('list_ai_secret_ids')
+  },
   async saveTextFile(content: string, options?: { defaultPath?: string; filters?: Array<{ name: string; extensions: string[] }> }) {
-    const selected = await save({
+    return invoke<string | null>('save_text_file', {
+      content,
       defaultPath: options?.defaultPath,
       filters: options?.filters,
     })
-    if (!selected) return null
-    await invoke('save_text_file', { path: selected, content })
-    return selected
   },
 }

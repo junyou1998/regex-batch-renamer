@@ -24,7 +24,7 @@ A powerful, ultra-lightweight, and intuitive cross-platform batch file renaming 
 - **Dual Renaming Modes**:
     - **Regex Mode**: Full Regular Expression support for advanced batch operations.
     - **Plain Text Mode**: Automatically handles special characters, intuitively replacing symbols like `[]`, `()`, and whitespaces.
-- **Flexible Sequence Numbering**: Use `$n` or `${n}` syntax to insert incrementing numbers with custom starting index and zero-padding (e.g., `${n:2}` or `001`).
+- **Flexible Sequence Numbering**: Use the `${n}` syntax to insert incrementing numbers with custom starting index and zero-padding (e.g., `${n:2}` or `001`).
 - **Quick & Custom Templates**: Built-in common templates (remove spaces, convert to underscores, replace all with sequence), plus the ability to save custom rule pipelines as presets.
 - **Safety & Protection**:
     - Real-time conflict detection before execution.
@@ -66,7 +66,7 @@ xattr -r -d com.apple.quarantine "/Applications/Regex Batch Renamer.app"
 
 ## 📖 Useful Tips
 
-### Sequence Numbering ($n)
+### Sequence Numbering (${n})
 
 Use sequence variables in the "Replace with" field:
 - `${n}`: 1, 2, 3...

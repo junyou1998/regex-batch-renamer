@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { marked } from 'marked'
+import { ref, computed, watch, onUnmounted } from 'vue'
+import { renderSafeMarkdown } from '../utils/markdown'
 import { usePluginStore, type InstalledPlugin, type MarketplacePlugin, type PluginOption } from '../stores/pluginStore'
 import { runPluginHealthCheck } from '../services/pluginRunner'
 import { useToastStore } from '../stores/toastStore'
+import { desktop } from '../services/desktop'
+import { useI18n } from 'vue-i18n'
 import {
   X,
   Puzzle,
@@ -36,6 +38,7 @@ const emit = defineEmits<{
 
 const pluginStore = usePluginStore()
 const toastStore = useToastStore()
+const { t } = useI18n()
 
 const activeTab = ref<'installed' | 'marketplace'>('installed')
 const searchQuery = ref('')
@@ -128,20 +131,26 @@ async function handleDrop(e: DragEvent) {
 async function processPluginFile(file: File) {
   try {
     const manifest = await pluginStore.installPluginFromZip(file)
-    toastStore.addToast(`成功安裝外掛：${manifest.name} (v${manifest.version})`, 'success', 3500)
+    if (!manifest) return
+    toastStore.addToast(t('plugins.installSuccess', { name: manifest.name, version: manifest.version }), 'success', 3500)
     activeTab.value = 'installed'
   } catch (err: any) {
-    toastStore.addToast(`外掛安裝失敗: ${err.message}`, 'error', 4500)
+    toastStore.addToast(t('plugins.installFailed', { detail: err?.message || String(err) }), 'error', 4500)
   }
 }
 
-function handleDeletePlugin(plugin: InstalledPlugin | { manifest?: { id: string; name: string }; id?: string; name?: string }) {
+async function handleDeletePlugin(plugin: InstalledPlugin | { manifest?: { id: string; name: string }; id?: string; name?: string }) {
   const id = 'manifest' in plugin && plugin.manifest ? plugin.manifest.id : (plugin as any).id
   const name = 'manifest' in plugin && plugin.manifest ? plugin.manifest.name : (plugin as any).name
 
-  if (window.confirm(`確定要解除安裝外掛「${name}」嗎？`)) {
+  const confirmed = await desktop.confirmDialog(t('plugins.confirmUninstall', { name }), {
+    title: t('plugins.uninstall'),
+    okLabel: t('plugins.uninstall'),
+    cancelLabel: t('common.cancel'),
+  })
+  if (confirmed) {
     pluginStore.uninstallPlugin(id)
-    toastStore.addToast(`已解除安裝 ${name}`, 'info', 2500)
+    toastStore.addToast(t('plugins.uninstalled', { name }), 'info', 2500)
     if (selectedDetailPlugin.value && selectedDetailPlugin.value.id === id) {
       selectedDetailPlugin.value.isInstalled = false
     }
@@ -160,20 +169,22 @@ watch(activeTab, (tab) => {
 
 async function handleInstallMarketplace(plugin: MarketplacePlugin | PluginDetailTarget) {
   if (!plugin.downloadUrl) {
-    toastStore.addToast('該外掛未提供有效下載連結', 'error', 3000)
+    toastStore.addToast(t('plugins.noDownloadUrl'), 'error', 3000)
     return
   }
 
   installingMap.value[plugin.id] = true
   try {
-    const manifest = await pluginStore.installPluginFromUrl(plugin.downloadUrl)
-    toastStore.addToast(`成功安裝外掛：${manifest.name} (v${manifest.version})`, 'success', 3500)
+    const remote = pluginStore.marketplacePlugins.find(m => m.id === plugin.id)
+    const manifest = await pluginStore.installPluginFromUrl(plugin.downloadUrl, remote?.sha256)
+    if (!manifest) return
+    toastStore.addToast(t('plugins.installSuccess', { name: manifest.name, version: manifest.version }), 'success', 3500)
     if (selectedDetailPlugin.value && selectedDetailPlugin.value.id === plugin.id) {
       selectedDetailPlugin.value.isInstalled = true
       selectedDetailPlugin.value.isEnabled = true
     }
   } catch (err: any) {
-    toastStore.addToast(`外掛安裝失敗: ${err.message}`, 'error', 4500)
+    toastStore.addToast(t('plugins.installFailed', { detail: err?.message || String(err) }), 'error', 4500)
   } finally {
     installingMap.value[plugin.id] = false
   }
@@ -182,9 +193,9 @@ async function handleInstallMarketplace(plugin: MarketplacePlugin | PluginDetail
 async function handleCheckHealth(pluginId: string) {
   const result = await runPluginHealthCheck(pluginId)
   if (result.status === 'healthy') {
-    toastStore.addToast(`外掛連線正常 (${result.latencyMs}ms)`, 'success', 2500)
+    toastStore.addToast(t('plugins.healthToastOk', { ms: result.latencyMs ?? 0 }), 'success', 2500)
   } else {
-    toastStore.addToast(`健康檢查異常: ${result.message || '連線失敗'}`, 'error', 3500)
+    toastStore.addToast(t('plugins.healthToastFailed', { detail: result.message || t('plugins.healthFailed') }), 'error', 3500)
   }
 }
 
@@ -218,10 +229,7 @@ async function openPluginDetail(plugin: InstalledPlugin | MarketplacePlugin) {
   } else if (!isInstalled && (plugin as MarketplacePlugin).readmeUrl) {
     isLoadingReadme.value = true
     try {
-      const res = await fetch((plugin as MarketplacePlugin).readmeUrl!)
-      if (res.ok) {
-        readmeContent.value = await res.text()
-      }
+      readmeContent.value = await pluginStore.fetchRemoteText((plugin as MarketplacePlugin).readmeUrl!)
     } catch (e) {
       console.warn('Failed to load README from marketplace URL:', e)
     } finally {
@@ -232,10 +240,7 @@ async function openPluginDetail(plugin: InstalledPlugin | MarketplacePlugin) {
     if (remote?.readmeUrl) {
       isLoadingReadme.value = true
       try {
-        const res = await fetch(remote.readmeUrl)
-        if (res.ok) {
-          readmeContent.value = await res.text()
-        }
+        readmeContent.value = await pluginStore.fetchRemoteText(remote.readmeUrl)
       } catch {
         // ignore
       } finally {
@@ -253,23 +258,36 @@ function closeDetail() {
 const renderedReadmeHtml = computed(() => {
   if (!readmeContent.value) return ''
   try {
-    return marked.parse(readmeContent.value) as string
+    return renderSafeMarkdown(readmeContent.value, { breaks: false })
   } catch (err) {
     console.error('Failed to parse markdown:', err)
-    return `<p>${readmeContent.value}</p>`
+    return ''
   }
 })
 
-import { openUrl } from '@tauri-apps/plugin-opener'
-
 async function handleOpenUrl(url?: string) {
-  if (!url) return
-  try {
-    await openUrl(url)
-  } catch {
-    window.open(url, '_blank')
-  }
+  if (!url || !/^https?:\/\//i.test(url)) return
+  await desktop.openExternal(url)
 }
+
+function handleReadmeClick(event: MouseEvent) {
+  const link = (event.target as HTMLElement).closest('a[href]') as HTMLAnchorElement | null
+  if (!link) return
+  event.preventDefault()
+  void handleOpenUrl(link.href)
+}
+
+function handleKeydown(event: KeyboardEvent) {
+  if (event.key !== 'Escape') return
+  if (selectedDetailPlugin.value) closeDetail()
+  else close()
+}
+
+watch(() => props.modelValue, (open) => {
+  if (open) window.addEventListener('keydown', handleKeydown)
+  else window.removeEventListener('keydown', handleKeydown)
+}, { immediate: true })
+onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
 </script>
 
 <template>
@@ -277,6 +295,9 @@ async function handleOpenUrl(url?: string) {
     <div
       v-if="modelValue"
       class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 pt-10 animate-fade-in"
+      role="dialog"
+      aria-modal="true"
+      :aria-label="$t('plugins.title')"
       @click.self="close"
       @dragover="handleDragOver"
       @dragleave="handleDragLeave"
@@ -291,8 +312,8 @@ async function handleOpenUrl(url?: string) {
         class="absolute inset-4 z-60 rounded-2xl border-3 border-dashed border-blue-500 bg-blue-500/10 backdrop-blur-md flex flex-col items-center justify-center pointer-events-none text-blue-600 dark:text-blue-400 animate-pulse"
       >
         <Upload class="w-16 h-16 mb-3 stroke-[1.5]" />
-        <h3 class="text-xl font-bold">釋放滑鼠以安裝插件</h3>
-        <p class="text-sm opacity-80 mt-1">支援 .rbr-plugin 或 .zip 格式</p>
+        <h3 class="text-xl font-bold">{{ $t('plugins.dropToInstall') }}</h3>
+        <p class="text-sm opacity-80 mt-1">{{ $t('plugins.dropFormats') }}</p>
       </div>
 
       <!-- Modal Card -->
@@ -310,10 +331,10 @@ async function handleOpenUrl(url?: string) {
               type="button"
               @click="closeDetail"
               class="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer mr-1 flex items-center gap-1 text-xs font-semibold"
-              title="返回列表"
+              :title="$t('plugins.backToList')"
             >
               <ArrowLeft class="w-4 h-4" />
-              <span>返回列表</span>
+              <span>{{ $t('plugins.backToList') }}</span>
             </button>
             <div v-else class="p-2 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 shadow-xs">
               <Puzzle class="w-5 h-5" />
@@ -363,7 +384,7 @@ async function handleOpenUrl(url?: string) {
                   </span>
                 </div>
                 <div class="flex items-center gap-3 mt-1.5 text-xs text-slate-500 dark:text-slate-400 flex-wrap">
-                  <span v-if="selectedDetailPlugin.author">作者：<span class="font-medium text-slate-700 dark:text-slate-300">{{ selectedDetailPlugin.author }}</span></span>
+                  <span v-if="selectedDetailPlugin.author">{{ $t('plugins.authorLabel') }}<span class="font-medium text-slate-700 dark:text-slate-300">{{ selectedDetailPlugin.author }}</span></span>
                   <button
                     v-if="selectedDetailPlugin.homepage"
                     type="button"
@@ -371,7 +392,7 @@ async function handleOpenUrl(url?: string) {
                     class="flex items-center gap-1 text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 hover:underline cursor-pointer"
                   >
                     <Globe class="w-3.5 h-3.5" />
-                    <span>專案首頁 / 官方網站</span>
+                    <span>{{ $t('plugins.homepage') }}</span>
                     <ExternalLink class="w-3 h-3" />
                   </button>
                 </div>
@@ -383,7 +404,7 @@ async function handleOpenUrl(url?: string) {
               <template v-if="pluginStore.getPlugin(selectedDetailPlugin.id)">
                 <!-- Toggle enable switch -->
                 <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs">
-                  <span class="text-slate-600 dark:text-slate-300 font-medium">啟用狀態</span>
+                  <span class="text-slate-600 dark:text-slate-300 font-medium">{{ $t('plugins.enabledState') }}</span>
                   <label class="relative inline-flex items-center cursor-pointer shrink-0">
                     <input
                       type="checkbox"
@@ -403,7 +424,7 @@ async function handleOpenUrl(url?: string) {
                   class="flex items-center gap-1 px-3 py-2 rounded-xl bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800/60 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/60 text-xs font-semibold transition-colors cursor-pointer"
                 >
                   <Trash2 class="w-3.5 h-3.5" />
-                  <span>解除安裝</span>
+                  <span>{{ $t('plugins.uninstall') }}</span>
                 </button>
               </template>
 
@@ -416,7 +437,7 @@ async function handleOpenUrl(url?: string) {
                 >
                   <LoaderCircle v-if="installingMap[selectedDetailPlugin.id]" class="w-3.5 h-3.5 animate-spin" />
                   <Download v-else class="w-3.5 h-3.5" />
-                  <span>{{ installingMap[selectedDetailPlugin.id] ? '安裝中...' : '安裝外掛' }}</span>
+                  <span>{{ installingMap[selectedDetailPlugin.id] ? $t('plugins.installing') : $t('plugins.installPlugin') }}</span>
                 </button>
               </template>
             </div>
@@ -426,15 +447,15 @@ async function handleOpenUrl(url?: string) {
           <div class="flex flex-wrap items-center gap-2 text-xs">
             <span v-if="selectedDetailPlugin.permissions?.includes('network')" class="px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/60 flex items-center gap-1 font-medium">
               <ShieldCheck class="w-3.5 h-3.5" />
-              <span>需要網路權限 (Network)</span>
+              <span>{{ $t('plugins.needsNetwork') }}</span>
             </span>
             <span v-else class="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60 flex items-center gap-1 font-medium">
               <ShieldCheck class="w-3.5 h-3.5" />
-              <span>100% 離線純本機運算</span>
+              <span>{{ $t('plugins.offlineOnly') }}</span>
             </span>
             <span v-if="selectedDetailPlugin.options?.length" class="px-2.5 py-1 rounded-lg bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/60 flex items-center gap-1 font-medium">
               <Layers class="w-3.5 h-3.5" />
-              <span>{{ selectedDetailPlugin.options.length }} 個可自訂選項</span>
+              <span>{{ $t('plugins.optionsCountN', { n: selectedDetailPlugin.options.length }) }}</span>
             </span>
           </div>
 
@@ -442,27 +463,28 @@ async function handleOpenUrl(url?: string) {
           <div class="border-t border-slate-200 dark:border-slate-800 pt-5">
             <div v-if="isLoadingReadme" class="flex flex-col items-center justify-center py-12 text-slate-400">
               <LoaderCircle class="w-7 h-7 animate-spin mb-3 text-blue-500" />
-              <p class="text-xs">正在載入外掛說明文檔 (README.md)...</p>
+              <p class="text-xs">{{ $t('plugins.loadingReadme') }}</p>
             </div>
 
             <div
               v-else-if="renderedReadmeHtml"
               class="plugin-markdown-content text-slate-800 dark:text-slate-200 leading-relaxed text-xs space-y-4"
               v-html="renderedReadmeHtml"
+              @click="handleReadmeClick"
             ></div>
 
             <!-- Fallback if no README available -->
             <div v-else class="space-y-4 text-xs text-slate-600 dark:text-slate-300">
               <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
-                <h4 class="font-bold text-sm mb-1 text-slate-900 dark:text-slate-100">外掛簡介</h4>
-                <p>{{ selectedDetailPlugin.description || '無詳細說明' }}</p>
+                <h4 class="font-bold text-sm mb-1 text-slate-900 dark:text-slate-100">{{ $t('plugins.intro') }}</h4>
+                <p>{{ selectedDetailPlugin.description || $t('plugins.noDescription') }}</p>
               </div>
 
               <div v-if="selectedDetailPlugin.options?.length" class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
-                <h4 class="font-bold text-sm mb-2 text-slate-900 dark:text-slate-100">可設定參數 (Options)</h4>
+                <h4 class="font-bold text-sm mb-2 text-slate-900 dark:text-slate-100">{{ $t('plugins.optionsTitle') }}</h4>
                 <ul class="list-disc pl-5 space-y-1.5 font-mono text-[11.5px]">
                   <li v-for="opt in selectedDetailPlugin.options" :key="opt.key">
-                    <strong>{{ opt.label }} ({{ opt.key }})</strong>: {{ opt.description || `類型: ${opt.type}` }}
+                    <strong>{{ opt.label }} ({{ opt.key }})</strong>: {{ opt.description || $t('plugins.optionType', { type: opt.type }) }}
                   </li>
                 </ul>
               </div>
@@ -564,7 +586,7 @@ async function handleOpenUrl(url?: string) {
                       <div
                         @click="openPluginDetail(plugin)"
                         class="flex items-center gap-2.5 min-w-0 cursor-pointer"
-                        title="點擊查看詳細說明與致謝"
+                        :title="$t('plugins.viewDetails')"
                       >
                         <div class="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple-950/60 border border-purple-200/60 dark:border-purple-800/60 flex items-center justify-center text-purple-600 dark:text-purple-400 font-bold shrink-0 group-hover:scale-105 transition-transform">
                           <Sparkles class="w-4 h-4" />
@@ -602,20 +624,20 @@ async function handleOpenUrl(url?: string) {
                       @click="openPluginDetail(plugin)"
                       class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-3 line-clamp-2 cursor-pointer hover:text-slate-900 dark:hover:text-slate-100"
                     >
-                      {{ plugin.manifest.description || '無描述' }}
+                      {{ plugin.manifest.description || $t('plugins.noDescription') }}
                     </p>
 
                     <!-- Permissions & Features Badges -->
                     <div class="flex flex-wrap items-center gap-1.5 mb-3 text-[10.5px]">
                       <span v-if="plugin.isBuiltin" class="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60 font-medium">
-                        內建
+                        {{ $t('plugins.builtin') }}
                       </span>
                       <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-400 font-mono">
                         {{ plugin.manifest.type }}
                       </span>
                       <span v-if="plugin.manifest.permissions?.includes('filesystem')" class="px-2 py-0.5 rounded-md bg-cyan-50 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-300 border border-cyan-200/60 dark:border-cyan-800/60 flex items-center gap-1">
                         <Folder class="w-3 h-3" />
-                        檔案讀取
+                        {{ $t('plugins.permFilesystem') }}
                       </span>
                       <span v-if="plugin.manifest.permissions?.includes('network')" class="px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-800/60 flex items-center gap-1">
                         <ShieldCheck class="w-3 h-3" />
@@ -635,7 +657,7 @@ async function handleOpenUrl(url?: string) {
                         type="button"
                         @click="openPluginDetail(plugin)"
                         class="hover:text-blue-500 transition-colors flex items-center gap-1 cursor-pointer"
-                        title="點擊查看詳細說明"
+                        :title="$t('plugins.viewDetails')"
                       >
                         <BookOpen class="w-3 h-3" />
                         <span class="font-mono">{{ plugin.manifest.id }}</span>
@@ -653,7 +675,7 @@ async function handleOpenUrl(url?: string) {
                           'bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800/60 hover:bg-red-100 dark:hover:bg-red-900/60': pluginStore.getPluginHealth(plugin.manifest.id).status === 'unhealthy',
                           'bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700': pluginStore.getPluginHealth(plugin.manifest.id).status === 'unknown' || pluginStore.getPluginHealth(plugin.manifest.id).status === 'checking'
                         }"
-                        :title="pluginStore.getPluginHealth(plugin.manifest.id).message || '點擊檢測健康度'"
+                        :title="pluginStore.getPluginHealth(plugin.manifest.id).message || $t('plugins.clickToCheckHealth')"
                       >
                         <span v-if="pluginStore.getPluginHealth(plugin.manifest.id).status === 'healthy'" class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
                         <span v-else-if="pluginStore.getPluginHealth(plugin.manifest.id).status === 'unhealthy'" class="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0"></span>
@@ -664,13 +686,13 @@ async function handleOpenUrl(url?: string) {
                           {{
                             pluginStore.getPluginHealth(plugin.manifest.id).status === 'healthy'
                               ? (pluginStore.getPluginHealth(plugin.manifest.id).latencyMs !== undefined
-                                  ? `連線正常 (${pluginStore.getPluginHealth(plugin.manifest.id).latencyMs}ms)`
-                                  : '連線正常')
+                                  ? $t('plugins.healthOkMs', { ms: pluginStore.getPluginHealth(plugin.manifest.id).latencyMs })
+                                  : $t('plugins.healthOkShort'))
                               : pluginStore.getPluginHealth(plugin.manifest.id).status === 'unhealthy'
-                              ? '服務異常'
+                              ? $t('plugins.healthBad')
                               : pluginStore.getPluginHealth(plugin.manifest.id).status === 'checking'
-                              ? '檢測中...'
-                              : '檢測連線'
+                              ? $t('plugins.checking')
+                              : $t('plugins.checkHealth')
                           }}
                         </span>
                       </button>
@@ -707,7 +729,7 @@ async function handleOpenUrl(url?: string) {
                       <div
                         @click="openPluginDetail(item)"
                         class="flex items-center gap-2.5 min-w-0 cursor-pointer"
-                        title="點擊查看詳細說明與致謝"
+                        :title="$t('plugins.viewDetails')"
                       >
                         <div class="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200/60 dark:border-blue-800/60 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold shrink-0 group-hover:scale-105 transition-transform">
                           <Puzzle class="w-4 h-4" />
@@ -729,7 +751,7 @@ async function handleOpenUrl(url?: string) {
                       @click="openPluginDetail(item)"
                       class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-3 line-clamp-2 cursor-pointer hover:text-slate-900 dark:hover:text-slate-100"
                     >
-                      {{ item.description || '無描述' }}
+                      {{ item.description || $t('plugins.noDescription') }}
                     </p>
 
                     <!-- Permissions & Features Badges -->
@@ -754,7 +776,7 @@ async function handleOpenUrl(url?: string) {
                       type="button"
                       @click="openPluginDetail(item)"
                       class="text-slate-400 hover:text-blue-500 text-[11px] font-mono flex items-center gap-1 cursor-pointer transition-colors"
-                      title="查看詳細說明"
+                      :title="$t('plugins.viewDetails')"
                     >
                       <BookOpen class="w-3 h-3" />
                       <span>{{ item.id }}</span>
@@ -768,7 +790,7 @@ async function handleOpenUrl(url?: string) {
                         class="px-3 py-1.5 rounded-lg bg-blue-500/80 text-white text-xs font-medium flex items-center gap-1.5 cursor-not-allowed"
                       >
                         <LoaderCircle class="w-3.5 h-3.5 animate-spin" />
-                        <span>安裝中...</span>
+                        <span>{{ $t('plugins.installing') }}</span>
                       </button>
 
                       <button
@@ -776,10 +798,10 @@ async function handleOpenUrl(url?: string) {
                         type="button"
                         @click="openPluginDetail(item)"
                         class="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 text-xs font-medium flex items-center gap-1 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-colors cursor-pointer"
-                        title="點擊查看詳細說明"
+                        :title="$t('plugins.viewDetails')"
                       >
                         <Check class="w-3.5 h-3.5 text-emerald-600" />
-                        <span>已安裝</span>
+                        <span>{{ $t('plugins.installed') }}</span>
                       </button>
 
                       <button

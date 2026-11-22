@@ -13,6 +13,14 @@ export interface Operation {
 
 export const useOperationStore = defineStore('operation', () => {
   const operations = ref<Operation[]>([])
+  /** Operation id -> regex compile error, filled by the preview pass. */
+  const ruleErrors = ref<Record<string, string>>({})
+
+  function setRuleErrors(errors: Record<string, string>) {
+    const prev = ruleErrors.value
+    const same = Object.keys(prev).length === Object.keys(errors).length && Object.entries(errors).every(([k, v]) => prev[k] === v)
+    if (!same) ruleErrors.value = errors
+  }
 
   function addOperation(type: OperationType, params: Record<string, any> = {}) {
     operations.value.push({
@@ -74,6 +82,8 @@ export const useOperationStore = defineStore('operation', () => {
 
   return {
     operations,
+    ruleErrors,
+    setRuleErrors,
     addOperation,
     removeOperation,
     updateOperation,

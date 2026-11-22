@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { escapeReplacementLiteral } from '../services/renameEngine'
 import { ref, onMounted, watch, onUnmounted, nextTick, computed } from 'vue'
 import { useOperationStore, type Operation } from '../stores/operationStore'
 import { useSettingsStore } from '../stores/settingsStore'
@@ -276,7 +277,7 @@ function getBadges(op: any): Badge[] {
   if (op.type === 'plugin') {
     badges.push({
       type: 'mode-plugin',
-      label: '外掛',
+      label: t('plugins.pluginBadge'),
       color: 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/60',
       isLiteral: true
     })
@@ -600,19 +601,13 @@ function confirmPrefixSuffix() {
     return
   }
 
-  if (prefixSuffixMode.value === 'prefix') {
-    operationStore.addOperation('regex', {
-      pattern: '^',
-      replacement: prefixSuffixValue.value,
-      useRegex: true
-    })
-  } else {
-    operationStore.addOperation('regex', {
-      pattern: '$',
-      replacement: prefixSuffixValue.value,
-      useRegex: true
-    })
-  }
+  // `$` in user text would otherwise be read as a capture reference ($1, $&).
+  const replacement = escapeReplacementLiteral(prefixSuffixValue.value)
+  operationStore.addOperation('regex', {
+    pattern: prefixSuffixMode.value === 'prefix' ? '^' : '$',
+    replacement,
+    useRegex: true
+  })
 
   closePrefixSuffixModal()
 }
@@ -629,7 +624,7 @@ function confirmPrefixSuffix() {
 
         <button type="button" @click="showHelp = true"
           class="text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer"
-          title="使用說明與 Regex 教學">
+          :title="$t('operations.helpTitle')">
           <HelpCircle class="h-4 w-4" />
         </button>
 
@@ -759,7 +754,7 @@ function confirmPrefixSuffix() {
                   class="w-full px-3.5 py-2 text-left text-slate-700 dark:text-slate-200 hover:bg-purple-50 dark:hover:bg-purple-950/40 hover:text-purple-600 dark:hover:text-purple-300 transition-colors cursor-pointer flex items-center justify-between gap-1.5"
                 >
                   <span class="truncate">{{ plugin.manifest.name }}</span>
-                  <span class="text-[10px] px-1.5 py-0.2 rounded bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 font-mono shrink-0">外掛</span>
+                  <span class="text-[10px] px-1.5 py-0.2 rounded bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300 font-mono shrink-0">{{ $t('plugins.pluginBadge') }}</span>
                 </button>
               </template>
 
@@ -841,7 +836,7 @@ function confirmPrefixSuffix() {
                 'bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800/60 hover:bg-red-100 dark:hover:bg-red-900/60': pluginStore.getPluginHealth(op.params?.pluginId).status === 'unhealthy',
                 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700': pluginStore.getPluginHealth(op.params?.pluginId).status === 'unknown' || pluginStore.getPluginHealth(op.params?.pluginId).status === 'checking'
               }"
-              :title="pluginStore.getPluginHealth(op.params?.pluginId).message || '點擊檢測健康度'"
+              :title="pluginStore.getPluginHealth(op.params?.pluginId).message || $t('plugins.clickToCheckHealth')"
             >
               <span
                 v-if="pluginStore.getPluginHealth(op.params?.pluginId).status === 'healthy'"
@@ -861,13 +856,13 @@ function confirmPrefixSuffix() {
                 {{
                   pluginStore.getPluginHealth(op.params?.pluginId).status === 'healthy'
                     ? (pluginStore.getPluginHealth(op.params?.pluginId).latencyMs !== undefined
-                        ? `連線正常 (${pluginStore.getPluginHealth(op.params?.pluginId).latencyMs}ms)`
-                        : '連線正常')
+                        ? $t('plugins.healthOkMs', { ms: pluginStore.getPluginHealth(op.params?.pluginId).latencyMs })
+                        : $t('plugins.healthOkShort'))
                     : pluginStore.getPluginHealth(op.params?.pluginId).status === 'unhealthy'
-                    ? '服務異常 (重試)'
+                    ? $t('plugins.healthBadRetry')
                     : pluginStore.getPluginHealth(op.params?.pluginId).status === 'checking'
-                    ? '檢測中...'
-                    : '檢測連線'
+                    ? $t('plugins.checking')
+                    : $t('plugins.checkHealth')
                 }}
               </span>
             </button>
@@ -876,7 +871,7 @@ function confirmPrefixSuffix() {
             <span v-if="op.type === 'plugin' && pluginStore.getPluginStatus(op.params?.pluginId).isBusy"
               class="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60 flex items-center gap-1">
               <LoaderCircle class="w-2.5 h-2.5 animate-spin" />
-              <span>運算中...</span>
+              <span>{{ $t('plugins.running') }}</span>
             </span>
           </div>
 
@@ -885,7 +880,7 @@ function confirmPrefixSuffix() {
             class="mb-3 p-2.5 rounded-lg border border-red-200 dark:border-red-900/60 bg-red-50 dark:bg-red-950/40 text-xs text-red-700 dark:text-red-300 flex items-start gap-2">
             <AlertCircle class="w-4 h-4 shrink-0 mt-0.5 text-red-500" />
             <div class="min-w-0">
-              <div class="font-semibold text-[11.5px]">外掛運算錯誤</div>
+              <div class="font-semibold text-[11.5px]">{{ $t('plugins.runError') }}</div>
               <div class="text-[11px] opacity-90 break-all font-mono">{{ pluginStore.getPluginStatus(op.params?.pluginId).lastError }}</div>
             </div>
           </div>
@@ -893,8 +888,8 @@ function confirmPrefixSuffix() {
           <!-- REGEX OPERATION FORM -->
           <div v-if="op.type === 'regex'" class="space-y-3">
             <div class="space-y-1">
-              <div class="flex justify-between items-center mb-1">
-                <label class="text-xs font-medium text-slate-600 dark:text-slate-400 ml-0.5">{{ $t('operations.patternLabel')
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mb-1">
+                <label class="text-xs font-medium text-slate-600 dark:text-slate-400 ml-0.5 mr-auto whitespace-nowrap">{{ $t('operations.patternLabel')
                   }}</label>
                 <label class="flex items-center gap-1.5 cursor-pointer group/cb select-none">
                   <div class="relative flex items-center justify-center shrink-0">
@@ -904,12 +899,27 @@ function confirmPrefixSuffix() {
                       <Check v-if="op.params.useRegex" class="w-2.5 h-2.5 text-white stroke-[3.5]" />
                     </div>
                   </div>
-                  <span class="text-xs text-slate-500 dark:text-slate-400 group-hover/cb:text-slate-700 dark:group-hover/cb:text-slate-300 transition-colors leading-none pt-px">{{ $t('operations.useRegex') }}</span>
+                  <span class="text-xs text-slate-500 dark:text-slate-400 group-hover/cb:text-slate-700 dark:group-hover/cb:text-slate-300 transition-colors leading-none pt-px whitespace-nowrap">{{ $t('operations.useRegex') }}</span>
+                </label>
+                <label class="flex items-center gap-1.5 cursor-pointer group/ci select-none" :title="$t('operations.caseInsensitiveDesc')">
+                  <div class="relative flex items-center justify-center shrink-0">
+                    <input type="checkbox" v-model="op.params.caseInsensitive" class="sr-only peer">
+                    <div
+                      class="w-3.5 h-3.5 rounded-sm border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-500/40 transition-all flex items-center justify-center shadow-2xs group-hover/ci:border-slate-400 dark:group-hover/ci:border-slate-500">
+                      <Check v-if="op.params.caseInsensitive" class="w-2.5 h-2.5 text-white stroke-[3.5]" />
+                    </div>
+                  </div>
+                  <span class="text-xs text-slate-500 dark:text-slate-400 group-hover/ci:text-slate-700 dark:group-hover/ci:text-slate-300 transition-colors leading-none pt-px whitespace-nowrap">{{ $t('operations.caseInsensitive') }}</span>
                 </label>
               </div>
               <input v-model="op.params.pattern" type="text"
                 :placeholder="op.params.useRegex ? $t('operations.placeholderPatternRegex') : $t('operations.placeholderPatternText')"
+                :aria-invalid="Boolean(operationStore.ruleErrors[op.id])"
+                :class="operationStore.ruleErrors[op.id] ? '!border-red-400 dark:!border-red-600 focus:!ring-red-500/40' : ''"
                 class="w-full bg-white dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all font-mono" />
+              <p v-if="operationStore.ruleErrors[op.id]" class="text-[11px] text-red-600 dark:text-red-400 ml-0.5 break-all" role="alert">
+                {{ $t('operations.invalidRegex', { detail: operationStore.ruleErrors[op.id] }) }}
+              </p>
             </div>
             <div class="space-y-1">
               <div class="text-xs text-slate-600 dark:text-slate-400 ml-1 flex justify-between items-center">
@@ -984,10 +994,10 @@ function confirmPrefixSuffix() {
                           ? 'bg-blue-600 text-white shadow-xs'
                           : 'bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950/70 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 border border-slate-200 dark:border-slate-700'
                       ]"
-                      title="點擊展開可用變數清單"
+                      :title="$t('plugins.showVariables')"
                     >
                       <Braces class="w-3 h-3" :class="{ 'text-white': activeVarPicker?.opId === op.id && activeVarPicker?.key === option.key, 'text-blue-500': activeVarPicker?.opId !== op.id || activeVarPicker?.key !== option.key }" />
-                      <span>變數</span>
+                      <span>{{ $t('plugins.variables') }}</span>
                       <ChevronDown class="w-2.5 h-2.5 opacity-70 transition-transform duration-150" :class="{ 'rotate-180': activeVarPicker?.opId === op.id && activeVarPicker?.key === option.key }" />
                     </button>
                   </div>
@@ -999,8 +1009,8 @@ function confirmPrefixSuffix() {
                       class="absolute z-50 left-0 right-0 w-full mt-1 py-1 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl max-h-56 overflow-y-auto custom-scrollbar"
                     >
                       <div class="px-3 py-1.5 text-[10.5px] font-medium text-slate-400 dark:text-slate-500 border-b border-slate-100 dark:border-slate-700/60 flex items-center justify-between select-none">
-                        <span>點選變數直接插入</span>
-                        <span class="font-mono text-[10px]">{{ option.variables?.length }} 個變數</span>
+                        <span>{{ $t('plugins.clickToInsertVariable') }}</span>
+                        <span class="font-mono text-[10px]">{{ $t('plugins.variableCount', { n: option.variables?.length || 0 }) }}</span>
                       </div>
                       <button
                         v-for="v in option.variables"
@@ -1031,7 +1041,7 @@ function confirmPrefixSuffix() {
 
             <div v-else class="p-3 rounded-lg border border-amber-200 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/40 text-xs text-amber-700 dark:text-amber-300 flex items-center gap-2">
               <AlertCircle class="w-4 h-4 shrink-0" />
-              <span>插件尚未安裝或已被停用 (ID: {{ op.params.pluginId }})</span>
+              <span>{{ $t('plugins.missingPlugin', { id: op.params.pluginId }) }}</span>
             </div>
           </div>
         </div>

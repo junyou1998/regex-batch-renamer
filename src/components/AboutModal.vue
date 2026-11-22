@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { marked } from 'marked'
+import { renderSafeMarkdown } from '../utils/markdown'
 import { useToastStore } from '../stores/toastStore'
 import { useI18n } from 'vue-i18n'
 import {
@@ -52,7 +52,7 @@ const highlightedRelease = computed(() => {
 })
 
 function renderMarkdown(markdown: string) {
-    return marked.parse(markdown || '', { breaks: true, gfm: true }) as string
+    return renderSafeMarkdown(markdown)
 }
 
 function getInAppUpdateBlockedReason() {
@@ -74,6 +74,12 @@ function openReleaseFallback(message: string) {
 
 async function handleChangelogClick(event: MouseEvent) {
     const target = event.target as HTMLElement
+    const link = target.closest('a[href]') as HTMLAnchorElement | null
+    if (link) {
+        event.preventDefault()
+        if (/^https?:\/\//i.test(link.href)) void desktop.openExternal(link.href)
+        return
+    }
     const pre = target.closest('pre')
     if (pre) {
         const code = pre.textContent || ''

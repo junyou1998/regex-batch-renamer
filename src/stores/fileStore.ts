@@ -49,9 +49,7 @@ export const useFileStore = defineStore('file', () => {
     const file = files.value.find(f => f.id === id)
     if (file) {
       file.status = status
-      if (errorMessage) {
-        file.errorMessage = errorMessage
-      }
+      file.errorMessage = status === 'error' ? errorMessage : undefined
     }
   }
 
@@ -62,13 +60,13 @@ export const useFileStore = defineStore('file', () => {
     }
   }
 
-  function updateFileAfterRename(id: string, newPath: string, newName: string) {
+  function updateFileAfterRename(id: string, newPath: string, newName: string, status: FileItem['status'] = 'pending') {
     const file = files.value.find(f => f.id === id)
     if (file) {
       file.originalName = newName
       file.path = newPath
       file.newName = newName
-      file.status = 'pending'
+      file.status = status
       file.errorMessage = undefined
     }
   }

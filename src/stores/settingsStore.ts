@@ -11,6 +11,7 @@ export const useSettingsStore = defineStore('settings', () => {
     const language = ref(initial.language)
     const themeMode = ref<ThemeMode>(initial.themeMode)
     const zoomLevel = ref(initial.zoomLevel)
+    const disableRulesAfterRename = ref(initial.disableRulesAfterRename)
 
     function persistSettings() {
         const settings: Settings = {
@@ -18,7 +19,8 @@ export const useSettingsStore = defineStore('settings', () => {
             processFilenameOnly: processFilenameOnly.value,
             language: language.value,
             themeMode: themeMode.value,
-            zoomLevel: zoomLevel.value
+            zoomLevel: zoomLevel.value,
+            disableRulesAfterRename: disableRulesAfterRename.value
         }
         saveSettings(settings)
     }
@@ -28,7 +30,7 @@ export const useSettingsStore = defineStore('settings', () => {
         void desktop.setZoomFactor(factor)
     }
 
-    watch([defaultUseRegex, processFilenameOnly, language, themeMode, zoomLevel], () => {
+    watch([defaultUseRegex, processFilenameOnly, language, themeMode, zoomLevel, disableRulesAfterRename], () => {
         persistSettings()
     }, { deep: true })
 
@@ -62,6 +64,7 @@ export const useSettingsStore = defineStore('settings', () => {
         language.value = defaultSettings.language
         themeMode.value = defaultSettings.themeMode
         zoomLevel.value = defaultSettings.zoomLevel
+        disableRulesAfterRename.value = defaultSettings.disableRulesAfterRename
     }
 
     function initZoom() {
@@ -74,6 +77,7 @@ export const useSettingsStore = defineStore('settings', () => {
         language,
         themeMode,
         zoomLevel,
+        disableRulesAfterRename,
         setDefaultUseRegex,
         setProcessFilenameOnly,
         setLanguage,

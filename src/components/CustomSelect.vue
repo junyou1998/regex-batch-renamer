@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onUnmounted, nextTick, watch } from 'vue'
 import { ChevronDown, Check } from 'lucide-vue-next'
+import { useI18n } from 'vue-i18n'
 
 export interface SelectOption {
   value: string | number
@@ -18,12 +19,13 @@ const props = withDefaults(
   }>(),
   {
     modelValue: '',
-    placeholder: '請選擇...',
+    placeholder: '',
     disabled: false,
     size: 'md'
   }
 )
 
+const { t } = useI18n()
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string | number): void
   (e: 'change', value: string | number): void
@@ -38,7 +40,7 @@ const selectedOption = computed(() => {
 })
 
 const displayLabel = computed(() => {
-  return selectedOption.value ? selectedOption.value.label : props.placeholder
+  return selectedOption.value ? selectedOption.value.label : (props.placeholder || t('common.selectPlaceholder'))
 })
 
 function toggleDropdown() {

@@ -20,8 +20,8 @@ import { CircleAlert, History, Info, LoaderCircle, PanelLeft, Settings, Sparkles
 import PluginModal from './components/PluginModal.vue'
 
 import { getLatestRelease, getReleasePageUrl, isNewerVersion, normalizeReleaseVersion } from './services/updateService'
-import { generateRenamePreviewAsync } from './services/renameEngine'
-import { replaceBasename } from './utils/path'
+import { generateRenamePreviewAsync, type RenameIssue } from './services/renameEngine'
+import { joinPath, replaceBasename } from './utils/path'
 import { desktop, type DesktopRuntimeInfo } from './services/desktop'
 
 const fileStore = useFileStore()
@@ -190,6 +190,7 @@ onMounted(async () => {
 
   await maybeShowPostUpdateNotes()
   checkForUpdates()
+  void aiStore.init()
   settingsStore.initZoom()
   window.addEventListener('keydown', handleGlobalKeydown)
   void desktop.setPendingChangesHandler(
@@ -237,61 +238,97 @@ onUnmounted(() => {
   }
 })
 
+function isTypingTarget(target: EventTarget | null) {
+  const el = target as HTMLElement | null
+  if (!el) return false
+  return el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName)
+}
+
 function handleGlobalKeydown(e: KeyboardEvent) {
-  // Handle DevTools: F12 or Cmd/Ctrl + Option/Alt + I
+  // DevTools (debug builds only): F12 or Cmd/Ctrl + Alt/Shift + I
   if (e.key === 'F12' || ((e.metaKey || e.ctrlKey) && (e.altKey || e.shiftKey) && (e.key === 'i' || e.key === 'I'))) {
     e.preventDefault()
     void desktop.openDevTools?.()
     return
   }
 
-  // Handle Zoom Shortcuts: Cmd/Ctrl + (+/-)
-  if (e.metaKey || e.ctrlKey) {
-    if (e.key === '=' || e.key === '+') {
+  if (!(e.metaKey || e.ctrlKey)) return
+  const key = e.key.toLowerCase()
+
+  if (e.key === '=' || e.key === '+') {
+    e.preventDefault()
+    settingsStore.setZoomLevel(settingsStore.zoomLevel + 10)
+  } else if (e.key === '-') {
+    e.preventDefault()
+    settingsStore.setZoomLevel(settingsStore.zoomLevel - 10)
+  } else if (e.key === '0') {
+    e.preventDefault()
+    settingsStore.setZoomLevel(100)
+  } else if (e.key === 'Enter' && !e.shiftKey) {
+    // Cmd/Ctrl + Enter: apply rename
+    if (canRename.value) {
       e.preventDefault()
-      settingsStore.setZoomLevel(settingsStore.zoomLevel + 10)
-    } else if (e.key === '-') {
-      e.preventDefault()
-      settingsStore.setZoomLevel(settingsStore.zoomLevel - 10)
-    } else if (e.key === '0') {
-      e.preventDefault()
-      settingsStore.setZoomLevel(100)
+      void handleRename()
     }
+  } else if (key === 'z' && !e.shiftKey && !isTypingTarget(e.target)) {
+    // Cmd/Ctrl + Z outside text fields: undo last rename
+    if (fileStore.lastRenameBatch.length > 0) {
+      e.preventDefault()
+      void handleUndo()
+    }
+  } else if (key === 'o' && !e.shiftKey) {
+    // Cmd/Ctrl + O: add files
+    e.preventDefault()
+    void addFilesFromDialog()
   }
 }
 
+async function addFilesFromDialog() {
+  try {
+    fileStore.addFilePaths(await desktop.selectFiles())
+  } catch (error) {
+    console.error('Failed to select files:', error)
+    toastStore.addToast(t('dropZone.openFailed'), 'error')
+  }
+}
 
-function debounce(fn: Function, delay: number) {
+function debounce<T extends (...args: any[]) => void>(fn: T, delay: number) {
   let timeoutId: ReturnType<typeof setTimeout>
-  return (...args: any[]) => {
+  return (...args: Parameters<T>) => {
     clearTimeout(timeoutId)
     timeoutId = setTimeout(() => fn(...args), delay)
   }
 }
 
-const updatePreviews = debounce(async () => {
-  if (fileStore.files.length === 0) {
-    hasConflicts.value = false
-    conflictMessage.value = ''
-    return
-  }
+const ISSUE_MESSAGE_KEYS: Record<RenameIssue, string> = {
+  'invalid-char': 'app.invalidChar',
+  duplicate: 'app.conflictDetected',
+  'empty-name': 'app.emptyName',
+  'reserved-name': 'app.reservedName',
+  'too-long': 'app.nameTooLong',
+}
 
+// Async plugin previews can finish out of order; only the latest run may write.
+let previewGeneration = 0
+
+const updatePreviews = debounce(async () => {
+  const generation = ++previewGeneration
   const preview = await generateRenamePreviewAsync(
     fileStore.files,
     operationStore.operations,
-    { processFilenameOnly: processFilenameOnly.value }
+    { processFilenameOnly: processFilenameOnly.value, platform: runtimeInfo.value?.platform }
   )
+  if (generation !== previewGeneration) return
+
+  operationStore.setRuleErrors(preview.ruleErrors)
 
   const fileMap = new Map(fileStore.files.map(file => [file.id, file]))
-
   preview.items.forEach(item => {
     const file = fileMap.get(item.id)
     if (!file) return
 
-    if (item.issue === 'invalid-char') {
-      fileStore.updateFileStatus(file.id, 'error', t('app.invalidChar'))
-    } else if (item.issue === 'duplicate') {
-      fileStore.updateFileStatus(file.id, 'error', t('app.conflictDetected'))
+    if (item.issue) {
+      fileStore.updateFileStatus(file.id, 'error', t(ISSUE_MESSAGE_KEYS[item.issue]))
     } else if (file.status === 'error') {
       fileStore.updateFileStatus(file.id, 'idle')
     }
@@ -302,201 +339,209 @@ const updatePreviews = debounce(async () => {
   })
 
   hasConflicts.value = preview.hasConflicts
-  if (preview.hasConflicts) {
-    conflictMessage.value = preview.conflictReason === 'invalid-char'
-      ? t('app.invalidChar')
-      : t('app.conflictDetected')
-  } else {
-    conflictMessage.value = t('app.conflictDetected')
-  }
+  conflictMessage.value = preview.conflictReason ? t(ISSUE_MESSAGE_KEYS[preview.conflictReason]) : ''
 }, 300)
 
 watch(
-  [() => fileStore.files, () => operationStore.operations, processFilenameOnly],
+  [() => fileStore.files.map(f => `${f.id}\u0000${f.path}\u0000${f.originalName}`).join('\u0001'), () => operationStore.operations, processFilenameOnly],
   () => {
     updatePreviews()
   },
   { deep: true }
 )
 
+// On narrow windows, opening the AI panel collapses the rules sidebar so the
+// file list stays readable; it comes back when the panel closes.
+let sidebarAutoCollapsed = false
+watch(() => aiStore.isOpen, (open) => {
+  if (open && !isSidebarCollapsed.value && window.innerWidth < 1240) {
+    isSidebarCollapsed.value = true
+    sidebarAutoCollapsed = true
+  } else if (!open && sidebarAutoCollapsed) {
+    isSidebarCollapsed.value = false
+    sidebarAutoCollapsed = false
+  }
+})
+watch(isSidebarCollapsed, (collapsed) => {
+  if (!collapsed) sidebarAutoCollapsed = false
+})
+
+const canRename = computed(() =>
+  !isProcessing.value && fileStore.files.length > 0 && !hasConflicts.value && fileStore.files.some(f => f.newName !== f.originalName)
+)
+
+function describeFileError(code?: string, raw?: string) {
+  if (!code || code === 'UNKNOWN') return raw ? t('fileErrors.UNKNOWN', { detail: raw }) : t('fileErrors.UNKNOWN', { detail: '' })
+  return t(`fileErrors.${code}`)
+}
+
+function isConflictCode(code?: string) {
+  return code === 'FILE_EXISTS' || code === 'DUPLICATE_TARGET'
+}
+
 async function handleRename() {
   if (isProcessing.value) return
   isProcessing.value = true
 
-  const filesToRename = fileStore.files.map(f => ({
-    oldPath: f.path,
-    newPath: replaceBasename(f.path, f.newName)
-  }))
+  try {
+    const pending = fileStore.files.filter(f => f.newName !== f.originalName)
+    if (pending.length === 0) return
 
-  const results = await desktop.renameFiles(filesToRename, { failOnExist: true })
-  const successfulRenames: { id: string; oldPath: string; newPath: string; originalName: string; newName: string }[] = []
-  const fileLogs: RenameFileLog[] = []
+    const filesToRename = pending.map(f => ({
+      oldPath: f.path,
+      newPath: replaceBasename(f.path, f.newName),
+    }))
 
-  let conflictCount = 0
-  let failedCount = 0
-  let successCount = 0
+    const results = await desktop.renameFiles(filesToRename)
+    const byPath = new Map(pending.map(f => [f.path, f]))
+    const successfulRenames: { id: string; oldPath: string; newPath: string; originalName: string; newName: string }[] = []
+    const fileLogs: RenameFileLog[] = []
 
-  results.forEach(res => {
-    const file = fileStore.files.find(f => f.path === res.path)
-    if (file) {
+    let conflictCount = 0
+    let failedCount = 0
+    let successCount = 0
+
+    for (const res of results) {
+      const file = byPath.get(res.path)
+      if (!file) continue
+      const newPath = res.newPath || replaceBasename(file.path, file.newName)
+
       if (res.success) {
-        const newPath = replaceBasename(file.path, file.newName)
-        successfulRenames.push({
-          id: file.id,
-          oldPath: file.path,
-          newPath: newPath,
-          originalName: file.originalName,
-          newName: file.newName
-        })
-        fileLogs.push({
-          id: file.id,
-          oldPath: file.path,
-          newPath: newPath,
-          originalName: file.originalName,
-          newName: file.newName,
-          status: 'success'
-        })
+        successfulRenames.push({ id: file.id, oldPath: file.path, newPath, originalName: file.originalName, newName: file.newName })
+        fileLogs.push({ id: file.id, oldPath: file.path, newPath, originalName: file.originalName, newName: file.newName, status: 'success' })
         successCount++
-        fileStore.updateFileAfterRename(file.id, newPath, file.newName)
+        fileStore.updateFileAfterRename(file.id, newPath, file.newName, 'success')
       } else {
-        const isConflict = res.code === 'FILE_EXISTS' || res.error === 'FILE_EXISTS'
-        if (isConflict) {
-          conflictCount++
-          fileStore.updateFileStatus(file.id, 'error', t('app.targetFileExists'))
-        } else {
-          failedCount++
-          fileStore.updateFileStatus(file.id, 'error', res.error)
-        }
+        const conflict = isConflictCode(res.code)
+        const message = describeFileError(res.code, res.error)
+        if (conflict) conflictCount++
+        else failedCount++
+        fileStore.updateFileStatus(file.id, 'error', message)
         fileLogs.push({
           id: file.id,
           oldPath: file.path,
-          newPath: replaceBasename(file.path, file.newName),
+          newPath,
           originalName: file.originalName,
           newName: file.newName,
-          status: isConflict ? 'conflict' : 'failed',
-          error: isConflict ? t('app.targetFileExists') : res.error
+          status: conflict ? 'conflict' : 'failed',
+          error: message,
         })
       }
     }
-  })
 
-  // Record to History Store
-  historyStore.addBatchLog({
-    action: 'rename',
-    totalFiles: fileStore.files.length,
-    successCount,
-    failedCount,
-    conflictCount,
-    rulesSnapshot: operationStore.getSnapshot(),
-    files: fileLogs
-  })
-
-  if (successfulRenames.length > 0) {
-    fileStore.setLastRenameBatch(successfulRenames)
-
-    const toastMessage = conflictCount > 0
-      ? t('app.renamedSuccess') + ` (${t('app.renameConflict', { n: conflictCount })})`
-      : t('app.renamedSuccess')
-
-    // Show toast with Undo action
-    toastStore.addToast(toastMessage, conflictCount > 0 ? 'warning' : 'success', 10000, {
-      label: t('app.undo'),
-      onClick: handleUndo
+    historyStore.addBatchLog({
+      action: 'rename',
+      totalFiles: pending.length,
+      successCount,
+      failedCount,
+      conflictCount,
+      rulesSnapshot: operationStore.getSnapshot(),
+      files: fileLogs,
     })
 
-    // Auto-disable all operations (layer visibility Concept)
-    operationStore.operations.forEach(op => {
-      op.enabled = false
-    })
-  } else if (conflictCount > 0) {
-    toastStore.addToast(t('app.renameConflict', { n: conflictCount }), 'error', 5000)
+    if (successfulRenames.length > 0) {
+      fileStore.setLastRenameBatch(successfulRenames)
+      const problems = conflictCount + failedCount
+      const toastMessage = problems > 0
+        ? `${t('app.renamedSuccessCount', { n: successCount })} (${t('app.renameProblems', { n: problems })})`
+        : t('app.renamedSuccessCount', { n: successCount })
+
+      toastStore.addToast(toastMessage, problems > 0 ? 'warning' : 'success', 10000, {
+        label: t('app.undo'),
+        onClick: handleUndo,
+      })
+
+      if (settingsStore.disableRulesAfterRename) {
+        operationStore.operations.forEach(op => {
+          op.enabled = false
+        })
+      }
+    } else if (conflictCount + failedCount > 0) {
+      toastStore.addToast(t('app.renameProblems', { n: conflictCount + failedCount }), 'error', 6000)
+    }
+  } catch (error: any) {
+    console.error('Rename failed:', error)
+    toastStore.addToast(t('fileErrors.UNKNOWN', { detail: error?.message || String(error) }), 'error', 6000)
+  } finally {
+    isProcessing.value = false
   }
-
-  isProcessing.value = false
 }
 
 async function handleUndo() {
   if (isProcessing.value || fileStore.lastRenameBatch.length === 0) return
   isProcessing.value = true
 
-  const undoBatch = fileStore.lastRenameBatch.map(item => ({
-    oldPath: item.newPath,
-    newPath: item.oldPath
-  }))
+  try {
+    const batch = [...fileStore.lastRenameBatch]
+    const results = await desktop.renameFiles(batch.map(item => ({ oldPath: item.newPath, newPath: item.oldPath })))
+    const byNewPath = new Map(batch.map(item => [item.newPath, item]))
+    const fileLogs: RenameFileLog[] = []
+    const undoneIds = new Set<string>()
 
-  // Skip files that would conflict with current files (e.g. if a new file took the old name)
-  const currentPaths = new Set(fileStore.files.map(f => f.path))
-  const safeUndoBatch = undoBatch.filter(item => !currentPaths.has(item.newPath))
-  const skippedCount = undoBatch.length - safeUndoBatch.length
+    let conflictCount = 0
+    let failedCount = 0
+    let successCount = 0
 
-  if (skippedCount > 0) {
-    fileStore.updateFileStatus(fileStore.lastRenameBatch[0].id, 'error', `Skipped ${skippedCount} files due to conflicts`)
-  }
-
-  const results = await desktop.renameFiles(safeUndoBatch, { failOnExist: true })
-  const fileLogs: RenameFileLog[] = []
-
-  let conflictCount = 0
-  let failedCount = 0
-  let successCount = 0
-
-  results.forEach(res => {
-    const historyItem = fileStore.lastRenameBatch.find(h => h.newPath === res.path)
-    if (historyItem) {
+    for (const res of results) {
+      const historyItem = byNewPath.get(res.path)
+      if (!historyItem) continue
       const file = fileStore.files.find(f => f.id === historyItem.id)
-      if (file) {
-        if (res.success) {
+
+      if (res.success) {
+        undoneIds.add(historyItem.id)
+        if (file) {
           fileStore.updateFileAfterRename(file.id, historyItem.oldPath, historyItem.originalName)
-          fileStore.updateNewName(file.id, historyItem.originalName)
-          fileLogs.push({
-            id: file.id,
-            oldPath: historyItem.newPath,
-            newPath: historyItem.oldPath,
-            originalName: historyItem.newName,
-            newName: historyItem.originalName,
-            status: 'undone'
-          })
-          successCount++
-        } else {
-          const isConflict = res.code === 'FILE_EXISTS' || res.error === 'FILE_EXISTS'
-          if (isConflict) {
-            conflictCount++
-            fileStore.updateFileStatus(file.id, 'error', t('app.targetFileExists'))
-          } else {
-            failedCount++
-            fileStore.updateFileStatus(file.id, 'error', res.error)
-          }
-          fileLogs.push({
-            id: file.id,
-            oldPath: historyItem.newPath,
-            newPath: historyItem.oldPath,
-            originalName: historyItem.newName,
-            newName: historyItem.originalName,
-            status: isConflict ? 'conflict' : 'failed',
-            error: isConflict ? t('app.targetFileExists') : res.error
-          })
         }
+        fileLogs.push({
+          id: historyItem.id,
+          oldPath: historyItem.newPath,
+          newPath: historyItem.oldPath,
+          originalName: historyItem.newName,
+          newName: historyItem.originalName,
+          status: 'undone',
+        })
+        successCount++
+      } else {
+        const conflict = isConflictCode(res.code)
+        const message = describeFileError(res.code, res.error)
+        if (conflict) conflictCount++
+        else failedCount++
+        if (file) fileStore.updateFileStatus(file.id, 'error', message)
+        fileLogs.push({
+          id: historyItem.id,
+          oldPath: historyItem.newPath,
+          newPath: historyItem.oldPath,
+          originalName: historyItem.newName,
+          newName: historyItem.originalName,
+          status: conflict ? 'conflict' : 'failed',
+          error: message,
+        })
       }
     }
-  })
 
-  // Record to History Store
-  historyStore.addBatchLog({
-    action: 'undo',
-    totalFiles: undoBatch.length,
-    successCount,
-    failedCount,
-    conflictCount,
-    files: fileLogs
-  })
+    // Keep only what is still left to undo, so a retry never re-runs reverted items.
+    fileStore.setLastRenameBatch(batch.filter(item => !undoneIds.has(item.id)))
 
-  if (conflictCount > 0) {
-    toastStore.addToast(t('app.undoConflict', { n: conflictCount }), 'error', 5000)
-  } else {
-    fileStore.clearUndo()
-    toastStore.addToast(t('app.undoSuccess'), 'success', 3000)
+    historyStore.addBatchLog({
+      action: 'undo',
+      totalFiles: batch.length,
+      successCount,
+      failedCount,
+      conflictCount,
+      files: fileLogs,
+    })
+
+    if (conflictCount + failedCount > 0) {
+      toastStore.addToast(t('app.undoConflict', { n: conflictCount + failedCount }), 'error', 6000)
+    } else {
+      toastStore.addToast(t('app.undoSuccess'), 'success', 3000)
+    }
+  } catch (error: any) {
+    console.error('Undo failed:', error)
+    toastStore.addToast(t('fileErrors.UNKNOWN', { detail: error?.message || String(error) }), 'error', 6000)
+  } finally {
+    isProcessing.value = false
   }
-  isProcessing.value = false
 }
 
 async function handleCopyTo() {
@@ -504,72 +549,93 @@ async function handleCopyTo() {
 
   let targetDir: string | undefined
   try {
-    targetDir = await desktop.selectDirectory()
+    targetDir = await desktop.selectDirectory('destination')
   } catch (error) {
     console.error('Failed to select directory:', error)
     toastStore.addToast(t('errors.selectDirectoryFailed'), 'error')
     return
   }
-
   if (!targetDir) return
 
   isProcessing.value = true
+  try {
+    const dir = targetDir
+    const requests = fileStore.files.map(f => ({ oldPath: f.path, newPath: joinPath(dir, f.newName) }))
+    let results = await desktop.copyRenameFiles(requests, 'skip')
 
-  const separator = targetDir.includes('\\') ? '\\' : '/'
+    // Never overwrite: offer to keep both copies for names that already exist.
+    const existing = results.filter(r => r.code === 'FILE_EXISTS' || r.code === 'DUPLICATE_TARGET')
+    if (existing.length > 0) {
+      const keepBoth = await desktop.confirmDialog(t('app.copyConflictMessage', { n: existing.length }), {
+        title: t('app.copyConflictTitle'),
+        okLabel: t('app.copyKeepBoth'),
+        cancelLabel: t('app.copySkip'),
+        kind: 'warning',
+      })
+      if (keepBoth) {
+        const retryPaths = new Set(existing.map(r => r.path))
+        const retried = await desktop.copyRenameFiles(requests.filter(r => retryPaths.has(r.oldPath)), 'suffix')
+        const retriedByPath = new Map(retried.map(r => [r.path, r]))
+        results = results.map(r => retriedByPath.get(r.path) ?? r)
+      }
+    }
 
-  const filesToCopy = fileStore.files.map(f => ({
-    oldPath: f.path,
-    newPath: `${targetDir}${separator}${f.newName}`
-  }))
+    const byPath = new Map(fileStore.files.map(f => [f.path, f]))
+    const fileLogs: RenameFileLog[] = []
+    let successCount = 0
+    let failedCount = 0
+    let conflictCount = 0
 
-  const results = await desktop.copyRenameFiles(filesToCopy)
-  const fileLogs: RenameFileLog[] = []
-
-  let successCount = 0
-  let failedCount = 0
-
-  results.forEach(res => {
-    const file = fileStore.files.find(f => f.path === res.path)
-    if (file) {
+    for (const res of results) {
+      const file = byPath.get(res.path)
+      if (!file) continue
+      const writtenPath = res.newPath || joinPath(dir, file.newName)
       if (res.success) {
         successCount++
         fileStore.updateFileStatus(file.id, 'success')
-        fileLogs.push({
-          id: file.id,
-          oldPath: file.path,
-          newPath: `${targetDir}${separator}${file.newName}`,
-          originalName: file.originalName,
-          newName: file.newName,
-          status: 'success'
-        })
+        fileLogs.push({ id: file.id, oldPath: file.path, newPath: writtenPath, originalName: file.originalName, newName: file.newName, status: 'success' })
       } else {
-        failedCount++
-        fileStore.updateFileStatus(file.id, 'error', res.error)
+        const conflict = isConflictCode(res.code)
+        const message = describeFileError(res.code, res.error)
+        if (conflict) conflictCount++
+        else failedCount++
+        fileStore.updateFileStatus(file.id, 'error', message)
         fileLogs.push({
           id: file.id,
           oldPath: file.path,
-          newPath: `${targetDir}${separator}${file.newName}`,
+          newPath: writtenPath,
           originalName: file.originalName,
           newName: file.newName,
-          status: 'failed',
-          error: res.error
+          status: conflict ? 'conflict' : 'failed',
+          error: message,
         })
       }
     }
-  })
 
-  // Record to History Store
-  historyStore.addBatchLog({
-    action: 'copy',
-    totalFiles: fileStore.files.length,
-    successCount,
-    failedCount,
-    conflictCount: 0,
-    rulesSnapshot: operationStore.getSnapshot(),
-    files: fileLogs
-  })
+    historyStore.addBatchLog({
+      action: 'copy',
+      totalFiles: fileStore.files.length,
+      successCount,
+      failedCount,
+      conflictCount,
+      rulesSnapshot: operationStore.getSnapshot(),
+      files: fileLogs,
+    })
 
-  isProcessing.value = false
+    const problems = failedCount + conflictCount
+    toastStore.addToast(
+      problems > 0
+        ? `${t('app.copiedCount', { n: successCount })} (${t('app.renameProblems', { n: problems })})`
+        : t('app.copiedCount', { n: successCount }),
+      problems > 0 ? 'warning' : 'success',
+      5000
+    )
+  } catch (error: any) {
+    console.error('Copy failed:', error)
+    toastStore.addToast(t('fileErrors.UNKNOWN', { detail: error?.message || String(error) }), 'error', 6000)
+  } finally {
+    isProcessing.value = false
+  }
 }
 </script>
 
@@ -625,6 +691,8 @@ async function handleCopyTo() {
             </button>
             <button
               @click="updateAvailable = false"
+              :aria-label="$t('common.close')"
+              :title="$t('common.close')"
               class="p-0.5 rounded-full hover:bg-blue-500/50 transition-colors opacity-80 hover:opacity-100 cursor-pointer"
             >
               <X class="w-3 h-3" />
@@ -713,7 +781,7 @@ async function handleCopyTo() {
               {{ conflictMessage }}
             </div>
             <div class="grid grid-cols-2 gap-3">
-              <button @click="handleRename" :disabled="isProcessing || fileStore.files.length === 0 || hasConflicts"
+              <button @click="handleRename" :disabled="!canRename" :title="$t('app.renameShortcut')"
                 class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2">
                 <LoaderCircle v-if="isProcessing" class="w-4 h-4 animate-spin" />
                 {{ isProcessing ? $t('app.processing') : $t('app.rename') }}

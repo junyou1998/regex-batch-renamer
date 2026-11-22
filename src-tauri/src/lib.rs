@@ -1,26 +1,25 @@
-mod ai_cli;
 mod ai_api;
+mod ai_cli;
 mod ai_task;
+mod file_ops;
+mod fs_scope;
+mod net;
+mod secrets;
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::fs;
-use std::path::PathBuf;
-use tauri::WebviewWindow;
+use std::io::Read;
+use std::path::{Path, PathBuf};
+use tauri::{Emitter, Manager, State, WebviewWindow};
+use tauri_plugin_dialog::DialogExt;
 use tauri_plugin_updater::UpdaterExt;
 
-#[derive(serde::Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct FileOperationRequest {
-    old_path: String,
-    new_path: String,
-}
+use file_ops::{CopyConflictPolicy, FileOperationRequest, FileOperationResult};
+use fs_scope::FsScope;
+use secrets::SecretStore;
 
-#[derive(Serialize)]
-struct FileOperationResult {
-    path: String,
-    success: bool,
-    error: Option<String>,
-}
+/// Largest file a plugin may read in one call.
+const MAX_PLUGIN_READ_BYTES: usize = 64 * 1024 * 1024;
 
 #[derive(Serialize)]
 struct RuntimeInfo {
@@ -41,22 +40,17 @@ fn platform_name() -> String {
 }
 
 fn release_channel() -> String {
-    option_env!("APP_RELEASE_CHANNEL")
-        .unwrap_or("stable")
-        .to_string()
+    option_env!("APP_RELEASE_CHANNEL").unwrap_or("stable").to_string()
 }
 
 fn runtime_version() -> String {
-    option_env!("APP_VERSION")
-        .unwrap_or(env!("CARGO_PKG_VERSION"))
-        .to_string()
+    option_env!("APP_VERSION").unwrap_or(env!("CARGO_PKG_VERSION")).to_string()
 }
 
 fn current_app_bundle_path() -> Option<PathBuf> {
     if std::env::consts::OS != "macos" {
         return None;
     }
-
     let executable = std::env::current_exe().ok()?;
     executable
         .ancestors()
@@ -64,7 +58,7 @@ fn current_app_bundle_path() -> Option<PathBuf> {
         .map(|path| path.to_path_buf())
 }
 
-fn app_bundle_parent_writable(bundle_path: &PathBuf) -> Option<bool> {
+fn app_bundle_parent_writable(bundle_path: &Path) -> Option<bool> {
     let parent = bundle_path.parent()?;
     let metadata = fs::metadata(parent).ok()?;
     Some(!metadata.permissions().readonly())
@@ -101,6 +95,367 @@ async fn install_app_update(app: tauri::AppHandle) -> Result<(), String> {
     app.restart();
 }
 
+#[tauri::command]
+fn runtime_info() -> RuntimeInfo {
+    let app_bundle_path = current_app_bundle_path();
+    RuntimeInfo {
+        platform: platform_name(),
+        runtime: "tauri".to_string(),
+        channel: release_channel(),
+        version: runtime_version(),
+        app_bundle_path: app_bundle_path.as_ref().map(|path| path.display().to_string()),
+        app_bundle_parent_writable: app_bundle_path.as_deref().and_then(app_bundle_parent_writable),
+    }
+}
+
+// ---------------------------------------------------------------------------
+// File selection: every path the webview can operate on comes through here or
+// through drag-and-drop, and is recorded in the FsScope.
+// ---------------------------------------------------------------------------
+
+fn paths_to_strings(paths: &[PathBuf]) -> Vec<String> {
+    paths.iter().map(|p| p.display().to_string()).collect()
+}
+
+#[tauri::command]
+async fn select_files(app: tauri::AppHandle, scope: State<'_, FsScope>) -> Result<Vec<String>, String> {
+    let (tx, rx) = tokio::sync::oneshot::channel();
+    app.dialog().file().pick_files(move |picked| {
+        let _ = tx.send(picked);
+    });
+    let picked = rx.await.map_err(|e| e.to_string())?.unwrap_or_default();
+    let paths: Vec<PathBuf> = picked.into_iter().filter_map(|p| p.into_path().ok()).collect();
+    scope.allow_items(&paths);
+    Ok(paths_to_strings(&paths))
+}
+
+#[derive(Deserialize, Clone, Copy, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+enum FolderPurpose {
+    /// Add the folder itself to the rename list.
+    Item,
+    /// Use the folder as a "Copy To" destination.
+    Destination,
+    /// Add the files directly inside the folder (not recursive, no hidden files).
+    Contents,
+}
+
+fn visible_files_in(dir: &Path) -> Vec<PathBuf> {
+    let mut files: Vec<PathBuf> = fs::read_dir(dir)
+        .map(|entries| {
+            entries
+                .flatten()
+                .filter(|entry| entry.file_type().map(|t| t.is_file()).unwrap_or(false))
+                .filter(|entry| !entry.file_name().to_string_lossy().starts_with('.'))
+                .map(|entry| entry.path())
+                .collect()
+        })
+        .unwrap_or_default();
+    files.sort();
+    files
+}
+
+#[tauri::command]
+async fn select_directory(
+    app: tauri::AppHandle,
+    scope: State<'_, FsScope>,
+    purpose: FolderPurpose,
+) -> Result<Option<Vec<String>>, String> {
+    let (tx, rx) = tokio::sync::oneshot::channel();
+    app.dialog().file().pick_folder(move |picked| {
+        let _ = tx.send(picked);
+    });
+    let Some(path) = rx.await.map_err(|e| e.to_string())?.and_then(|p| p.into_path().ok()) else {
+        return Ok(None);
+    };
+    let selected = match purpose {
+        FolderPurpose::Item => {
+            scope.allow_items([&path]);
+            vec![path]
+        }
+        FolderPurpose::Destination => {
+            scope.allow_destination(&path);
+            vec![path]
+        }
+        FolderPurpose::Contents => {
+            let files = visible_files_in(&path);
+            scope.allow_items(&files);
+            files
+        }
+    };
+    Ok(Some(paths_to_strings(&selected)))
+}
+
+#[derive(Deserialize)]
+struct SaveFilter {
+    name: String,
+    extensions: Vec<String>,
+}
+
+/// Show a save dialog and write the text. The webview never chooses the path.
+#[tauri::command]
+async fn save_text_file(
+    app: tauri::AppHandle,
+    content: String,
+    default_path: Option<String>,
+    filters: Option<Vec<SaveFilter>>,
+) -> Result<Option<String>, String> {
+    let mut builder = app.dialog().file();
+    if let Some(name) = default_path.as_deref().and_then(|p| Path::new(p).file_name()).and_then(|n| n.to_str()) {
+        builder = builder.set_file_name(name);
+    }
+    for filter in filters.unwrap_or_default() {
+        let exts: Vec<&str> = filter.extensions.iter().map(String::as_str).collect();
+        builder = builder.add_filter(filter.name, &exts);
+    }
+    let (tx, rx) = tokio::sync::oneshot::channel();
+    builder.save_file(move |picked| {
+        let _ = tx.send(picked);
+    });
+    let Some(path) = rx.await.map_err(|e| e.to_string())?.and_then(|p| p.into_path().ok()) else {
+        return Ok(None);
+    };
+    fs::write(&path, content).map_err(|e| e.to_string())?;
+    Ok(Some(path.display().to_string()))
+}
+
+// ---------------------------------------------------------------------------
+// Rename / copy
+// ---------------------------------------------------------------------------
+
+#[tauri::command]
+async fn rename_files(scope: State<'_, FsScope>, files: Vec<FileOperationRequest>) -> Result<Vec<FileOperationResult>, String> {
+    Ok(file_ops::rename_batch(&scope, files))
+}
+
+#[tauri::command]
+async fn copy_rename_files(
+    scope: State<'_, FsScope>,
+    files: Vec<FileOperationRequest>,
+    on_conflict: Option<CopyConflictPolicy>,
+) -> Result<Vec<FileOperationResult>, String> {
+    Ok(file_ops::copy_batch(&scope, files, on_conflict.unwrap_or(CopyConflictPolicy::Skip)))
+}
+
+// ---------------------------------------------------------------------------
+// Plugin file access (scoped to loaded files)
+// ---------------------------------------------------------------------------
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct NativeFileMetadata {
+    size: u64,
+    created_at_ms: Option<u64>,
+    modified_at_ms: Option<u64>,
+    is_file: bool,
+    is_dir: bool,
+}
+
+fn ensure_loaded(scope: &FsScope, path: &str) -> Result<PathBuf, String> {
+    let path = PathBuf::from(path);
+    if scope.is_item_allowed(&path) {
+        Ok(path)
+    } else {
+        Err(file_ops::NOT_ALLOWED.to_string())
+    }
+}
+
+#[tauri::command]
+async fn read_file_binary(
+    scope: State<'_, FsScope>,
+    path: String,
+    max_bytes: Option<usize>,
+) -> Result<tauri::ipc::Response, String> {
+    let path = ensure_loaded(&scope, &path)?;
+    let limit = max_bytes.unwrap_or(MAX_PLUGIN_READ_BYTES).min(MAX_PLUGIN_READ_BYTES);
+    let file = fs::File::open(&path).map_err(|e| e.kind().to_string())?;
+    let mut buffer = Vec::new();
+    file.take(limit as u64).read_to_end(&mut buffer).map_err(|e| e.kind().to_string())?;
+    Ok(tauri::ipc::Response::new(buffer))
+}
+
+#[tauri::command]
+async fn get_file_metadata(scope: State<'_, FsScope>, path: String) -> Result<NativeFileMetadata, String> {
+    let path = ensure_loaded(&scope, &path)?;
+    let metadata = fs::metadata(&path).map_err(|e| e.kind().to_string())?;
+    let to_ms = |t: std::io::Result<std::time::SystemTime>| {
+        t.ok()
+            .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+            .map(|d| d.as_millis() as u64)
+    };
+    Ok(NativeFileMetadata {
+        size: metadata.len(),
+        created_at_ms: to_ms(metadata.created()),
+        modified_at_ms: to_ms(metadata.modified()),
+        is_file: metadata.is_file(),
+        is_dir: metadata.is_dir(),
+    })
+}
+
+// ---------------------------------------------------------------------------
+// Network (plugins + marketplace)
+// ---------------------------------------------------------------------------
+
+#[tauri::command]
+async fn plugin_http_request(request: net::HttpProxyRequest) -> Result<net::HttpProxyResponse, String> {
+    net::proxy_request(request).await
+}
+
+#[tauri::command]
+async fn fetch_remote_text(url: String) -> Result<String, String> {
+    let bytes = net::fetch_bytes(&url).await?;
+    Ok(String::from_utf8_lossy(&bytes).to_string())
+}
+
+#[tauri::command]
+async fn fetch_remote_bytes(url: String) -> Result<tauri::ipc::Response, String> {
+    Ok(tauri::ipc::Response::new(net::fetch_bytes(&url).await?))
+}
+
+// ---------------------------------------------------------------------------
+// Window helpers
+// ---------------------------------------------------------------------------
+
+#[tauri::command]
+fn set_zoom_factor(window: WebviewWindow, factor: f64) -> Result<(), String> {
+    window.set_zoom(factor).map_err(|error| error.to_string())
+}
+
+#[tauri::command]
+fn exit_app(app_handle: tauri::AppHandle) {
+    app_handle.exit(0);
+}
+
+/// DevTools are only available in debug builds.
+#[tauri::command]
+fn open_devtools(_window: WebviewWindow) {
+    #[cfg(debug_assertions)]
+    _window.open_devtools();
+}
+
+// ---------------------------------------------------------------------------
+// AI
+// ---------------------------------------------------------------------------
+
+#[tauri::command]
+async fn check_ai_cli_status(provider: Option<String>) -> ai_cli::AiCliStatus {
+    tauri::async_runtime::spawn_blocking(move || ai_cli::check_status(provider.as_deref()))
+        .await
+        .unwrap_or_else(|e| ai_cli::AiCliStatus {
+            installed: false,
+            path: None,
+            version: None,
+            ready: false,
+            message: Some(e.to_string()),
+            provider: None,
+        })
+}
+
+#[tauri::command]
+async fn run_ai_chat(request: ai_cli::AiChatRequest) -> Result<ai_cli::AiChatResponse, String> {
+    ai_cli::run_chat(request).await
+}
+
+#[tauri::command]
+async fn test_ai_api_connection(
+    secrets: State<'_, SecretStore>,
+    profile: ai_api::AiApiProfile,
+) -> Result<ai_api::AiApiTestResult, String> {
+    let saved = secrets.get(&profile.id);
+    Ok(ai_api::test_connection(&profile, saved).await)
+}
+
+#[tauri::command]
+async fn list_ai_models(secrets: State<'_, SecretStore>, profile: ai_api::AiApiProfile) -> Result<Vec<String>, String> {
+    let saved = secrets.get(&profile.id);
+    ai_api::list_models(&profile, saved).await
+}
+
+#[tauri::command]
+async fn run_ai_api_chat(
+    secrets: State<'_, SecretStore>,
+    request: ai_cli::AiChatRequest,
+    profile: ai_api::AiApiProfile,
+) -> Result<ai_cli::AiChatResponse, String> {
+    let saved = secrets.get(&profile.id);
+    ai_api::run_api_chat(request, profile, saved).await
+}
+
+#[tauri::command]
+fn cancel_ai_chat(task_id: String) -> bool {
+    ai_task::cancel_task(&task_id)
+}
+
+#[tauri::command]
+fn set_ai_secret(secrets: State<'_, SecretStore>, profile_id: String, api_key: String) -> Result<(), String> {
+    secrets.set(&profile_id, &api_key)
+}
+
+#[tauri::command]
+fn delete_ai_secret(secrets: State<'_, SecretStore>, profile_id: String) -> Result<(), String> {
+    secrets.delete(&profile_id)
+}
+
+/// Which profiles have a saved key. Keys themselves never leave Rust.
+#[tauri::command]
+fn list_ai_secret_ids(secrets: State<'_, SecretStore>) -> Vec<String> {
+    secrets.profile_ids()
+}
+
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
+pub fn run() {
+    tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_os::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .manage(FsScope::default())
+        .setup(|app| {
+            let config_dir = app
+                .path()
+                .app_config_dir()
+                .unwrap_or_else(|_| std::env::temp_dir().join("regex-batch-renamer"));
+            app.manage(SecretStore::new(config_dir));
+            Ok(())
+        })
+        .on_window_event(|window, event| {
+            // Register dropped paths before the frontend sees them, then hand
+            // them over through our own event.
+            if let tauri::WindowEvent::DragDrop(tauri::DragDropEvent::Drop { paths, .. }) = event {
+                window.state::<FsScope>().allow_items(paths);
+                let _ = window.emit("app://files-dropped", paths_to_strings(paths));
+            }
+        })
+        .invoke_handler(tauri::generate_handler![
+            runtime_info,
+            select_files,
+            select_directory,
+            save_text_file,
+            rename_files,
+            copy_rename_files,
+            read_file_binary,
+            get_file_metadata,
+            plugin_http_request,
+            fetch_remote_text,
+            fetch_remote_bytes,
+            set_zoom_factor,
+            exit_app,
+            open_devtools,
+            install_app_update,
+            check_ai_cli_status,
+            run_ai_chat,
+            test_ai_api_connection,
+            list_ai_models,
+            run_ai_api_chat,
+            cancel_ai_chat,
+            set_ai_secret,
+            delete_ai_secret,
+            list_ai_secret_ids
+        ])
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
+}
+
 #[cfg(test)]
 mod tests {
     use super::is_supported_windows_update_asset;
@@ -118,207 +473,4 @@ mod tests {
             "https://example.com/Regex.Batch.Renamer_x64.app.tar.gz"
         ));
     }
-}
-
-#[tauri::command]
-fn runtime_info() -> RuntimeInfo {
-    let app_bundle_path = current_app_bundle_path();
-
-    RuntimeInfo {
-        platform: platform_name(),
-        runtime: "tauri".to_string(),
-        channel: release_channel(),
-        version: runtime_version(),
-        app_bundle_path: app_bundle_path
-            .as_ref()
-            .map(|path| path.display().to_string()),
-        app_bundle_parent_writable: app_bundle_path
-            .as_ref()
-            .and_then(app_bundle_parent_writable),
-    }
-}
-
-#[tauri::command]
-async fn rename_files(
-    files: Vec<FileOperationRequest>,
-    fail_on_exist: bool,
-) -> Vec<FileOperationResult> {
-    files
-        .into_iter()
-        .map(|file| {
-            if file.old_path == file.new_path {
-                return FileOperationResult {
-                    path: file.old_path,
-                    success: true,
-                    error: None,
-                };
-            }
-
-            if fail_on_exist && fs::metadata(&file.new_path).is_ok() {
-                return FileOperationResult {
-                    path: file.old_path,
-                    success: false,
-                    error: Some("FILE_EXISTS".to_string()),
-                };
-            }
-
-            match fs::rename(&file.old_path, &file.new_path) {
-                Ok(_) => FileOperationResult {
-                    path: file.old_path,
-                    success: true,
-                    error: None,
-                },
-                Err(error) => FileOperationResult {
-                    path: file.old_path,
-                    success: false,
-                    error: Some(error.kind().to_string()),
-                },
-            }
-        })
-        .collect()
-}
-
-#[tauri::command]
-async fn copy_rename_files(files: Vec<FileOperationRequest>) -> Vec<FileOperationResult> {
-    files
-        .into_iter()
-        .map(|file| match fs::copy(&file.old_path, &file.new_path) {
-            Ok(_) => FileOperationResult {
-                path: file.old_path,
-                success: true,
-                error: None,
-            },
-            Err(error) => FileOperationResult {
-                path: file.old_path,
-                success: false,
-                error: Some(error.kind().to_string()),
-            },
-        })
-        .collect()
-}
-
-#[tauri::command]
-fn set_zoom_factor(window: WebviewWindow, factor: f64) -> Result<(), String> {
-    window.set_zoom(factor).map_err(|error| error.to_string())
-}
-
-#[tauri::command]
-fn exit_app(app_handle: tauri::AppHandle) {
-    app_handle.exit(0);
-}
-
-#[tauri::command]
-fn open_devtools(window: WebviewWindow) {
-    window.open_devtools();
-}
-
-#[tauri::command]
-fn check_ai_cli_status(provider: Option<String>) -> ai_cli::AiCliStatus {
-    ai_cli::check_status(provider.as_deref())
-}
-
-#[tauri::command]
-async fn run_ai_chat(request: ai_cli::AiChatRequest) -> Result<ai_cli::AiChatResponse, String> {
-    ai_cli::run_chat(request).await
-}
-
-#[tauri::command]
-async fn test_ai_api_connection(profile: ai_api::AiApiProfile) -> Result<ai_api::AiApiTestResult, String> {
-    ai_api::test_gemini_api_connection(&profile).await
-}
-
-#[tauri::command]
-async fn run_ai_api_chat(
-    request: ai_cli::AiChatRequest,
-    profile: ai_api::AiApiProfile,
-) -> Result<ai_cli::AiChatResponse, String> {
-    ai_api::run_api_chat(request, profile).await
-}
-
-#[tauri::command]
-fn cancel_ai_chat(task_id: String) -> bool {
-    ai_task::cancel_task(&task_id)
-}
-
-#[tauri::command]
-fn save_text_file(path: String, content: String) -> Result<(), String> {
-    fs::write(&path, content).map_err(|error| format!("無法儲存檔案: {error}"))
-}
-
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-struct NativeFileMetadata {
-    size: u64,
-    created_at_ms: Option<u64>,
-    modified_at_ms: Option<u64>,
-    is_file: bool,
-    is_dir: bool,
-}
-
-#[tauri::command]
-async fn read_file_binary(path: String, max_bytes: Option<usize>) -> Result<Vec<u8>, String> {
-    use std::io::Read;
-    let file = fs::File::open(&path).map_err(|e| format!("無法開啟檔案: {e}"))?;
-    let mut buffer = Vec::new();
-    if let Some(max) = max_bytes {
-        file.take(max as u64)
-            .read_to_end(&mut buffer)
-            .map_err(|e| format!("讀取檔案失敗: {e}"))?;
-    } else {
-        let mut handle = file;
-        handle
-            .read_to_end(&mut buffer)
-            .map_err(|e| format!("讀取檔案失敗: {e}"))?;
-    }
-    Ok(buffer)
-}
-
-#[tauri::command]
-async fn get_file_metadata(path: String) -> Result<NativeFileMetadata, String> {
-    let metadata = fs::metadata(&path).map_err(|e| format!("取得檔案屬性失敗: {e}"))?;
-    let created_at_ms = metadata
-        .created()
-        .ok()
-        .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
-        .map(|d| d.as_millis() as u64);
-    let modified_at_ms = metadata
-        .modified()
-        .ok()
-        .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
-        .map(|d| d.as_millis() as u64);
-    Ok(NativeFileMetadata {
-        size: metadata.len(),
-        created_at_ms,
-        modified_at_ms,
-        is_file: metadata.is_file(),
-        is_dir: metadata.is_dir(),
-    })
-}
-
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
-pub fn run() {
-    tauri::Builder::default()
-        .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_os::init())
-        .plugin(tauri_plugin_updater::Builder::new().build())
-        .invoke_handler(tauri::generate_handler![
-            runtime_info,
-            rename_files,
-            copy_rename_files,
-            save_text_file,
-            read_file_binary,
-            get_file_metadata,
-            set_zoom_factor,
-            exit_app,
-            open_devtools,
-            install_app_update,
-            check_ai_cli_status,
-            run_ai_chat,
-            test_ai_api_connection,
-            run_ai_api_chat,
-            cancel_ai_chat
-        ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
 }

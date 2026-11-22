@@ -2,6 +2,27 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import JSZip from 'jszip'
 import { BUILTIN_PLUGINS } from '../services/builtinPlugins'
+import { desktop } from '../services/desktop'
+import { resetPluginSandbox } from '../services/pluginRunner'
+import i18n from '../i18n'
+
+const t = (key: string, params?: Record<string, unknown>) => i18n.global.t(key, params ?? {}) as string
+
+interface ParsedPluginPackage {
+  manifest: PluginManifest
+  code: string
+  readme?: string
+}
+
+function compareVersions(a: string, b: string): number {
+  const pa = a.replace(/^v/, '').split(/[.-]/).map(n => parseInt(n, 10) || 0)
+  const pb = b.replace(/^v/, '').split(/[.-]/).map(n => parseInt(n, 10) || 0)
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const diff = (pa[i] || 0) - (pb[i] || 0)
+    if (diff !== 0) return diff
+  }
+  return 0
+}
 
 export type PluginOptionType = 'select' | 'boolean' | 'string' | 'number'
 
@@ -64,6 +85,8 @@ export interface MarketplacePlugin {
   readmeUrl?: string
   homepage?: string
   permissions?: string[]
+  /** Optional hex SHA-256 of the package; verified before install when present. */
+  sha256?: string
   stars?: number
   options?: PluginOption[]
 }
@@ -163,7 +186,7 @@ export const usePluginStore = defineStore('plugin', () => {
 
   function installPluginFromManifestAndCode(manifest: PluginManifest, code: string, readme?: string) {
     if (!manifest.id || !manifest.name) {
-      throw new Error('Invalid manifest: id and name are required')
+      throw new Error(t('plugins.errInvalidManifest'))
     }
 
     installedPlugins.value[manifest.id] = {
@@ -174,36 +197,38 @@ export const usePluginStore = defineStore('plugin', () => {
       isBuiltin: false,
       installedAt: Date.now()
     }
+    resetPluginSandbox(manifest.id)
     savePlugins()
   }
 
-  async function installPluginFromZip(file: File | ArrayBuffer): Promise<PluginManifest> {
+  async function parsePluginZip(file: File | ArrayBuffer | Uint8Array): Promise<ParsedPluginPackage> {
     const zip = new JSZip()
     const content = await zip.loadAsync(file)
 
     const manifestFile = content.file('manifest.json') || content.file(/.*manifest\.json$/i)[0]
     if (!manifestFile) {
-      throw new Error('未在插件壓縮包中找到 manifest.json 描述檔')
+      throw new Error(t('plugins.errNoManifest'))
     }
 
-    const manifestText = await manifestFile.async('text')
     let manifest: PluginManifest
     try {
-      manifest = JSON.parse(manifestText)
-    } catch (e) {
-      throw new Error('manifest.json 格式錯誤，非有效 JSON')
+      manifest = JSON.parse(await manifestFile.async('text'))
+    } catch {
+      throw new Error(t('plugins.errManifestJson'))
+    }
+    if (!manifest?.id || !manifest?.name || !/^[a-z0-9][a-z0-9._-]{0,63}$/i.test(manifest.id)) {
+      throw new Error(t('plugins.errInvalidManifest'))
     }
 
     const entryFilename = manifest.entry || 'index.js'
     const codeFile = content.file(entryFilename) || content.file(/.*index\.js$/i)[0]
     if (!codeFile) {
-      throw new Error(`未找到插件入口執行腳本 (${entryFilename})`)
+      throw new Error(t('plugins.errNoEntry', { entry: entryFilename }))
     }
-
     const code = await codeFile.async('text')
 
     const readmeFile = content.file('README.md') || content.file(/.*README\.md$/i)[0]
-    let readme: string | undefined = undefined
+    let readme: string | undefined
     if (readmeFile) {
       try {
         readme = await readmeFile.async('text')
@@ -211,14 +236,54 @@ export const usePluginStore = defineStore('plugin', () => {
         console.warn('Failed to parse README.md from plugin package:', e)
       }
     }
+    return { manifest, code, readme }
+  }
 
-    installPluginFromManifestAndCode(manifest, code, readme)
-    return manifest
+  /**
+   * Ask the user before installing: shows the permissions the plugin wants and
+   * warns when it replaces an installed plugin with the same id.
+   */
+  async function confirmInstall(manifest: PluginManifest): Promise<boolean> {
+    const permissions = manifest.permissions || []
+    const lines = [t('plugins.confirmInstallIntro', { name: manifest.name, version: manifest.version || '?' })]
+    if (manifest.author) lines.push(t('plugins.confirmInstallAuthor', { author: manifest.author }))
+    lines.push('')
+    if (permissions.length === 0) {
+      lines.push(t('plugins.confirmNoPermissions'))
+    } else {
+      lines.push(t('plugins.confirmPermissionsTitle'))
+      for (const perm of permissions) {
+        const key = perm === 'network' ? 'plugins.permNetworkDesc' : perm === 'filesystem' ? 'plugins.permFilesystemDesc' : ''
+        lines.push(`• ${key ? t(key) : perm}`)
+      }
+    }
+    const existing = installedPlugins.value[manifest.id]
+    if (existing) {
+      lines.push('')
+      lines.push(t('plugins.confirmReplace', { version: existing.manifest.version || '?' }))
+    }
+    lines.push('')
+    lines.push(t('plugins.confirmTrust'))
+    return desktop.confirmDialog(lines.join('\n'), {
+      title: t('plugins.confirmInstallTitle'),
+      okLabel: t('plugins.install'),
+      cancelLabel: t('common.cancel'),
+      kind: permissions.length > 0 ? 'warning' : 'info',
+    })
+  }
+
+  /** Install from a package. Returns null when the user cancels. */
+  async function installPluginFromZip(file: File | ArrayBuffer | Uint8Array): Promise<PluginManifest | null> {
+    const parsed = await parsePluginZip(file)
+    if (!(await confirmInstall(parsed.manifest))) return null
+    installPluginFromManifestAndCode(parsed.manifest, parsed.code, parsed.readme)
+    return parsed.manifest
   }
 
   function uninstallPlugin(id: string) {
     if (installedPlugins.value[id]) {
       delete installedPlugins.value[id]
+      resetPluginSandbox(id)
       savePlugins()
     }
   }
@@ -230,31 +295,46 @@ export const usePluginStore = defineStore('plugin', () => {
     const zip = new JSZip()
     zip.file('manifest.json', JSON.stringify(plugin.manifest, null, 2))
     zip.file(plugin.manifest.entry || 'index.js', plugin.code)
+    if (plugin.readme) zip.file('README.md', plugin.readme)
 
     return await zip.generateAsync({ type: 'blob' })
   }
 
-  async function installPluginFromUrl(url: string): Promise<PluginManifest> {
-    const response = await fetch(url)
-    if (!response.ok) {
-      throw new Error(`下載插件失敗 (HTTP ${response.status})`)
-    }
-    const arrayBuffer = await response.arrayBuffer()
-    return await installPluginFromZip(arrayBuffer)
+  async function sha256Hex(bytes: Uint8Array): Promise<string> {
+    const digest = await crypto.subtle.digest('SHA-256', bytes as BufferSource)
+    return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('')
   }
 
-  // Placeholder store API to fetch remote marketplace index
+  async function installPluginFromUrl(url: string, expectedSha256?: string): Promise<PluginManifest | null> {
+    const bytes = await desktop.fetchRemoteBytes(url)
+    if (expectedSha256) {
+      const actual = await sha256Hex(bytes)
+      if (actual.toLowerCase() !== expectedSha256.trim().toLowerCase()) {
+        throw new Error(t('plugins.errChecksum'))
+      }
+    }
+    return await installPluginFromZip(bytes)
+  }
+
+  async function fetchRemoteText(url: string): Promise<string> {
+    return desktop.fetchRemoteText(url)
+  }
+
+  /** True when the marketplace lists a newer version than the installed one. */
+  function hasUpdate(id: string): boolean {
+    const installed = installedPlugins.value[id]
+    const remote = marketplacePlugins.value.find(p => p.id === id)
+    if (!installed || !remote?.version) return false
+    return compareVersions(remote.version, installed.manifest.version || '0') > 0
+  }
+
   async function fetchMarketplacePlugins(customRepoUrl?: string) {
     const url = customRepoUrl || marketplaceRepoUrl.value
     isFetchingMarketplace.value = true
     marketplaceError.value = null
 
     try {
-      const response = await fetch(url, { cache: 'no-cache' })
-      if (!response.ok) {
-        throw new Error(`HTTP Error: ${response.status}`)
-      }
-      const data = await response.json()
+      const data = JSON.parse(await desktop.fetchRemoteText(url))
       if (Array.isArray(data)) {
         marketplacePlugins.value = data
       } else if (data && Array.isArray(data.plugins)) {
@@ -263,9 +343,8 @@ export const usePluginStore = defineStore('plugin', () => {
         marketplacePlugins.value = []
       }
     } catch (err: any) {
-      console.warn('Marketplace store repo not available yet:', err)
-      marketplaceError.value = err.message || '無法連線至插件市集倉庫'
-      // Keep empty or mock placeholder list for preview
+      console.warn('Marketplace index unavailable:', err)
+      marketplaceError.value = t('plugins.errMarketplace', { detail: err?.message || String(err) })
       marketplacePlugins.value = []
     } finally {
       isFetchingMarketplace.value = false
@@ -295,6 +374,8 @@ export const usePluginStore = defineStore('plugin', () => {
     installPluginFromManifestAndCode,
     installPluginFromZip,
     installPluginFromUrl,
+    fetchRemoteText,
+    hasUpdate,
     uninstallPlugin,
     exportPluginAsZip,
     fetchMarketplacePlugins

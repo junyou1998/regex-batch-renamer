@@ -83,11 +83,24 @@ async function openFileDialog() {
   }
 }
 
+async function clearList() {
+  const hasPending = fileStore.files.some(f => f.newName !== f.originalName)
+  if (hasPending) {
+    const ok = await desktop.confirmDialog(t('preview.clearConfirm', { n: fileStore.files.length }), {
+      title: t('preview.clear'),
+      okLabel: t('preview.clear'),
+      cancelLabel: t('common.cancel'),
+    })
+    if (!ok) return
+  }
+  fileStore.clearFiles()
+}
+
 async function openDirectoryDialog() {
   try {
-    const dir = await desktop.selectDirectory?.()
-    if (dir) {
-      addFiles([dir])
+    const paths = await desktop.selectFolderContents()
+    if (paths.length > 0) {
+      addFiles(paths)
     }
   } catch (error) {
     console.error('Failed to select directory:', error)
@@ -364,27 +377,27 @@ onBeforeUnmount(() => {
 
     <!-- Top Action Bar -->
     <div
-      class="bg-slate-200/60 dark:bg-slate-900/60 px-4 py-2.5 border-b border-slate-300 dark:border-slate-700 flex justify-between items-center backdrop-blur-sm shrink-0">
-      <div class="flex items-center gap-2">
-        <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200">
+      class="@container bg-slate-200/60 dark:bg-slate-900/60 px-4 py-2.5 border-b border-slate-300 dark:border-slate-700 flex justify-between items-center gap-2 backdrop-blur-sm shrink-0">
+      <div class="flex items-center gap-2 min-w-0">
+        <h3 class="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">
           {{ $t('preview.title', { n: fileStore.files.length }) }}
         </h3>
       </div>
-      <div v-if="fileStore.files.length > 0" class="flex items-center gap-2">
-        <button @click="openFileDialog"
-          class="inline-flex items-center gap-1.5 text-xs font-medium bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 px-2.5 py-1 rounded-md border border-slate-300 dark:border-slate-600 shadow-2xs transition-colors cursor-pointer">
+      <div v-if="fileStore.files.length > 0" class="flex items-center gap-2 shrink-0">
+        <button @click="openFileDialog" :title="$t('preview.addFiles')" :aria-label="$t('preview.addFiles')"
+          class="whitespace-nowrap inline-flex items-center gap-1.5 text-xs font-medium bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 px-2.5 py-1 rounded-md border border-slate-300 dark:border-slate-600 shadow-2xs transition-colors cursor-pointer">
           <FilePlus class="w-3.5 h-3.5 text-blue-500" />
-          <span>{{ $t('preview.addFiles') }}</span>
+          <span class="hidden @xl:inline">{{ $t('preview.addFiles') }}</span>
         </button>
-        <button @click="openDirectoryDialog"
-          class="inline-flex items-center gap-1.5 text-xs font-medium bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 px-2.5 py-1 rounded-md border border-slate-300 dark:border-slate-600 shadow-2xs transition-colors cursor-pointer">
+        <button @click="openDirectoryDialog" :title="$t('preview.addFolder')" :aria-label="$t('preview.addFolder')"
+          class="whitespace-nowrap inline-flex items-center gap-1.5 text-xs font-medium bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 px-2.5 py-1 rounded-md border border-slate-300 dark:border-slate-600 shadow-2xs transition-colors cursor-pointer">
           <FolderPlus class="w-3.5 h-3.5 text-blue-500" />
-          <span>{{ $t('preview.addFolder') }}</span>
+          <span class="hidden @xl:inline">{{ $t('preview.addFolder') }}</span>
         </button>
-        <button @click="fileStore.clearFiles"
-          class="inline-flex items-center gap-1 text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 px-2.5 py-1 rounded-md hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors cursor-pointer">
+        <button @click="clearList" :title="$t('preview.clear')" :aria-label="$t('preview.clear')"
+          class="whitespace-nowrap inline-flex items-center gap-1 text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 px-2.5 py-1 rounded-md hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors cursor-pointer">
           <Trash2 class="w-3.5 h-3.5" />
-          <span>{{ $t('preview.clear') }}</span>
+          <span class="hidden @xl:inline">{{ $t('preview.clear') }}</span>
         </button>
       </div>
     </div>
@@ -448,11 +461,11 @@ onBeforeUnmount(() => {
 
           <!-- Status Column -->
           <div class="px-4 py-2 text-center">
-            <Check v-if="file.status === 'success'" class="inline-block w-4 h-4 text-green-500" title="成功" />
+            <Check v-if="file.status === 'success'" class="inline-block w-4 h-4 text-green-500" :title="$t('preview.statusSuccess')" :aria-label="$t('preview.statusSuccess')" />
             <CircleX v-else-if="file.status === 'error'" class="inline-block w-4 h-4 text-red-500"
               :title="file.errorMessage" />
             <span v-else-if="file.originalName !== file.newName"
-              class="inline-flex items-center justify-center w-5 h-5 text-amber-500" title="待處理">
+              class="inline-flex items-center justify-center w-5 h-5 text-amber-500" :title="$t('preview.statusPending')" :aria-label="$t('preview.statusPending')">
               <Clock class="w-4 h-4" />
             </span>
           </div>

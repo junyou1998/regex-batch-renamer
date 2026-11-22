@@ -516,7 +516,7 @@ function close() {
                       <Layers class="w-3.5 h-3.5 text-blue-500" />
                       {{ $t('history.rulesUsed') }} ({{ selectedBatch.rulesSnapshot.length }})
                     </span>
-                    <span class="text-slate-400 text-[11px]">{{ showRulesSnapshot ? '▲ 收合' : '▼ 展開' }}</span>
+                    <span class="text-slate-400 text-[11px]">{{ showRulesSnapshot ? '▲ ' + $t('history.collapse') : '▼ ' + $t('history.expand') }}</span>
                   </button>
 
                   <div v-if="showRulesSnapshot" class="mt-2 space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
@@ -700,7 +700,7 @@ function close() {
 
                         <tr v-if="filteredFiles.length === 0">
                           <td colspan="3" class="py-12 text-center text-slate-400 font-sans">
-                            沒有符合條件的檔案紀錄
+                            {{ $t('history.noMatchingFiles') }}
                           </td>
                         </tr>
                       </tbody>

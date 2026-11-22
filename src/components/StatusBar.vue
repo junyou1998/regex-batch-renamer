@@ -168,7 +168,7 @@ function toggleProcessFilenameOnly() {
         :class="{ 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40': pluginStore.isAnyPluginBusy }"
       >
         <Puzzle class="w-2.5 h-2.5 opacity-70" :class="{ 'animate-spin text-blue-500': pluginStore.isAnyPluginBusy }" />
-        <span v-if="pluginStore.isAnyPluginBusy" class="text-blue-600 dark:text-blue-400 font-medium">運算中...</span>
+        <span v-if="pluginStore.isAnyPluginBusy" class="text-blue-600 dark:text-blue-400 font-medium">{{ $t('plugins.running') }}</span>
         <span v-else>{{ $t('statusBar.plugins', { n: pluginStore.enabledTransformerPlugins.length }) }}</span>
       </button>
 

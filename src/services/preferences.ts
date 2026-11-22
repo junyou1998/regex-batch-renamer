@@ -7,6 +7,8 @@ export interface Settings {
   language: Locale
   themeMode: ThemeMode
   zoomLevel: number
+  /** Turn every rule off after a successful rename (the "layer" workflow). */
+  disableRulesAfterRename: boolean
 }
 
 const STORAGE_KEY = 'regex-batch-renamer-settings'
@@ -19,6 +21,7 @@ export const defaultSettings: Settings = {
   language: 'zh-TW',
   themeMode: 'auto',
   zoomLevel: 100,
+  disableRulesAfterRename: true,
 }
 
 function isLocale(value: string): value is Locale {

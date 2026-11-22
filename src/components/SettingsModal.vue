@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { useSettingsStore } from '../stores/settingsStore'
-import { useAiStore } from '../stores/aiStore'
+import { useAiStore, DEFAULT_API_MODELS } from '../stores/aiStore'
+import { describeAiError } from '../utils/aiErrors'
 import { useI18n } from 'vue-i18n'
 import type { Locale } from '../services/preferences'
 import {
@@ -22,34 +23,36 @@ import {
 import ProviderIcon from './icons/ProviderIcon.vue'
 import type { AiProfile, AiApiTestResult } from '../services/desktop/types'
 
+// Suggestions only; the live list from "Load models" (the provider's /models
+// endpoint) is authoritative, so new models show up without an app update.
 const providerOptions = [
   {
     id: 'anthropic',
     name: 'Anthropic',
     defaultEndpoint: 'https://api.anthropic.com/v1',
-    defaultModel: 'claude-4-6-sonnet',
-    models: ['claude-4-6-sonnet', 'claude-sonnet-5', 'claude-opus-5', 'claude-3-7-sonnet-latest'],
+    defaultModel: DEFAULT_API_MODELS.anthropic,
+    models: ['claude-opus-5-5', 'claude-sonnet-5-5', 'claude-haiku-5-5'],
   },
   {
     id: 'openai',
     name: 'OpenAI',
     defaultEndpoint: 'https://api.openai.com/v1',
-    defaultModel: 'gpt-4o-mini',
-    models: ['gpt-4o', 'gpt-4o-mini', 'o3-mini', 'gpt-4.5-preview'],
+    defaultModel: DEFAULT_API_MODELS.openai,
+    models: ['gpt-5.5'],
   },
   {
     id: 'gemini',
     name: 'Gemini',
     defaultEndpoint: 'https://generativelanguage.googleapis.com',
-    defaultModel: 'gemini-3.6-flash',
-    models: ['gemini-3.6-flash', 'gemini-3.6-pro', 'gemini-2.5-flash', 'gemini-1.5-flash'],
+    defaultModel: DEFAULT_API_MODELS.gemini,
+    models: ['gemini-3.8-flash', 'gemini-3.5-flash-lite'],
   },
   {
     id: 'ollama',
     name: 'Ollama',
     defaultEndpoint: 'http://localhost:11434/v1',
-    defaultModel: 'llama3.3',
-    models: ['llama3.1:8b', 'llama3.3', 'qwen2.5:7b', 'deepseek-r1:8b', 'mistral'],
+    defaultModel: DEFAULT_API_MODELS.ollama,
+    models: ['llama3.3', 'qwen2.5:7b', 'mistral'],
   },
 ] as const
 
@@ -62,19 +65,52 @@ const editingProfile = ref<AiProfile>({
   type: 'api',
   apiKey: '',
   endpoint: 'https://generativelanguage.googleapis.com',
-  model: 'gemini-3.6-flash',
-  temperature: 0.2,
+  model: DEFAULT_API_MODELS.gemini,
   isBuiltin: false,
 })
+const liveModels = ref<string[]>([])
+const isLoadingModels = ref(false)
+const isSaving = ref(false)
 const showProviderDropdown = ref(false)
 const showApiKey = ref(false)
 const isTestingApi = ref(false)
 const apiTestResult = ref<AiApiTestResult | null>(null)
 
-const currentProviderModels = computed(() => {
+const currentProviderModels = computed<readonly string[]>(() => {
+  if (liveModels.value.length > 0) return liveModels.value.slice(0, 30)
   const found = providerOptions.find((p) => p.id === editingProfile.value.provider)
   return found ? found.models : []
 })
+
+const apiTestMessage = computed(() => {
+  const res = apiTestResult.value
+  if (!res) return ''
+  return describeAiError(res.message)
+})
+
+const canTestConnection = computed(() => {
+  const prof = editingProfile.value
+  return prof.provider === 'ollama' || Boolean(prof.apiKey?.trim()) || Boolean(prof.hasSavedKey)
+})
+
+async function loadLiveModels() {
+  isLoadingModels.value = true
+  try {
+    liveModels.value = await aiStore.listModels(editingProfile.value)
+    if (liveModels.value.length === 0) {
+      apiTestResult.value = { success: false, message: 'AI_TEST_NO_MODELS' }
+    }
+  } catch (e: any) {
+    apiTestResult.value = { success: false, message: e?.message || String(e) }
+  } finally {
+    isLoadingModels.value = false
+  }
+}
+
+async function handleClearSavedKey() {
+  await aiStore.clearSavedKey(editingProfile.value.id)
+  editingProfile.value.hasSavedKey = false
+}
 
 function getProviderDisplayName(prof: AiProfile): string {
   if (prof.provider === 'claude_cli') return 'Claude Code CLI'
@@ -93,10 +129,10 @@ function startCreateProfile() {
     type: 'api',
     apiKey: '',
     endpoint: 'https://generativelanguage.googleapis.com',
-    model: 'gemini-3.6-flash',
-    temperature: 0.2,
+    model: DEFAULT_API_MODELS.gemini,
     isBuiltin: false,
   }
+  liveModels.value = []
   showApiKey.value = false
   showProviderDropdown.value = false
   apiTestResult.value = null
@@ -105,7 +141,8 @@ function startCreateProfile() {
 
 function startEditProfile(prof: AiProfile) {
   isCreatingNew.value = false
-  editingProfile.value = JSON.parse(JSON.stringify(prof))
+  editingProfile.value = { ...JSON.parse(JSON.stringify(prof)), apiKey: '' }
+  liveModels.value = []
   showApiKey.value = false
   showProviderDropdown.value = false
   apiTestResult.value = null
@@ -121,6 +158,7 @@ function selectProvider(provId: string) {
     }
     editingProfile.value.endpoint = opt.defaultEndpoint
     editingProfile.value.model = opt.defaultModel
+    liveModels.value = []
   }
   showProviderDropdown.value = false
 }
@@ -129,12 +167,19 @@ function selectModel(modelName: string) {
   editingProfile.value.model = modelName
 }
 
-function saveCurrentProfile() {
+async function saveCurrentProfile() {
   if (!editingProfile.value.name.trim()) {
     editingProfile.value.name = editingProfile.value.provider
   }
-  aiStore.saveProfile(editingProfile.value)
-  aiViewMode.value = 'list'
+  isSaving.value = true
+  try {
+    await aiStore.saveProfile(editingProfile.value)
+    aiViewMode.value = 'list'
+  } catch (e: any) {
+    apiTestResult.value = { success: false, message: e?.message || String(e) }
+  } finally {
+    isSaving.value = false
+  }
 }
 
 async function handleTestConnection() {
@@ -143,6 +188,7 @@ async function handleTestConnection() {
   try {
     const res = await aiStore.testProfileConnection(editingProfile.value)
     apiTestResult.value = res
+    if (res.models?.length) liveModels.value = res.models
   } finally {
     isTestingApi.value = false
   }
@@ -446,6 +492,34 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                     {{ $t('settings.processFilenameOnlyDesc') }}
                   </p>
                 </label>
+
+                <label class="block cursor-pointer group/item select-none space-y-1">
+                  <div class="flex items-center gap-2.5">
+                    <div class="relative flex items-center justify-center shrink-0">
+                      <input
+                        type="checkbox"
+                        v-model="settingsStore.disableRulesAfterRename"
+                        class="sr-only peer"
+                      />
+                      <div
+                        class="w-4 h-4 rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-500/40 transition-all flex items-center justify-center shadow-2xs group-hover/item:border-slate-400 dark:group-hover/item:border-slate-500"
+                      >
+                        <Check
+                          v-if="settingsStore.disableRulesAfterRename"
+                          class="w-3 h-3 text-white stroke-[3.5]"
+                        />
+                      </div>
+                    </div>
+                    <span
+                      class="text-sm font-medium text-slate-700 dark:text-slate-200 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400 transition-colors leading-none pt-px"
+                    >
+                      {{ $t('settings.disableRulesAfterRename') }}
+                    </span>
+                  </div>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 pl-[26px]">
+                    {{ $t('settings.disableRulesAfterRenameDesc') }}
+                  </p>
+                </label>
               </div>
 
               <hr class="border-slate-200 dark:border-slate-700" />
@@ -653,7 +727,8 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                       <div class="relative flex items-center justify-center shrink-0">
                         <input
                           type="checkbox"
-                          v-model="aiStore.autoApply"
+                          :checked="aiStore.autoApply"
+                          @change="aiStore.setAutoApply(($event.target as HTMLInputElement).checked)"
                           class="sr-only peer"
                         />
                         <div
@@ -764,18 +839,29 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                       <input
                         :type="showApiKey ? 'text' : 'password'"
                         v-model="editingProfile.apiKey"
-                        :placeholder="editingProfile.provider === 'ollama' ? $t('settings.apiKeyOptionalPlaceholder') : $t('settings.apiKeyPlaceholder')"
+                        autocomplete="off"
+                        :placeholder="editingProfile.hasSavedKey ? $t('settings.apiKeySavedPlaceholder') : editingProfile.provider === 'ollama' ? $t('settings.apiKeyOptionalPlaceholder') : $t('settings.apiKeyPlaceholder')"
                         class="w-full pl-3 pr-9 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-hidden font-mono"
                       />
                       <button
                         type="button"
                         @click="showApiKey = !showApiKey"
                         class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                        :title="showApiKey ? '隱藏 API Key' : '顯示 API Key'"
+                        :title="showApiKey ? $t('settings.hideApiKey') : $t('settings.showApiKey')"
+                        :aria-label="showApiKey ? $t('settings.hideApiKey') : $t('settings.showApiKey')"
                       >
                         <EyeOff v-if="showApiKey" class="w-4 h-4" />
                         <Eye v-else class="w-4 h-4" />
                       </button>
+                      <p class="mt-1 text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                        <span>{{ editingProfile.hasSavedKey ? $t('settings.apiKeySavedHint') : $t('settings.apiKeyStorageHint') }}</span>
+                        <button
+                          v-if="editingProfile.hasSavedKey"
+                          type="button"
+                          @click="handleClearSavedKey"
+                          class="text-red-600 dark:text-red-400 hover:underline cursor-pointer"
+                        >{{ $t('settings.apiKeyClear') }}</button>
+                      </p>
                     </div>
                   </div>
 
@@ -792,18 +878,30 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                     </div>
                   </div>
 
-                  <!-- 5. 預設模型 (API Only) -->
-                  <div v-if="editingProfile.type === 'api'" class="grid grid-cols-1 sm:grid-cols-4 items-center gap-2">
+                  <!-- 5. Model (API: default model; CLI: optional override) -->
+                  <div class="grid grid-cols-1 sm:grid-cols-4 items-center gap-2">
                     <label class="font-medium text-slate-700 dark:text-slate-300">{{ $t('settings.defaultModel') }}</label>
                     <div class="sm:col-span-3 space-y-1.5">
                       <input
                         type="text"
                         v-model="editingProfile.model"
-                        :placeholder="$t('settings.modelIdPlaceholder')"
+                        :placeholder="editingProfile.type === 'cli' ? $t('settings.cliModelPlaceholder') : $t('settings.modelIdPlaceholder')"
                         class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-100 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-hidden font-mono"
                       />
-                      <div v-if="currentProviderModels.length > 0" class="flex items-center gap-1.5 flex-wrap pt-0.5">
+                      <p v-if="editingProfile.type === 'cli'" class="text-[10px] text-slate-500 dark:text-slate-400">
+                        {{ $t('settings.cliModelHint') }}
+                      </p>
+                      <div v-if="editingProfile.type === 'api'" class="flex items-center gap-1.5 flex-wrap pt-0.5">
                         <span class="text-[10px] text-slate-400">{{ $t('settings.quickSelectLabel') }}:</span>
+                        <button
+                          type="button"
+                          @click="loadLiveModels"
+                          :disabled="isLoadingModels || !canTestConnection"
+                          class="px-1.5 py-0.5 rounded text-[10px] text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-950/40 disabled:opacity-50 cursor-pointer flex items-center gap-1"
+                        >
+                          <RefreshCw class="w-2.5 h-2.5" :class="{ 'animate-spin': isLoadingModels }" />
+                          {{ $t('settings.loadModels') }}
+                        </button>
                         <button
                           v-for="m in currentProviderModels"
                           :key="m"
@@ -825,7 +923,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                   >
                     <Check v-if="apiTestResult.success" class="w-4 h-4 shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
                     <AlertTriangle v-else class="w-4 h-4 shrink-0 mt-0.5 text-red-600 dark:text-red-400" />
-                    <span>{{ apiTestResult.message }}</span>
+                    <span class="whitespace-pre-wrap break-words">{{ apiTestMessage }}</span>
                   </div>
 
                   <!-- Bottom Actions -->
@@ -834,7 +932,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                       v-if="editingProfile.type === 'api'"
                       type="button"
                       @click="handleTestConnection"
-                      :disabled="isTestingApi || (editingProfile.provider !== 'ollama' && !editingProfile.apiKey?.trim())"
+                      :disabled="isTestingApi || !canTestConnection"
                       class="px-3.5 py-2 rounded-lg border border-slate-300 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 cursor-pointer"
                     >
                       <RefreshCw class="w-3.5 h-3.5" :class="{ 'animate-spin': isTestingApi }" />
@@ -843,6 +941,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                     <button
                       type="button"
                       @click="saveCurrentProfile"
+                      :disabled="isSaving"
                       class="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition-colors cursor-pointer shadow-xs"
                     >
                       {{ $t('settings.saveAndApply') }}
