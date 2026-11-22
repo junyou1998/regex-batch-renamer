@@ -389,7 +389,9 @@
             "AI_MODEL_NOT_FOUND": "找不到指定的模型，請在設定中改用可用的模型",
             "AI_TEST_OK": "連線成功，模型 {detail} 可使用",
             "AI_TEST_MODEL_MISSING": "連線成功，但帳號中沒有模型 {detail}，請從下方清單選擇",
-            "AI_TEST_NO_MODELS": "連線成功，但沒有可用的模型（Ollama 請先執行 ollama pull {detail}）"
+            "AI_TEST_NO_MODELS": "連線成功，但沒有可用的模型（Ollama 請先執行 ollama pull {detail}）",
+            "AI_OVERLOADED": "AI 服務目前過於繁忙（服務商端的暫時狀況），自動重試後仍失敗。請稍後再試，或到「設定 › AI 助理」改用其他模型。",
+            "AI_RATE_LIMITED": "已達到此 API Key 的使用頻率或額度上限，請稍後再試，或檢查服務商的用量與方案。"
         }
     },
     "statusBar": {

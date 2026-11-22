@@ -299,23 +299,69 @@ pub async fn run_api_chat(
     result
 }
 
+/// Statuses worth retrying: rate limits and temporary server overload
+/// (Anthropic uses 529 for "overloaded").
+fn is_retryable(status: u16) -> bool {
+    matches!(status, 429 | 500 | 502 | 503 | 504 | 529)
+}
+
+/// Delay before retry `attempt` (1-based), honouring a short Retry-After.
+fn retry_delay(attempt: u32, retry_after: Option<&str>) -> Duration {
+    let suggested = retry_after.and_then(|v| v.trim().parse::<u64>().ok()).map(|secs| secs.min(15));
+    Duration::from_secs(suggested.unwrap_or(match attempt {
+        1 => 2,
+        _ => 5,
+    }))
+}
+
+const MAX_ATTEMPTS: u32 = 3;
+/// Cloud APIs: give up on one attempt after this long...
+const CLOUD_ATTEMPT_TIMEOUT_SECS: u64 = 60;
+/// ...and never start a retry once this much time has passed overall.
+const CLOUD_RETRY_BUDGET: Duration = Duration::from_secs(100);
+
 async fn post_json(r: &Resolved, url: &str, payload: &Value, extra: &[(&str, &str)]) -> Result<Value, String> {
-    let client = http_client(if r.provider == Provider::Ollama { 300 } else { 180 })?;
-    let mut builder = with_auth(client.post(url), r).json(payload);
-    for (k, v) in extra {
-        builder = builder.header(*k, *v);
-    }
-    let response = builder.send().await.map_err(network_error)?;
-    let status = response.status();
-    let body = response.text().await.unwrap_or_default();
-    if !status.is_success() {
+    let client = http_client(if r.provider == Provider::Ollama { 300 } else { CLOUD_ATTEMPT_TIMEOUT_SECS })?;
+    let started = std::time::Instant::now();
+    let mut attempt = 0;
+    loop {
+        attempt += 1;
+        let mut builder = with_auth(client.post(url), r).json(payload);
+        for (k, v) in extra {
+            builder = builder.header(*k, *v);
+        }
+        let response = builder.send().await.map_err(network_error)?;
+        let status = response.status();
+        let retry_after = response
+            .headers()
+            .get("retry-after")
+            .and_then(|v| v.to_str().ok())
+            .map(str::to_string);
+        let body = response.text().await.unwrap_or_default();
+        if status.is_success() {
+            return serde_json::from_str(&body).map_err(|e| err::with(err::PARSE, e));
+        }
+
+        let code = status.as_u16();
         let detail = api_error_detail(&body);
-        if status.as_u16() == 404 && detail.to_lowercase().contains("model") {
+        let delay = retry_delay(attempt, retry_after.as_deref());
+        let within_budget = started.elapsed() + delay < CLOUD_RETRY_BUDGET;
+        if is_retryable(code) && attempt < MAX_ATTEMPTS && within_budget {
+            // Cancellation still works: the caller races this future against the cancel signal.
+            tokio::time::sleep(delay).await;
+            continue;
+        }
+        if code == 404 && detail.to_lowercase().contains("model") {
             return Err(err::with(err::MODEL_NOT_FOUND, format!("{}: {detail}", r.model)));
         }
-        return Err(err::with(err::HTTP, format!("{} {detail}", status.as_u16())));
+        if code == 429 {
+            return Err(err::with(err::RATE_LIMITED, format!("{} — {detail}", r.model)));
+        }
+        if is_retryable(code) {
+            return Err(err::with(err::OVERLOADED, format!("{} — {code} {detail}", r.model)));
+        }
+        return Err(err::with(err::HTTP, format!("{code} {detail}")));
     }
-    serde_json::from_str(&body).map_err(|e| err::with(err::PARSE, e))
 }
 
 fn finish(raw_text: &str, usage: Option<AiUsage>, model: Option<String>) -> Result<AiChatResponse, String> {
@@ -500,7 +546,20 @@ async fn ollama_chat(prompt: &str, r: &Resolved) -> Result<AiChatResponse, Strin
 
 #[cfg(test)]
 mod tests {
-    use super::is_text_chat_model;
+    use super::{is_retryable, is_text_chat_model, retry_delay};
+    use std::time::Duration;
+
+    #[test]
+    fn retries_only_temporary_failures() {
+        for code in [429, 500, 502, 503, 504, 529] {
+            assert!(is_retryable(code), "{code}");
+        }
+        for code in [400, 401, 403, 404] {
+            assert!(!is_retryable(code), "{code}");
+        }
+        assert_eq!(retry_delay(1, None), Duration::from_secs(2));
+        assert_eq!(retry_delay(2, Some("120")), Duration::from_secs(15));
+    }
 
     #[test]
     fn filters_special_purpose_models() {
@@ -509,6 +568,53 @@ mod tests {
         }
         for drop in ["gemini-2.5-flash-preview-tts", "gemini-3-pro-image", "gemini-omni-1.2-flash", "nano-banana-pro-preview", "gemini-3.5-transcribe", "text-embedding-3-large", "gemini-3.1-pro-preview-customtools"] {
             assert!(!is_text_chat_model(drop), "{drop}");
+        }
+    }
+}
+
+/// Live smoke test against a real provider. Ignored by default; run with
+/// `RBR_LIVE_KEY=... RBR_LIVE_PROVIDER=gemini RBR_LIVE_MODEL=... cargo test live_ -- --ignored --nocapture`.
+#[cfg(test)]
+mod live_tests {
+    use super::*;
+    use crate::ai_cli::AiChatRequest;
+
+    #[tokio::test(flavor = "current_thread")]
+    #[ignore]
+    async fn live_provider_round_trip() {
+        let key = std::env::var("RBR_LIVE_KEY").expect("RBR_LIVE_KEY");
+        let profile = AiApiProfile {
+            id: "live".into(),
+            name: "live".into(),
+            provider: std::env::var("RBR_LIVE_PROVIDER").unwrap_or_else(|_| "gemini".into()),
+            api_key: String::new(),
+            endpoint: String::new(),
+            model: std::env::var("RBR_LIVE_MODEL").unwrap_or_default(),
+            temperature: None,
+        };
+        let request = AiChatRequest {
+            prompt: "把相機檔名改成 日期 + Tokyo + 三位數流水號".into(),
+            history: vec![],
+            sample_filenames: vec!["IMG_20260812_093015.jpg".into(), "IMG_20260813_121907.jpg".into()],
+            current_pipeline: vec![],
+            process_filename_only: Some(true),
+            provider: None,
+            task_id: None,
+            model: None,
+            installed_plugins: vec![],
+            current_preview: vec![],
+        };
+        let started = std::time::Instant::now();
+        let result = run_api_chat(request, profile, Some(key)).await;
+        println!("elapsed: {:?}", started.elapsed());
+        match result {
+            Ok(resp) => {
+                println!("model: {:?} usage: {:?}", resp.model, resp.usage);
+                println!("reply: {}", resp.reply);
+                println!("pipeline: {}", serde_json::to_string_pretty(&resp.pipeline).unwrap());
+                assert!(!resp.pipeline.is_empty());
+            }
+            Err(e) => panic!("live call failed: {e}"),
         }
     }
 }

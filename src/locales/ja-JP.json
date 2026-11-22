@@ -389,7 +389,9 @@
             "AI_MODEL_NOT_FOUND": "モデルが見つかりません。設定で利用可能なモデルを選んでください",
             "AI_TEST_OK": "接続成功：モデル {detail} を利用できます",
             "AI_TEST_MODEL_MISSING": "接続できましたが、モデル {detail} は利用できません。下の一覧から選んでください",
-            "AI_TEST_NO_MODELS": "接続できましたが利用可能なモデルがありません（Ollama の場合：ollama pull {detail}）"
+            "AI_TEST_NO_MODELS": "接続できましたが利用可能なモデルがありません（Ollama の場合：ollama pull {detail}）",
+            "AI_OVERLOADED": "AI サービスが混雑しています（プロバイダー側の一時的な問題）。自動再試行でも解決しませんでした。しばらくしてから再試行するか、「設定 › AI アシスタント」で別のモデルに切り替えてください。",
+            "AI_RATE_LIMITED": "この API キーのレート制限または利用上限に達しました。しばらくしてから再試行するか、プロバイダーの利用状況とプランを確認してください。"
         }
     },
     "statusBar": {

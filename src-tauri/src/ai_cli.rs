@@ -19,6 +19,8 @@ pub mod err {
     pub const PARSE: &str = "AI_PARSE_ERROR";
     pub const REFUSED: &str = "AI_REFUSED";
     pub const MODEL_NOT_FOUND: &str = "AI_MODEL_NOT_FOUND";
+    pub const OVERLOADED: &str = "AI_OVERLOADED";
+    pub const RATE_LIMITED: &str = "AI_RATE_LIMITED";
 
     pub fn with(code: &str, detail: impl std::fmt::Display) -> String {
         let detail = detail.to_string();

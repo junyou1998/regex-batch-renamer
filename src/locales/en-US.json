@@ -389,7 +389,9 @@
             "AI_MODEL_NOT_FOUND": "Model not found — pick an available model in Settings",
             "AI_TEST_OK": "Connected — model {detail} is available",
             "AI_TEST_MODEL_MISSING": "Connected, but model {detail} isn't available — pick one from the list below",
-            "AI_TEST_NO_MODELS": "Connected, but no models are available (for Ollama, run: ollama pull {detail})"
+            "AI_TEST_NO_MODELS": "Connected, but no models are available (for Ollama, run: ollama pull {detail})",
+            "AI_OVERLOADED": "The AI service is overloaded right now (a temporary issue on the provider's side) and automatic retries didn't help. Try again shortly, or switch to another model in Settings › AI Assistant.",
+            "AI_RATE_LIMITED": "This API key hit its rate or quota limit. Try again later, or check your usage and plan with the provider."
         }
     },
     "statusBar": {
