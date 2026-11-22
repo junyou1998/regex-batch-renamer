@@ -8,3 +8,10 @@ const app = createApp(App)
 app.use(createPinia())
 app.use(i18n)
 app.mount('#app')
+
+if (import.meta.env.VITE_DEMO_MODE === '1') {
+  void Promise.all([import('./dev/demoBridge'), import('./stores/fileStore')]).then(([demo, files]) => {
+    const initial = demo.demoInitialFiles()
+    if (initial.length > 0) files.useFileStore().addFilePaths(initial)
+  })
+}
