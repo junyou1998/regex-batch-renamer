@@ -170,7 +170,7 @@
         "tipRegexTitle": "正则表达式 (Regex)",
         "tipRegexDesc": "开启：用 Regex 语法匹配，例如 \\d+ 代表一串数字。关闭：把输入内容当作普通文字。",
         "tipCaseTitle": "不区分大小写",
-        "tipCaseDesc": "匹配时忽略英文大小写，例如 img 也会匹配 IMG。",
+        "tipCaseDesc": "开启后匹配时忽略英文大小写，例如 img 也会匹配 IMG。点击切换。",
         "tipVariableTitle": "插入变量",
         "tipVariableDesc": "插入序号 ${'{'}n{'}'}、补零 ${'{'}n:3{'}'}、自定义起始值等变量。",
         "tipFindTitle": "查找",
@@ -186,7 +186,11 @@
         "helpButton": "教程",
         "emptyHelpLink": "第一次使用？看看使用说明与 Regex 教程",
         "seeSyntaxHelp": "查看语法说明",
-        "tipRegexHelp": "不熟悉 Regex？按 {key} 打开教程。"
+        "tipRegexHelp": "不熟悉 Regex？按 {key} 打开教程。",
+        "stateRegexOn": "当前：已开启（使用 Regex 语法）",
+        "stateRegexOff": "当前：已关闭（按普通文字匹配）",
+        "stateCaseOn": "当前：已开启（不区分大小写）",
+        "stateCaseOff": "当前：已关闭（区分大小写）"
     },
     "preview": {
         "title": "预览变更 ({n} 文件)",

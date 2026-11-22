@@ -170,7 +170,7 @@
         "tipRegexTitle": "正規表現 (Regex)",
         "tipRegexDesc": "オン：正規表現で照合（例：\\d+ は数字の並び）。オフ：入力をそのまま文字として照合。",
         "tipCaseTitle": "大文字小文字を区別しない",
-        "tipCaseDesc": "英字の大小を区別せず照合します（img は IMG にも一致）。",
+        "tipCaseDesc": "オンにすると大文字小文字を区別せず照合します（img は IMG にも一致）。クリックで切り替え。",
         "tipVariableTitle": "変数を挿入",
         "tipVariableDesc": "連番 ${'{'}n{'}'}、ゼロ埋め ${'{'}n:3{'}'}、開始値の指定などを挿入します。",
         "tipFindTitle": "検索",
@@ -186,7 +186,11 @@
         "helpButton": "ガイド",
         "emptyHelpLink": "はじめての方へ：使い方と正規表現ガイド",
         "seeSyntaxHelp": "構文ヘルプを見る",
-        "tipRegexHelp": "正規表現に不慣れなら {key} でガイドを開けます。"
+        "tipRegexHelp": "正規表現に不慣れなら {key} でガイドを開けます。",
+        "stateRegexOn": "現在：オン（正規表現で照合）",
+        "stateRegexOff": "現在：オフ（通常の文字として照合）",
+        "stateCaseOn": "現在：オン（大文字小文字を区別しない）",
+        "stateCaseOff": "現在：オフ（大文字小文字を区別する）"
     },
     "preview": {
         "title": "プレビュー ({n} ファイル)",

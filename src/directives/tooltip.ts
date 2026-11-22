@@ -14,6 +14,10 @@ import type { Directive, DirectiveBinding } from 'vue'
 export interface TooltipOptions {
   title: string
   desc?: string
+  /** Current state of a toggle, e.g. "On — ignoring case". */
+  status?: string
+  /** Colours the status dot: true = on (blue), false = off (grey). */
+  statusOn?: boolean
   shortcut?: string
   placement?: 'top' | 'bottom' | 'left' | 'right'
   disabled?: boolean
@@ -60,8 +64,12 @@ function render(options: TooltipOptions) {
   const shortcut = options.shortcut
     ? `<kbd class="ml-2 shrink-0 rounded border border-white/20 bg-white/10 px-1 font-mono text-[10px] text-slate-200">${escapeHtml(options.shortcut)}</kbd>`
     : ''
+  const status = options.status
+    ? `<div class="mt-1 flex items-center gap-1.5 text-[11px] font-medium ${options.statusOn ? 'text-sky-300' : 'text-slate-300'}">` +
+      `<span class="inline-block h-1.5 w-1.5 shrink-0 rounded-full ${options.statusOn ? 'bg-sky-400' : 'bg-slate-500'}"></span>${escapeHtml(options.status)}</div>`
+    : ''
   const desc = options.desc ? `<div class="mt-0.5 text-[11px] text-slate-300">${escapeHtml(options.desc)}</div>` : ''
-  el.innerHTML = `<div class="flex items-center justify-between font-semibold"><span>${escapeHtml(options.title)}</span>${shortcut}</div>${desc}`
+  el.innerHTML = `<div class="flex items-center justify-between font-semibold"><span>${escapeHtml(options.title)}</span>${shortcut}</div>${status}${desc}`
 }
 
 function place(host: HTMLElement, preferred: TooltipOptions['placement'] = 'top') {
@@ -145,11 +153,15 @@ function bind(el: TooltipHost, binding: DirectiveBinding<TooltipValue>) {
   const onEnter = () => schedule(el)
   const onLeave = () => hide()
   const onKey = (e: KeyboardEvent) => e.key === 'Escape' && hide()
+  // Toggle buttons keep their tooltip on click so the status line updates live.
+  const onPress = () => {
+    if (!el.hasAttribute('aria-pressed')) hide()
+  }
   el.addEventListener('mouseenter', onEnter)
   el.addEventListener('mouseleave', onLeave)
   el.addEventListener('focusin', onEnter)
   el.addEventListener('focusout', onLeave)
-  el.addEventListener('pointerdown', onLeave)
+  el.addEventListener('pointerdown', onPress)
   el.addEventListener('keydown', onKey)
 
   el.__tooltip = {
@@ -159,7 +171,7 @@ function bind(el: TooltipHost, binding: DirectiveBinding<TooltipValue>) {
       el.removeEventListener('mouseleave', onLeave)
       el.removeEventListener('focusin', onEnter)
       el.removeEventListener('focusout', onLeave)
-      el.removeEventListener('pointerdown', onLeave)
+      el.removeEventListener('pointerdown', onPress)
       el.removeEventListener('keydown', onKey)
     },
   }

@@ -170,7 +170,7 @@
         "tipRegexTitle": "Regular expression",
         "tipRegexDesc": "On: match with regex syntax, e.g. \\d+ for a run of digits. Off: match the text literally.",
         "tipCaseTitle": "Ignore case",
-        "tipCaseDesc": "Letters match regardless of case, so img also matches IMG.",
+        "tipCaseDesc": "When on, letters match regardless of case (img also matches IMG). Click to toggle.",
         "tipVariableTitle": "Insert a variable",
         "tipVariableDesc": "Insert a sequence number ${'{'}n{'}'}, zero-padded ${'{'}n:3{'}'}, a custom start, and more.",
         "tipFindTitle": "Find",
@@ -186,7 +186,11 @@
         "helpButton": "Guide",
         "emptyHelpLink": "New here? Read the guide and regex basics",
         "seeSyntaxHelp": "See syntax help",
-        "tipRegexHelp": "New to regex? Press {key} for the guide."
+        "tipRegexHelp": "New to regex? Press {key} for the guide.",
+        "stateRegexOn": "Now: on — using regex syntax",
+        "stateRegexOff": "Now: off — matching plain text",
+        "stateCaseOn": "Now: on — case is ignored",
+        "stateCaseOff": "Now: off — case must match"
     },
     "preview": {
         "title": "Preview Changes ({n} files)",

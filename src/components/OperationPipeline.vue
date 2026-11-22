@@ -922,7 +922,12 @@ function confirmPrefixSuffix() {
                     @click="op.params.useRegex = !op.params.useRegex"
                     :aria-pressed="Boolean(op.params.useRegex)"
                     :aria-label="$t('operations.useRegex')"
-                    v-tooltip="{ title: $t('operations.tipRegexTitle'), desc: `${$t('operations.tipRegexDesc')} ${$t('operations.tipRegexHelp', { key: `${modKey} /` })}` }"
+                    v-tooltip="{
+                      title: $t('operations.tipRegexTitle'),
+                      status: op.params.useRegex ? $t('operations.stateRegexOn') : $t('operations.stateRegexOff'),
+                      statusOn: Boolean(op.params.useRegex),
+                      desc: `${$t('operations.tipRegexDesc')} ${$t('operations.tipRegexHelp', { key: `${modKey} /` })}`
+                    }"
                     class="h-6 min-w-6 px-1 rounded-md font-mono text-[11px] font-bold transition-colors cursor-pointer"
                     :class="op.params.useRegex
                       ? 'bg-blue-600 text-white'
@@ -931,7 +936,12 @@ function confirmPrefixSuffix() {
                     @click="op.params.caseInsensitive = !op.params.caseInsensitive"
                     :aria-pressed="Boolean(op.params.caseInsensitive)"
                     :aria-label="$t('operations.caseInsensitive')"
-                    v-tooltip="{ title: $t('operations.tipCaseTitle'), desc: $t('operations.tipCaseDesc') }"
+                    v-tooltip="{
+                      title: $t('operations.tipCaseTitle'),
+                      status: op.params.caseInsensitive ? $t('operations.stateCaseOn') : $t('operations.stateCaseOff'),
+                      statusOn: Boolean(op.params.caseInsensitive),
+                      desc: $t('operations.tipCaseDesc')
+                    }"
                     class="h-6 min-w-6 px-1 rounded-md text-[11px] font-bold transition-colors cursor-pointer"
                     :class="op.params.caseInsensitive
                       ? 'bg-blue-600 text-white'

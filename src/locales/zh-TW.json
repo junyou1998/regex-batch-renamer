@@ -170,7 +170,7 @@
         "tipRegexTitle": "正規表示式 (Regex)",
         "tipRegexDesc": "開啟：用 Regex 語法比對，例如 \\d+ 代表一串數字。關閉：把輸入內容當作一般文字。",
         "tipCaseTitle": "不分大小寫",
-        "tipCaseDesc": "比對時忽略英文大小寫，例如 img 也會符合 IMG。",
+        "tipCaseDesc": "開啟後比對時忽略英文大小寫，例如 img 也會符合 IMG。點一下切換。",
         "tipVariableTitle": "插入變數",
         "tipVariableDesc": "插入流水號 ${'{'}n{'}'}、補零 ${'{'}n:3{'}'}、自訂起始值等變數。",
         "tipFindTitle": "尋找",
@@ -186,7 +186,11 @@
         "helpButton": "教學",
         "emptyHelpLink": "第一次使用？看看使用說明與 Regex 教學",
         "seeSyntaxHelp": "查看語法說明",
-        "tipRegexHelp": "不熟 Regex？按 {key} 打開教學。"
+        "tipRegexHelp": "不熟 Regex？按 {key} 打開教學。",
+        "stateRegexOn": "目前：已開啟（使用 Regex 語法）",
+        "stateRegexOff": "目前：已關閉（當作一般文字比對）",
+        "stateCaseOn": "目前：已開啟（不分大小寫）",
+        "stateCaseOff": "目前：已關閉（區分大小寫）"
     },
     "preview": {
         "title": "預覽變更 ({n} 檔案)",
