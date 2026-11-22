@@ -103,7 +103,7 @@ const STORAGE_KEY = 'regex_batch_renamer_plugins'
 export const usePluginStore = defineStore('plugin', () => {
   const installedPlugins = ref<Record<string, InstalledPlugin>>({})
   const marketplacePlugins = ref<MarketplacePlugin[]>([])
-  const marketplaceRepoUrl = ref<string>('https://raw.githubusercontent.com/junyou1998/regex-batch-renamer-plugins/main/dist/index.json')
+  const marketplaceRepoUrl = ref<string>('https://raw.githubusercontent.com/junyou1998/renamix-plugins/main/dist/index.json')
   const isFetchingMarketplace = ref<boolean>(false)
   const marketplaceError = ref<string | null>(null)
   const healthMap = ref<Record<string, PluginHealthState>>({})

@@ -15,7 +15,7 @@ const year = new Date().getFullYear()
       </div>
       <nav class="flex flex-wrap gap-x-6 gap-y-2 text-sm" :aria-label="$t('footer.links')">
         <a :href="`https://github.com/${REPO}`" class="hover:text-white" rel="noopener">{{ $t('footer.source') }}</a>
-        <a href="https://github.com/junyou1998/regex-batch-renamer-plugins" class="hover:text-white" rel="noopener">{{ $t('footer.plugins') }}</a>
+        <a href="https://github.com/junyou1998/renamix-plugins" class="hover:text-white" rel="noopener">{{ $t('footer.plugins') }}</a>
         <a :href="`https://github.com/${REPO}/issues`" class="hover:text-white" rel="noopener">{{ $t('footer.feedback') }}</a>
         <a href="https://www.buymeacoffee.com/junyou" class="hover:text-white" rel="noopener">{{ $t('footer.coffee') }}</a>
       </nav>

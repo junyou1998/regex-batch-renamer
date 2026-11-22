@@ -1,6 +1,7 @@
 mod ai_api;
 mod ai_cli;
 mod ai_task;
+mod bundle_name;
 mod file_ops;
 mod fs_scope;
 mod net;
@@ -443,6 +444,11 @@ fn list_ai_secret_ids(secrets: State<'_, SecretStore>) -> Vec<String> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Release builds only: dev runs aren't inside a .app bundle anyway.
+    if !cfg!(debug_assertions) && bundle_name::migrate_and_relaunch() {
+        return;
+    }
+
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())

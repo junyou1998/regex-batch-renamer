@@ -10,7 +10,7 @@
 
 [繁體中文](README.zh-TW.md) · [简体中文](README.zh-CN.md) · **English**
 
-[Website](https://renamix.junyou.tw/) · [Download](https://github.com/junyou1998/renamix/releases/latest) · [Plugins](https://github.com/junyou1998/regex-batch-renamer-plugins)
+[Website](https://renamix.junyou.tw/) · [Download](https://github.com/junyou1998/renamix/releases/latest) · [Plugins](https://github.com/junyou1998/renamix-plugins)
 
 </div>
 
@@ -96,7 +96,7 @@ Sequence variables: `${n}` → 1, 2, 3 · `${n:3}` → 001, 002 · `${n:3:10}` �
 
 ## 🧩 Plugins
 
-Open **Plugins** in the title bar to browse the [plugin marketplace](https://github.com/junyou1998/regex-batch-renamer-plugins) or install a `.rbr-plugin` file. Before installing you'll see which permissions a plugin asks for (network access, reading the files you added). Plugins run in an isolated worker and can't reach anything else.
+Open **Plugins** in the title bar to browse the [plugin marketplace](https://github.com/junyou1998/renamix-plugins) or install a `.rbr-plugin` file. Before installing you'll see which permissions a plugin asks for (network access, reading the files you added). Plugins run in an isolated worker and can't reach anything else.
 
 ## ⌨️ Keyboard shortcuts
 

@@ -10,7 +10,7 @@
 
 **繁體中文** · [简体中文](README.zh-CN.md) · [English](README.md)
 
-[官方網站](https://renamix.junyou.tw/) · [下載](https://github.com/junyou1998/renamix/releases/latest) · [外掛](https://github.com/junyou1998/regex-batch-renamer-plugins)
+[官方網站](https://renamix.junyou.tw/) · [下載](https://github.com/junyou1998/renamix/releases/latest) · [外掛](https://github.com/junyou1998/renamix-plugins)
 
 </div>
 
@@ -96,7 +96,7 @@ xattr -r -d com.apple.quarantine "/Applications/Renamix.app"
 
 ## 🧩 外掛
 
-點標題列的「外掛」即可瀏覽[外掛市集](https://github.com/junyou1998/regex-batch-renamer-plugins)，或安裝 `.rbr-plugin` 檔案。安裝前會列出外掛要求的權限（網路連線、讀取你加入的檔案）。外掛在隔離的 Worker 中執行，無法存取其他資源。
+點標題列的「外掛」即可瀏覽[外掛市集](https://github.com/junyou1998/renamix-plugins)，或安裝 `.rbr-plugin` 檔案。安裝前會列出外掛要求的權限（網路連線、讀取你加入的檔案）。外掛在隔離的 Worker 中執行，無法存取其他資源。
 
 ## ⌨️ 鍵盤快捷鍵
 
