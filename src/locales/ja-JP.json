@@ -307,7 +307,7 @@
             }
         },
         "numbering": {
-            "title": "連番機能 ($n)",
+            "title": "連番機能 (${'{'}n{'}'})",
             "description": "「置換後の文字列」フィールドで {code} を使用して、増加する数値を挿入できます。",
             "table": {
                 "syntax": "構文",
@@ -335,6 +335,30 @@
             "zoomOut": "縮小",
             "zoomReset": "ズームをリセット",
             "close": "ダイアログを閉じる"
+        },
+        "copySnippet": "{code} をコピー",
+        "clickToCopy": "クリックでコピー",
+        "copied": "コピーしました",
+        "ai": {
+            "title": "AI アシスタント",
+            "openPanel": "AI アシスタントを開く",
+            "description": "正規表現が書けなくても大丈夫。名前の変え方を普段の言葉で伝えると、AI がルールを作ります。今のルールの説明も頼めます。",
+            "cliTitle": "方法 1：インストール済みの AI CLI",
+            "cliDesc": "Claude Code、Codex、Grok CLI にサインイン済みなら選ぶだけ。API キー不要で、CLI の現在のモデルを使います。",
+            "apiTitle": "方法 2：API キー",
+            "apiDesc": "「設定 › AI アシスタント」で Gemini、OpenAI、Anthropic のキーを追加するか、ローカルの Ollama に接続します。キーはこの PC にのみ保存されます。",
+            "flowTitle": "使い方",
+            "step1": "内容を伝える",
+            "step2": "プレビューを確認",
+            "step3": "「適用」を押す",
+            "step4": "必要なら元に戻す",
+            "examplesTitle": "こう聞いてみる（クリックで送信）",
+            "example1": "IMG_20260812_093015.jpg のような名前を 2026-08-12_東京_001.jpg に変えて",
+            "example2": "名前から「final」「copy」「(1)」を消して、空白をアンダースコアに",
+            "example3": "今のルールが何をしているか説明して",
+            "examplesTip": "コツ：「変更前 → 変更後」の例を 1 つ示すのが最も伝わりやすいです。",
+            "askThis": "この質問を AI に送る",
+            "privacy": "各リクエストではメッセージ、現在のルール、最大 30 件のファイル名を送信します。ファイルの内容は送信しません。"
         }
     },
     "templates": {

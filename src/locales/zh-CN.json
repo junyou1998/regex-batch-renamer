@@ -307,7 +307,7 @@
             }
         },
         "numbering": {
-            "title": "流水号功能 ($n)",
+            "title": "流水号功能 (${'{'}n{'}'})",
             "description": "您可以在「替换为」字段中使用 {code} 来插入递增的数字。",
             "table": {
                 "syntax": "语法",
@@ -335,6 +335,30 @@
             "zoomOut": "缩小界面",
             "zoomReset": "重置缩放",
             "close": "关闭对话框"
+        },
+        "copySnippet": "复制 {code}",
+        "clickToCopy": "点击复制",
+        "copied": "已复制到剪贴板",
+        "ai": {
+            "title": "AI 助手",
+            "openPanel": "打开 AI 助手",
+            "description": "不会写 Regex 也没关系：用普通的话描述你想怎么改名，AI 会帮你生成规则；也可以请它解释当前的规则在做什么。",
+            "cliTitle": "方式一：使用已安装的 AI CLI",
+            "cliDesc": "如果你已登录 Claude Code、Codex 或 Grok CLI，直接选用即可，不需要 API Key，会沿用 CLI 当前设置的模型。",
+            "apiTitle": "方式二：使用 API Key",
+            "apiDesc": "到“设置 › AI 助手”添加 Gemini、OpenAI、Anthropic 的 API Key，或连接本机的 Ollama。Key 只保存在本机。",
+            "flowTitle": "使用流程",
+            "step1": "描述需求",
+            "step2": "检查预览",
+            "step3": "点“应用”",
+            "step4": "不满意就“撤销”",
+            "examplesTitle": "试试这样问（点击直接发送）",
+            "example1": "把 IMG_20260812_093015.jpg 这种文件名改成 2026-08-12_东京_001.jpg",
+            "example2": "删掉文件名里的“final”“copy”“(1)”，并把空格换成下划线",
+            "example3": "解释当前的规则在做什么",
+            "examplesTip": "小诀窍：直接给一个“改前 → 改后”的例子，AI 最容易理解。",
+            "askThis": "用这句话问 AI",
+            "privacy": "每次提问会发送你的消息、当前规则与最多 30 个文件名，不会发送文件内容。"
         }
     },
     "templates": {

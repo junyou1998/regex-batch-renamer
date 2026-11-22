@@ -307,7 +307,7 @@
             }
         },
         "numbering": {
-            "title": "Sequential Numbering ($n)",
+            "title": "Sequential Numbering (${'{'}n{'}'})",
             "description": "You can use {code} in the \"Replace with\" field to insert incrementing numbers.",
             "table": {
                 "syntax": "Syntax",
@@ -335,6 +335,30 @@
             "zoomOut": "Zoom out",
             "zoomReset": "Reset zoom",
             "close": "Close a dialog"
+        },
+        "copySnippet": "Copy {code}",
+        "clickToCopy": "Click to copy",
+        "copied": "Copied to clipboard",
+        "ai": {
+            "title": "AI assistant",
+            "openPanel": "Open AI assistant",
+            "description": "No regex needed: describe how you want files renamed in plain words and the AI writes the rules. It can also explain what your current rules do.",
+            "cliTitle": "Option 1: an AI CLI you already use",
+            "cliDesc": "If you're signed in to Claude Code, Codex or Grok CLI, just pick it. No API key needed, and it uses the CLI's current model.",
+            "apiTitle": "Option 2: an API key",
+            "apiDesc": "Add a Gemini, OpenAI or Anthropic key in Settings › AI Assistant, or connect a local Ollama. Keys stay on this computer.",
+            "flowTitle": "How it works",
+            "step1": "Describe it",
+            "step2": "Check the preview",
+            "step3": "Click Apply",
+            "step4": "Revert if needed",
+            "examplesTitle": "Try asking (click to send)",
+            "example1": "Rename files like IMG_20260812_093015.jpg to 2026-08-12_Tokyo_001.jpg",
+            "example2": "Remove “final”, “copy” and “(1)” from the names and replace spaces with underscores",
+            "example3": "Explain what the current rules do",
+            "examplesTip": "Tip: a single “before → after” example is the clearest way to explain what you want.",
+            "askThis": "Ask the AI this",
+            "privacy": "Each request sends your message, the current rules and up to 30 filenames — never file contents."
         }
     },
     "templates": {
