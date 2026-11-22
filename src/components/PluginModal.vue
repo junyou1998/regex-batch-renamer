@@ -512,7 +512,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
                 <span>{{ $t('plugins.tabInstalled') }} ({{ pluginStore.pluginList.length }})</span>
               </button>
 
-              <button
+              <button data-testid="tab-marketplace"
                 type="button"
                 @click="activeTab = 'marketplace'"
                 :class="[

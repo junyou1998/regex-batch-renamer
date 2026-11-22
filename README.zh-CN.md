@@ -1,56 +1,60 @@
+<div align="center">
+
+<img src="public/icon.png" width="112" alt="Renamix 图标" />
+
 # Renamix
 
-> 支持 Regex、插件与 AI 的批量文件重命名工具 · 原名 **Regex Batch Renamer**。
+**支持 Regex、插件与 AI 的批量文件重命名工具，适用于 macOS、Windows 与 Linux。**
 
-[繁體中文](README.zh-TW.md) | **简体中文** | [English](README.md)
+<sub>原名 <b>Regex Batch Renamer</b></sub>
 
-🌐 **官方网站**: https://renamer.junyou.tw/
+[繁體中文](README.zh-TW.md) · **简体中文** · [English](README.md)
 
-<img src="public/icon.png" align="left" width="128" style="margin-right: 24px; margin-bottom: 12px;" alt="App Icon" />
+[官方网站](https://renamer.junyou.tw/) · [下载](https://github.com/junyou1998/regex-batch-renamer/releases/latest) · [插件](https://github.com/junyou1998/regex-batch-renamer-plugins)
 
-一个强大、极致轻量且直观的跨平台批量重命名工具 (支持 macOS / Windows / Linux)。基于 **Tauri v2 + Vue 3 + Tailwind CSS v4 + Rust** 打造，支持正则表达式 (Regex)、纯文本替换、自定义快速模板与流水号功能，让繁琐的文件重命名工作变得流畅且简单。
+</div>
 
-<br clear="left"/>
+<img src="assets/screenshots/zh-CN/hero.webp" alt="Renamix：左侧是规则，右侧实时预览重命名前后的差异" width="100%" />
+
+Renamix 能一次重命名上百个文件。把多条“查找与替换”规则串起来，在真正修改之前先预览每一个新文件名，不满意一键撤销。不会写 Regex 也没关系，用普通的话描述，AI 助手会帮你生成规则。
+
+## ✨ 特色
+
+- **逐步实时预览**：规则从上到下依次应用，每个新文件名都以醒目的差异标示预览；重命名前就会标出文件名冲突。
+- **安全第一**：整批重命名以“事务”方式执行，互换（`a ↔ b`）、连锁编号、仅修改大小写都能正确处理；只要有一个失败，整批自动还原。创建副本时绝不覆盖已有文件。按 `⌘/Ctrl + Z` 撤销上一批。
+- **Regex 或普通文字**：`.*` 切换正则表达式、`Aa` 切换不区分大小写；内置捕获分组（`$1`）、序号（`${n:3}`）与快速模板。
+- **AI 助手**：用自己的话描述想怎么重命名。可直接使用你已登录的 Claude Code、Codex、Grok CLI，或 Gemini、OpenAI、Anthropic、本机 Ollama。建议会先预览、确认后才应用，也能一键还原。
+- **插件**：从插件市场安装繁简转换、照片 EXIF 命名等功能。插件在隔离沙箱中运行，只能使用它声明的权限。
+- **历史与审计记录**：每次重命名、复制与撤销都会记录，可重新加载当时的规则，或导出为 CSV / JSON。
+- **日常好用**：可添加文件夹内的文件（含子文件夹）或直接重命名文件夹、完整的键盘快捷键、浅色与深色主题，界面支持繁中、简中、English、日本語。
+
+## 📸 界面截图
+
+| AI 助手 | 整理杂乱文件名 |
+| --- | --- |
+| <img src="assets/screenshots/zh-CN/ai.webp" alt="AI 助手生成重命名规则" /> | <img src="assets/screenshots/zh-CN/docs.webp" alt="移除文件名中的 copy、final、(1)" /> |
+| **插件市场** | **历史与审计记录** |
+| <img src="assets/screenshots/zh-CN/plugins.webp" alt="插件市场" /> | <img src="assets/screenshots/zh-CN/history.webp" alt="重命名历史与每个文件的结果" /> |
+
+<details>
+<summary>深色主题</summary>
 <br />
+<img src="assets/screenshots/zh-CN/dark.webp" alt="Renamix 深色主题" width="100%" />
+</details>
 
-<img src="public/screenshot.png" alt="App Screenshot" width="800" />
+## 📥 下载安装
 
-## ✨ 主要功能
+前往 [GitHub Releases](https://github.com/junyou1998/regex-batch-renamer/releases/latest) 下载最新版本：
 
-- **🤖 AI 智能规则助理**：
-    - **自然语言生成规则**：用自然语言描述重命名意图（例如「将日期前移、删除括号前缀、转下划线小写」），由 AI 自动分析文件特征并生成精准的 Regex 规则管道。
-    - **本地 CLI 模式**：支持 **Claude Code CLI**、**OpenAI Codex CLI** 与 **xAI Grok CLI**，直接使用本地已登录的 CLI 工具进行生成。
-    - **主流 API 与本地 Ollama**：支持 **Google Gemini**、**OpenAI**、**Anthropic** 云端 API，以及 **Ollama 本地离线模型**（免密钥、自动匹配本地模型标签）。
-    - **双层配置管理与安全中断**：支持自定义多组 AI 配置与一键切换默认，生成中途随时可即时「停止生成」并释放连接／终止进程。
-- **直观操作**：支持拖拽文件 (Drag & Drop) 与即时高亮预览重命名结果。
-- **双重重命名模式**：
-    - **Regex 模式**：支持完整强大的正则表达式语法，适合进阶批量处理。
-    - **纯文本模式**：自动处理转义字符，直观替换 `[]`、`()`、空格等特殊符号。
-- **灵活流水号**：使用 `${n}` 语法轻松插入递增数字，支持自定义起始值与位数补零（如 `${n:2}` 或 `001`）。
-- **快速与自定义模板**：内置常用模板（如移除空格、转下划线、全局序号替换），并支持将常用重命名流程保存为自定义模板随时调用。
-- **安全保护机制**：
-    - 执行前完整预览冲突检测。
-    - 支持「创建副本」保留原始文件。
-    - **窗口关闭保护**：有未应用的重命名时主动弹出确认，防止误关遗失进度。
-- **🕒 更名历史记录与日志审计**：
-    - 自动持久化存储每次重命名、副本与撤销批量操作。
-    - 可视化双栏时间轴、文件前后对照 Diff、关键词搜索与状态筛选。
-    - 一键「载入当时规则管道」，快速复现过往规则。
-    - 支持通过原生系统对话框导出 **CSV** 或 **JSON** 审计报表（支持单一聚焦批次或全局历史）。
-- **📊 底部信息状态栏**：即时呈现文件数、文件夹数、变更笔数、冲突警告、作用范围切换（仅文件名/完整名称）、AI 连接状态与撤销快捷键。
-- **质感现代化界面**：沉浸式原生 Titlebar 设计，支持侧边栏折叠收起与 macOS / Windows / Linux 深浅色主题（自动跟随系统）。
+| 平台 | 文件 |
+| --- | --- |
+| macOS（Apple Silicon / Intel） | `.dmg` |
+| Windows（64 位） | `-setup.exe` |
+| Linux | `.AppImage` 或 `.deb` |
 
-## 📥 下载与安装
+有新版本时，App 会自动提示并更新。
 
-请至 [GitHub Releases](https://github.com/junyou1998/regex-batch-renamer/releases) 下载最新安装包：
-
-- **macOS**：提供 Apple Silicon (`.dmg`) 与 Intel 安装包。
-- **Windows**：提供 64 位安装程序 (`.exe`)。
-- **Linux**：提供 AppImage 与 `.deb` 软件包。
-
-### macOS 用户注意事项
-
-若安装未签名的 macOS 版本触发 Gatekeeper 提示，可在终端执行指令手动解除隔离：
+**macOS 用户注意：** 目前尚未经过 Apple 公证。若系统提示“已损坏”或“无法打开”，请在终端执行：
 
 ```bash
 xattr -r -d com.apple.quarantine "/Applications/Renamix.app"
@@ -58,74 +62,78 @@ xattr -r -d com.apple.quarantine "/Applications/Renamix.app"
 
 ## 🚀 快速开始
 
-1. **加入文件**：将文件拖拽至窗口任意区域，或点击「加入文件 / 加入文件夹」。
-2. **新增规则**：在左侧「重命名流程」中点击「+ 新增规则」或选择「⚡ 快速模板」。
-3. **设定条件**：
-    - 输入「查找目标」与「替换为」内容。
-    - 勾选/取消勾选「使用正则表达式 (Regex)」切换模式。
-4. **预览结果**：右侧表格即时预览新文件名，变更部分以绿色高亮标记。
-5. **执行更名**：确认无误后，点击「执行重命名」直接修改文件名，或「创建副本」另存文件。
+1. **添加文件**：把文件或文件夹拖进窗口，或点击“添加文件 / 添加文件夹”（`⌘/Ctrl + O`）。
+2. **新增规则**：点击“+ 新增规则”或选择“快速模板”，输入要查找的文字与要替换成的内容。
+3. **检查预览**：右侧会显示每个新文件名，有问题的会以红色标示。
+4. **执行**：点击“执行重命名”（`⌘/Ctrl + Enter`），或“创建副本”把重命名后的文件复制到其他文件夹。
 
-## 📖 常用技巧
+随时按 `F1` 或 `⌘/Ctrl + /` 打开内置的使用说明与 Regex 教程。
 
-### 流水号 (${n})
+## 📖 Regex 与序号速查
 
-在「替换为」字段中使用序号变量：
-- `${n}`：1, 2, 3...
-- `${n:2}` 或 `${n:03}`：01, 02, 03... / 001, 002, 003...
+| 查找 | 替换为 | 结果 |
+| --- | --- | --- |
+| `\s+` | `_` | `my file name.txt` → `my_file_name.txt` |
+| `(\d{4})(\d{2})(\d{2})` | `$1-$2-$3` | `20231125.jpg` → `2023-11-25.jpg` |
+| `\s*\([^)]*\)` | （留空） | `File (copy).txt` → `File.txt` |
+| `^.*` | `Photo_${n:3}` | → `Photo_001`、`Photo_002`… |
 
-### 常用 Regex 范例
+序号变量：`${n}` → 1、2、3 · `${n:3}` → 001、002 · `${n:3:10}` → 010、011（位数 : 起始值）。
 
-- **删除空白**：查找 `\s+`，替换为 `(留空)`
-- **日期格式标准化**：查找 `(\d{4})(\d{2})(\d{2})`，替换为 `$1-$2-$3` (将 20231125 转为 2023-11-25)
-- **删除括号与内容**：查找 `\s*\([^)]*\)`，替换为 `(留空)`
+## 🤖 AI 助手
 
-## 🤖 AI 智能规则助理使用指南
+1. 点击标题栏的“✨ AI 助手”。
+2. 选择连接方式：
+   - **CLI**：使用你已登录的 Claude Code、Codex 或 Grok CLI，不需要 API Key，会沿用 CLI 当前设置的模型。
+   - **API Key**：到“设置 › AI 助手”添加 Gemini、OpenAI、Anthropic，或连接本机的 Ollama。Key 只保存在你的电脑上。
+3. 用普通的话提问，例如：
+   - “把 `IMG_20260812_093015.jpg` 改成 `2026-08-12_东京_001.jpg`”
+   - “删掉 final、copy、(1)，并把空格换成下划线”
+   - “解释当前的规则在做什么”
+4. 检查建议的规则后点击“应用”，不满意就点“撤销”。
 
-1. **开启助理**：点击右上角「✨ AI 助理」按钮展开对话侧栏。
-2. **选择或新增服务**：
-   - 默认提供 **Claude Code CLI**、**OpenAI Codex CLI** 与 **xAI Grok CLI** 本地模式（需本地已安装并登录）。
-   - 或点击「设置 > AI 助理」新增 **Google Gemini**、**OpenAI**、**Anthropic** 或 **本地 Ollama** API 配置。
-3. **自然语言提问**：
-   - 「帮我把文件名中的日期 20240101 改成 2024-01-01」
-   - 「移除动漫压制组的 [XXX] 前缀并补上 S01E 流水号」
-   - 「提取所有下划线前的文字，其余转为大写」
-4. **即时应用**：AI 会在对话中回传分析结果与重命名规则管道，并支持「自动应用」或手动一键载入至左侧重命名流程！
+**隐私：** 每次提问会发送你的消息、当前的规则与最多 30 个文件名，不会发送文件内容。
 
-## 🛠️ 开发与技术栈
+## 🧩 插件
 
-本项目全面采用现代化技术架构打造：
+点击标题栏的“插件”即可浏览[插件市场](https://github.com/junyou1998/regex-batch-renamer-plugins)，或安装 `.rbr-plugin` 文件。安装前会列出插件请求的权限（网络连接、读取你添加的文件）。插件在隔离的 Worker 中运行，无法访问其他资源。
 
-- **桌面应用框架**：[Tauri v2](https://v2.tauri.app/) (高效、极致轻量的 Rust 后端)
-- **前端框架**：[Vue 3](https://vuejs.org/) (Composition API + `<script setup>`)
-- **样式引擎**：[Tailwind CSS v4](https://tailwindcss.com/)
-- **编程语言**：[TypeScript](https://www.typescriptlang.org/) + [Rust](https://www.rust-lang.org/)
-- **构建工具**：[Vite](https://vitejs.dev/)
-- **状态管理**：[Pinia](https://pinia.vuejs.org/)
-- **国际化支持**：[Vue I18n](https://vue-i18n.intlify.dev/)
+## ⌨️ 键盘快捷键
 
-### 本地开发指令
+| 操作 | 快捷键 |
+| --- | --- |
+| 执行重命名 | `⌘/Ctrl + Enter` |
+| 撤销上一次重命名 | `⌘/Ctrl + Z` |
+| 添加文件 | `⌘/Ctrl + O` |
+| 打开使用说明 | `F1` 或 `⌘/Ctrl + /` |
+| 放大 / 缩小 / 重置缩放 | `⌘/Ctrl + +` / `−` / `0` |
+| 关闭对话框 | `Esc` |
+
+## 🛠️ 开发
+
+基于 [Tauri v2](https://v2.tauri.app/)（Rust）、[Vue 3](https://vuejs.org/)、[Pinia](https://pinia.vuejs.org/)、[Tailwind CSS v4](https://tailwindcss.com/) 与 [Vue I18n](https://vue-i18n.intlify.dev/) 构建。
 
 ```bash
-# 安装依赖 (优先使用 pnpm)
-pnpm install
-
-# 启动桌面应用开发模式 (含 Vite 热重载与 Rust 后端)
-pnpm run dev
-
-# 执行类型检查与前端构建验证
-pnpm run tauri:ci
-
-# 打包正式发行版桌面应用
-pnpm run build
+pnpm install          # 安装依赖
+pnpm dev              # 启动桌面版（支持热重载）
+pnpm tauri:ci         # 类型检查并构建前端
+pnpm build            # 构建正式版安装包
+pnpm demo             # 在浏览器中以示例文件运行界面（无需 Tauri）
 ```
 
-## ☕ 赞助开发
+重新生成本文档中的截图（需要 Google Chrome 与 `cwebp`）：
 
-如果您觉得这个工具对您有帮助，欢迎赞助我一杯咖啡，这将成为我持续开发与维护的动力！
+```bash
+pnpm demo                                # 终端 1
+node scripts/capture-screenshots.mjs     # 终端 2
+```
 
-<a href="https://www.buymeacoffee.com/junyou" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+## ☕ 支持开发
 
-## 📄 授权
+如果 Renamix 帮你节省了时间，欢迎请我喝杯咖啡：
 
-[MIT License](LICENSE)
+<a href="https://www.buymeacoffee.com/junyou" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="48" /></a>
+
+## 📄 许可证
+
+[MIT](LICENSE)

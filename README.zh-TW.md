@@ -1,56 +1,60 @@
+<div align="center">
+
+<img src="public/icon.png" width="112" alt="Renamix 圖示" />
+
 # Renamix
 
-> 支援 Regex、外掛與 AI 的批次檔案更名工具 · 原名 **Regex Batch Renamer**。
+**支援 Regex、外掛與 AI 的批次檔案更名工具，適用 macOS、Windows 與 Linux。**
 
-**繁體中文** | [简体中文](README.zh-CN.md) | [English](README.md)
+<sub>原名 <b>Regex Batch Renamer</b></sub>
 
-🌐 **官方網站**: https://renamer.junyou.tw/
+**繁體中文** · [简体中文](README.zh-CN.md) · [English](README.md)
 
-<img src="public/icon.png" align="left" width="128" style="margin-right: 24px; margin-bottom: 12px;" alt="App Icon" />
+[官方網站](https://renamer.junyou.tw/) · [下載](https://github.com/junyou1998/regex-batch-renamer/releases/latest) · [外掛](https://github.com/junyou1998/regex-batch-renamer-plugins)
 
-一個強大、極致輕量且直觀的跨平台批次更名工具 (支援 macOS / Windows / Linux)。基於 **Tauri v2 + Vue 3 + Tailwind CSS v4 + Rust** 打造，支援正規表達式 (Regex)、純文字取代、自訂快速範本與流水號功能，讓繁瑣的檔案更名工作變得流暢且簡單。
+</div>
 
-<br clear="left"/>
+<img src="assets/screenshots/zh-TW/hero.webp" alt="Renamix：左側是規則，右側即時預覽改名前後的差異" width="100%" />
+
+Renamix 能一次更名上百個檔案。把多條「尋找與取代」規則串起來，在真正修改之前先預覽每一個新檔名，不滿意一鍵復原。不會寫 Regex 也沒關係，用一般的話描述，AI 助理會幫你產生規則。
+
+## ✨ 特色
+
+- **逐步即時預覽**：規則由上而下依序套用，每個新檔名都以醒目的差異標示預覽；更名前就會標出檔名衝突。
+- **安全第一**：整批更名以「交易」方式執行，互換（`a ↔ b`）、連鎖編號、只改大小寫都能正確處理；只要有一個失敗，整批自動還原。建立副本時絕不覆蓋既有檔案。按 `⌘/Ctrl + Z` 復原上一批。
+- **Regex 或一般文字**：`.*` 切換正規表示式、`Aa` 切換不分大小寫；內建擷取群組（`$1`）、流水號（`${n:3}`）與快速範本。
+- **AI 助理**：用自己的話描述想怎麼改名。可直接使用你已登入的 Claude Code、Codex、Grok CLI，或 Gemini、OpenAI、Anthropic、本機 Ollama。建議會先預覽、確認後才套用，也能一鍵還原。
+- **外掛**：從外掛市集安裝繁簡轉換、照片 EXIF 命名等功能。外掛在隔離沙盒中執行，只能使用它宣告的權限。
+- **歷史與稽核紀錄**：每次更名、複製與復原都會記錄，可重新載入當時的規則，或匯出成 CSV / JSON。
+- **日常好用**：可加入資料夾內的檔案（含子資料夾）或直接更名資料夾、完整的鍵盤快捷鍵、淺色與深色主題，介面支援繁中、简中、English、日本語。
+
+## 📸 畫面截圖
+
+| AI 助理 | 整理雜亂檔名 |
+| --- | --- |
+| <img src="assets/screenshots/zh-TW/ai.webp" alt="AI 助理產生更名規則" /> | <img src="assets/screenshots/zh-TW/docs.webp" alt="移除檔名中的 copy、final、(1)" /> |
+| **外掛市集** | **歷史與稽核紀錄** |
+| <img src="assets/screenshots/zh-TW/plugins.webp" alt="外掛市集" /> | <img src="assets/screenshots/zh-TW/history.webp" alt="更名歷史與每個檔案的結果" /> |
+
+<details>
+<summary>深色主題</summary>
 <br />
+<img src="assets/screenshots/zh-TW/dark.webp" alt="Renamix 深色主題" width="100%" />
+</details>
 
-<img src="public/screenshot.png" alt="App Screenshot" width="800" />
+## 📥 下載安裝
 
-## ✨ 主要功能
+到 [GitHub Releases](https://github.com/junyou1998/regex-batch-renamer/releases/latest) 下載最新版本：
 
-- **🤖 AI 智慧規則助理**：
-    - **自然語言生成規則**：用大白話描述更名意圖（例如「將日期前移、刪除括號前綴、轉底線小寫」），由 AI 自動分析檔案特徵並生成精確的 Regex 規則管道。
-    - **本機 CLI 模式**：支援 **Claude Code CLI**、**OpenAI Codex CLI** 與 **xAI Grok CLI**，直接使用本機已登入的 CLI 工具進行生成。
-    - **主流 API 與本地 Ollama**：支援 **Google Gemini**、**OpenAI**、**Anthropic** 雲端 API，以及 **Ollama 本機離線模型**（免金鑰、自動匹配本機模型標籤）。
-    - **雙層配置管理與安全中斷**：支援自訂多組 AI 配置與一鍵切換預設，生成中途隨時可即時「停止生成」並釋放連線／殺死進程。
-- **直觀操作**：支援拖曳檔案 (Drag & Drop) 與即時高亮預覽更名結果。
-- **雙重更名模式**：
-    - **Regex 模式**：支援完整強大的正規表達式語法，適合進階批次處理。
-    - **純文字模式**：自動處理跳脫字元，直觀取代 `[]`、`()`、空白等特殊符號。
-- **靈活流水號**：使用 `${n}` 語法輕鬆插入遞增數字，支援自訂起始值與位數補零（如 `${n:2}` 或 `001`）。
-- **快速與自訂範本**：內建常用範本（如移除空格、轉底線、全域序號替換），並支援將常用更名流程儲存為自訂範本隨時調用。
-- **安全保護機制**：
-    - 執行前完整預覽衝突檢測。
-    - 支援「建立副本」保留原始檔案。
-    - **視窗關閉保護**：有未套用的更名時主動彈出確認，防止誤關遺失進度。
-- **🕒 更名歷程紀錄與日誌審計**：
-    - 自動持久化儲存每次更名、副本與復原批次操作。
-    - 視覺化雙欄時間軸、檔案前後對照 Diff、關鍵字搜尋與狀態篩選。
-    - 一鍵「載入當時規則管道」，快速復現過往規則。
-    - 支援透過原生系統對話框匯出 **CSV** 或 **JSON** 審計報表（支援單一聚焦批次或全域歷史）。
-- **📊 底部資訊狀態列**：即時呈現檔案數、資料夾數、變更筆數、衝突警告、作用範圍切換（僅檔名/完整名稱）、AI 連線狀態與復原快捷鍵。
-- **質感現代化介面**：沉浸式原生 Titlebar 設計，支援側邊欄折疊收合與 macOS / Windows / Linux 深淺色主題（自動跟隨系統）。
+| 平台 | 檔案 |
+| --- | --- |
+| macOS（Apple Silicon / Intel） | `.dmg` |
+| Windows（64 位元） | `-setup.exe` |
+| Linux | `.AppImage` 或 `.deb` |
 
-## 📥 下載與安裝
+有新版本時，App 會自動提示並更新。
 
-請至 [GitHub Releases](https://github.com/junyou1998/regex-batch-renamer/releases) 下載最新安裝檔：
-
-- **macOS**：提供 Apple Silicon (`.dmg`) 與 Intel 安裝檔。
-- **Windows**：提供 64 位元安裝檔 (`.exe`)。
-- **Linux**：提供 AppImage 與 `.deb` 套件。
-
-### macOS 使用者注意事項
-
-若安裝未簽章的 macOS 版本觸發 Gatekeeper 提示，可於終端機執行指令手動解除隔離：
+**macOS 使用者注意：** 目前尚未經過 Apple 公證。若系統顯示「已損毀」或「無法打開」，請在終端機執行：
 
 ```bash
 xattr -r -d com.apple.quarantine "/Applications/Renamix.app"
@@ -58,74 +62,78 @@ xattr -r -d com.apple.quarantine "/Applications/Renamix.app"
 
 ## 🚀 快速開始
 
-1. **加入檔案**：將檔案拖曳至視窗任意區域，或點擊「加入檔案 / 加入資料夾」。
-2. **新增規則**：在左側「更名流程」中點擊「+ 新增規則」或選擇「⚡ 快速範本」。
-3. **設定條件**：
-    - 輸入「尋找目標」與「取代為」內容。
-    - 勾選/取消勾選「使用正規表達式 (Regex)」切換模式。
-4. **預覽結果**：右側表格即時預覽新檔名，變更部分以綠色高亮標記。
-5. **執行更名**：確認無誤後，點擊「執行重命名」直接修改檔名，或「建立副本」另存檔案。
+1. **加入檔案**：把檔案或資料夾拖進視窗，或點「加入檔案 / 加入資料夾」（`⌘/Ctrl + O`）。
+2. **新增規則**：點「+ 新增規則」或選擇「快速範本」，輸入要尋找的文字與要取代成的內容。
+3. **檢查預覽**：右側會顯示每個新檔名，有問題的會以紅色標示。
+4. **執行**：點「執行重命名」（`⌘/Ctrl + Enter`），或「建立副本」把改好名的檔案複製到其他資料夾。
 
-## 📖 常用技巧
+隨時按 `F1` 或 `⌘/Ctrl + /` 開啟內建的使用說明與 Regex 教學。
 
-### 流水號 (${n})
+## 📖 Regex 與流水號速查
 
-在「取代為」欄位中使用序號變數：
-- `${n}`：1, 2, 3...
-- `${n:2}` 或 `${n:03}`：01, 02, 03... / 001, 002, 003...
+| 尋找 | 取代為 | 結果 |
+| --- | --- | --- |
+| `\s+` | `_` | `my file name.txt` → `my_file_name.txt` |
+| `(\d{4})(\d{2})(\d{2})` | `$1-$2-$3` | `20231125.jpg` → `2023-11-25.jpg` |
+| `\s*\([^)]*\)` | （留空） | `File (copy).txt` → `File.txt` |
+| `^.*` | `Photo_${n:3}` | → `Photo_001`、`Photo_002`… |
 
-### 常用 Regex 範例
+流水號變數：`${n}` → 1、2、3 · `${n:3}` → 001、002 · `${n:3:10}` → 010、011（位數 : 起始值）。
 
-- **刪除空白**：尋找 `\s+`，取代為 `(留空)`
-- **日期格式標準化**：尋找 `(\d{4})(\d{2})(\d{2})`，取代為 `$1-$2-$3` (將 20231125 轉為 2023-11-25)
-- **刪除括號與內容**：尋找 `\s*\([^)]*\)`，取代為 `(留空)`
+## 🤖 AI 助理
 
-## 🤖 AI 智慧規則助理使用指南
+1. 點標題列的「✨ AI 助手」。
+2. 選擇連線方式：
+   - **CLI**：使用你已登入的 Claude Code、Codex 或 Grok CLI，不需要 API Key，會沿用 CLI 目前設定的模型。
+   - **API Key**：到「設定 › AI 助理」加入 Gemini、OpenAI、Anthropic，或連接本機的 Ollama。Key 只存在你的電腦上。
+3. 用一般的話提問，例如：
+   - 「把 `IMG_20260812_093015.jpg` 改成 `2026-08-12_東京_001.jpg`」
+   - 「刪掉 final、copy、(1)，並把空白換成底線」
+   - 「解釋目前的規則在做什麼」
+4. 檢查建議的規則後按「套用」，不滿意就按「復原」。
 
-1. **開啟助理**：點擊右上角「✨ AI 助理」按鈕展開對話側欄。
-2. **選擇或新增服務**：
-   - 預設提供 **Claude Code CLI**、**OpenAI Codex CLI** 與 **xAI Grok CLI** 本機模式（需本機已安裝並登入）。
-   - 或點擊「設定 > AI 助理」新增 **Google Gemini**、**OpenAI**、**Anthropic** 或 **本機 Ollama** API 配置。
-3. **自然語言提問**：
-   - 「幫我把檔案名中的日期 20240101 改成 2024-01-01」
-   - 「移除動漫壓制組的 [XXX] 前綴並補上 S01E 流水號」
-   - 「提取所有底線前的文字，其餘轉為大寫」
-4. **即時套用**：AI 會在對話中回傳分析結果與更名規則管道，並支援「自動套用」或手動一鍵載入至左側更名流程！
+**隱私：** 每次提問會送出你的訊息、目前的規則與最多 30 個檔名，不會送出檔案內容。
 
-## 🛠️ 開發與技術棧
+## 🧩 外掛
 
-本專案全面採用現代化技術架構打造：
+點標題列的「外掛」即可瀏覽[外掛市集](https://github.com/junyou1998/regex-batch-renamer-plugins)，或安裝 `.rbr-plugin` 檔案。安裝前會列出外掛要求的權限（網路連線、讀取你加入的檔案）。外掛在隔離的 Worker 中執行，無法存取其他資源。
 
-- **桌面應用框架**：[Tauri v2](https://v2.tauri.app/) (高效、極致輕量的 Rust 後端)
-- **前端框架**：[Vue 3](https://vuejs.org/) (Composition API + `<script setup>`)
-- **樣式引擎**：[Tailwind CSS v4](https://tailwindcss.com/)
-- **程式語言**：[TypeScript](https://www.typescriptlang.org/) + [Rust](https://www.rust-lang.org/)
-- **建置工具**：[Vite](https://vitejs.dev/)
-- **狀態管理**：[Pinia](https://pinia.vuejs.org/)
-- **國際化支援**：[Vue I18n](https://vue-i18n.intlify.dev/)
+## ⌨️ 鍵盤快捷鍵
 
-### 本地開發指令
+| 動作 | 快捷鍵 |
+| --- | --- |
+| 執行重命名 | `⌘/Ctrl + Enter` |
+| 復原上一次更名 | `⌘/Ctrl + Z` |
+| 加入檔案 | `⌘/Ctrl + O` |
+| 開啟使用說明 | `F1` 或 `⌘/Ctrl + /` |
+| 放大 / 縮小 / 重設縮放 | `⌘/Ctrl + +` / `−` / `0` |
+| 關閉對話框 | `Esc` |
+
+## 🛠️ 開發
+
+使用 [Tauri v2](https://v2.tauri.app/)（Rust）、[Vue 3](https://vuejs.org/)、[Pinia](https://pinia.vuejs.org/)、[Tailwind CSS v4](https://tailwindcss.com/) 與 [Vue I18n](https://vue-i18n.intlify.dev/) 打造。
 
 ```bash
-# 安裝依賴 (優先使用 pnpm)
-pnpm install
-
-# 啟動桌面應用開發模式 (含 Vite 熱重載與 Rust 後端)
-pnpm run dev
-
-# 執行型別檢查與前端建置驗證
-pnpm run tauri:ci
-
-# 打包正式發行版桌面應用
-pnpm run build
+pnpm install          # 安裝相依套件
+pnpm dev              # 啟動桌面版（支援熱重載）
+pnpm tauri:ci         # 型別檢查並建置前端
+pnpm build            # 建置正式版安裝檔
+pnpm demo             # 在瀏覽器中以示範檔案執行介面（不需 Tauri）
 ```
 
-## ☕ 贊助開發
+重新產生本文件中的截圖（需要 Google Chrome 與 `cwebp`）：
 
-如果您覺得這個工具對您有幫助，歡迎贊助我一杯咖啡，這將成為我持續開發與維護的動力！
+```bash
+pnpm demo                                # 終端機 1
+node scripts/capture-screenshots.mjs     # 終端機 2
+```
 
-<a href="https://www.buymeacoffee.com/junyou" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+## ☕ 支持開發
+
+如果 Renamix 幫你省下了時間，歡迎請我喝杯咖啡：
+
+<a href="https://www.buymeacoffee.com/junyou" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="48" /></a>
 
 ## 📄 授權
 
-[MIT License](LICENSE)
+[MIT](LICENSE)

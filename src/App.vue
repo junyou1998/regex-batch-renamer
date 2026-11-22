@@ -661,6 +661,7 @@ async function handleCopyTo() {
       <div class="flex items-center no-drag" :style="{ paddingLeft: macTrafficLightsPadding }">
         <button
           @click="isSidebarCollapsed = !isSidebarCollapsed"
+          data-testid="toggle-sidebar"
           v-tooltip="{ title: isSidebarCollapsed ? $t('app.showSidebar') : $t('app.hideSidebar'), placement: 'bottom' }"
           class="w-6 h-6 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 hover:text-slate-900 dark:hover:text-slate-100 transition-colors cursor-pointer flex items-center justify-center"
         >
@@ -726,6 +727,7 @@ async function handleCopyTo() {
 
         <button
           @click="showPlugins = true"
+          data-testid="open-plugins"
           v-tooltip="{ title: $t('plugins.title'), placement: 'bottom' }"
           class="w-6 h-6 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 hover:text-slate-900 dark:hover:text-slate-100 transition-colors cursor-pointer flex items-center justify-center relative"
         >
@@ -734,6 +736,7 @@ async function handleCopyTo() {
 
         <button
           @click="showHistory = true"
+          data-testid="open-history"
           v-tooltip="{ title: $t('history.title'), placement: 'bottom' }"
           class="w-6 h-6 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200/80 dark:hover:bg-slate-700/80 hover:text-slate-900 dark:hover:text-slate-100 transition-colors cursor-pointer flex items-center justify-center relative"
         >
@@ -791,7 +794,7 @@ async function handleCopyTo() {
               {{ conflictMessage }}
             </div>
             <div class="grid grid-cols-2 gap-3">
-              <button @click="handleRename" :disabled="!canRename" v-tooltip="$t('app.renameShortcut')"
+              <button @click="handleRename" data-testid="rename" :disabled="!canRename" v-tooltip="$t('app.renameShortcut')"
                 class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2">
                 <LoaderCircle v-if="isProcessing" class="w-4 h-4 animate-spin" />
                 {{ isProcessing ? $t('app.processing') : $t('app.rename') }}

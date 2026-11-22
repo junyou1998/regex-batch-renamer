@@ -14,6 +14,7 @@ import type {
   FileOperationRequest,
   FileOperationResult,
 } from '../services/desktop/types'
+import pkg from '../../package.json'
 
 const DEMO_DIR = '/Users/demo/Pictures/Tokyo 2026'
 const DOCS_DIR = '/Users/demo/Documents/Project Phoenix'
@@ -34,12 +35,12 @@ export const DEMO_FILE_SETS: Record<string, string[]> = {
     'IMG_20260816_095911.jpg',
   ].map(name => `${DEMO_DIR}/${name}`),
   docs: [
-    'final_report_v2 (1).docx',
-    'Final Report v3 FINAL.docx',
+    'project_brief_v2 (1).docx',
+    'Quarterly Report v3 FINAL.docx',
     'meeting notes  2026-03-04.txt',
     'budget_draft_COPY.xlsx',
-    'Budget Draft (edited).xlsx',
-    'presentation   final   final.pptx',
+    'Budget Forecast (edited).xlsx',
+    'Kickoff Presentation final final.pptx',
     'scan0001.pdf',
     'scan0002.pdf',
     'scan0003.pdf',
@@ -94,19 +95,42 @@ function demoCopy(files: FileOperationRequest[], policy: CopyConflictPolicy): Fi
   })
 }
 
+const DEMO_REPLIES: Record<string, { reply: string; explanation: string; place: string }> = {
+  'zh-TW': {
+    reply: '我把相機檔名中的拍攝日期整理成 `YYYY-MM-DD`，再加上地點與三位數流水號；副檔名會自動保留。',
+    explanation: '步驟 1：擷取年、月、日並改寫成 `$1-$2-$3`。\n步驟 2：在結尾加上「 東京 ${n:3}」，依序產生 001、002…',
+    place: '東京',
+  },
+  'zh-CN': {
+    reply: '我把相机文件名中的拍摄日期整理成 `YYYY-MM-DD`，再加上地点与三位数序号；扩展名会自动保留。',
+    explanation: '步骤 1：捕获年、月、日并改写成 `$1-$2-$3`。\n步骤 2：在结尾加上“ 东京 ${n:3}”，依次生成 001、002…',
+    place: '东京',
+  },
+  'en-US': {
+    reply: 'I turned the camera timestamp into a `YYYY-MM-DD` date, then added the place and a 3-digit number. Extensions are kept automatically.',
+    explanation: 'Step 1: capture year, month and day and rewrite them as `$1-$2-$3`.\nStep 2: append " Tokyo ${n:3}" to number the files 001, 002…',
+    place: 'Tokyo',
+  },
+}
+
+function currentLocale(): string {
+  try {
+    return JSON.parse(localStorage.getItem('regex-batch-renamer-settings') || '{}').language || 'zh-TW'
+  } catch {
+    return 'zh-TW'
+  }
+}
+
 function demoAiResponse(request: AiChatRequest): AiChatResponse {
   const zh = /[一-鿿]/.test(request.prompt)
   if (request.sampleFilenames.some(n => /^IMG_\d{8}_\d{6}/.test(n))) {
+    const copy = DEMO_REPLIES[currentLocale()] || DEMO_REPLIES['en-US']
     return {
-      reply: zh
-        ? '我把相機檔名中的拍攝日期整理成 `YYYY-MM-DD`，並在後面加上地點與三位數流水號，副檔名會自動保留。'
-        : 'I turned the camera timestamp into a `YYYY-MM-DD` date, then added the place and a 3-digit sequence. Extensions are kept automatically.',
-      explanation: zh
-        ? '步驟 1：`IMG_(\\d{4})(\\d{2})(\\d{2})_\\d{6}` 擷取年、月、日並改寫成 `$1-$2-$3`。\n步驟 2：在結尾加上 ` Tokyo ${n:3}`，產生 001、002…'
-        : 'Step 1: `IMG_(\\d{4})(\\d{2})(\\d{2})_\\d{6}` captures year, month and day and rewrites them as `$1-$2-$3`.\nStep 2: appends ` Tokyo ${n:3}` to produce 001, 002…',
+      reply: copy.reply,
+      explanation: copy.explanation,
       pipeline: [
         { type: 'regex', params: { pattern: 'IMG_(\\d{4})(\\d{2})(\\d{2})_\\d{6}', replacement: '$1-$2-$3', useRegex: true } },
-        { type: 'regex', params: { pattern: '$', replacement: ' Tokyo ${n:3}', useRegex: true } },
+        { type: 'regex', params: { pattern: '$', replacement: ` ${copy.place} \${n:3}`, useRegex: true } },
       ],
       usage: { inputTokens: 1284, outputTokens: 212 },
       model: 'claude-opus-5-5',
@@ -177,7 +201,7 @@ export const demoDesktopBridge: DesktopBridge = {
     document.documentElement.style.zoom = String(factor)
   },
   async getRuntimeInfo() {
-    return { platform: 'darwin', runtime: 'tauri', channel: 'stable', version: '0.8.0' }
+    return { platform: 'darwin', runtime: 'tauri', channel: 'stable', version: pkg.version }
   },
   setPendingChangesHandler() {},
   clearPendingChangesHandler() {},
