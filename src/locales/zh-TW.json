@@ -83,7 +83,7 @@
         "reloadModels": "重新載入"
     },
     "app": {
-        "title": "Regex Batch Renamer",
+        "title": "Renamix",
         "subtitle": "批次更名工具",
         "showSidebar": "顯示左側面板",
         "hideSidebar": "隱藏左側面板",
@@ -182,7 +182,11 @@
         "tipToggleDesc": "停用的規則不會套用，但設定會保留。",
         "tipRemove": "刪除此規則",
         "tipReorderTitle": "拖曳調整順序",
-        "tipReorderDesc": "規則會由上而下依序套用。"
+        "tipReorderDesc": "規則會由上而下依序套用。",
+        "helpButton": "教學",
+        "emptyHelpLink": "第一次使用？看看使用說明與 Regex 教學",
+        "seeSyntaxHelp": "查看語法說明",
+        "tipRegexHelp": "不熟 Regex？按 {key} 打開教學。"
     },
     "preview": {
         "title": "預覽變更 ({n} 檔案)",
@@ -316,7 +320,18 @@
                 "replace": "取代:"
             }
         },
-        "close": "關閉"
+        "close": "關閉",
+        "shortcuts": {
+            "title": "鍵盤快捷鍵",
+            "rename": "執行重命名",
+            "undo": "復原上一次更名",
+            "addFiles": "加入檔案",
+            "help": "開啟這份說明（也可按 F1）",
+            "zoomIn": "放大介面",
+            "zoomOut": "縮小介面",
+            "zoomReset": "重設縮放",
+            "close": "關閉對話框"
+        }
     },
     "templates": {
         "sectionBuiltIn": "快速範本",

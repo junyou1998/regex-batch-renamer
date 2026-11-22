@@ -1,6 +1,6 @@
 {
     "app": {
-        "title": "Regex Batch Renamer",
+        "title": "Renamix",
         "subtitle": "Powerful Batch File Renaming Tool",
         "description": "A modern and intuitive batch file renaming tool with regex support and real-time preview."
     },
@@ -11,7 +11,7 @@
         "learnMore": "Learn More"
     },
     "features": {
-        "title": "Why Regex Batch Renamer?",
+        "title": "Why Renamix?",
         "subtitle": "Stop wasting time on manual file organization",
         "batch": {
             "title": "Tame the Chaos",
@@ -40,7 +40,7 @@
         "viewAll": "View all releases on GitHub"
     },
     "footer": {
-        "copyright": "© 2024 Regex Batch Renamer. MIT License.",
+        "copyright": "© 2026 Renamix. MIT License.",
         "github": "GitHub",
         "releases": "Releases"
     }

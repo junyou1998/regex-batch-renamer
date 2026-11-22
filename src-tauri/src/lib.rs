@@ -521,14 +521,14 @@ mod tests {
     #[test]
     fn accepts_windows_nsis_setup_exe_assets() {
         assert!(is_supported_windows_update_asset(
-            "https://example.com/Regex.Batch.Renamer_0.5.1_x64-setup.exe"
+            "https://example.com/Renamix_0.5.1_x64-setup.exe"
         ));
     }
 
     #[test]
     fn rejects_non_windows_update_assets() {
         assert!(!is_supported_windows_update_asset(
-            "https://example.com/Regex.Batch.Renamer_x64.app.tar.gz"
+            "https://example.com/Renamix_x64.app.tar.gz"
         ));
     }
 }

@@ -1,6 +1,6 @@
 {
     "app": {
-        "title": "Regex Batch Renamer",
+        "title": "Renamix",
         "subtitle": "强大的批量文件重命名工具",
         "description": "现代化且直观的批量文件重命名工具，支持正则表达式与实时预览。"
     },
@@ -11,7 +11,7 @@
         "learnMore": "了解更多"
     },
     "features": {
-        "title": "为什么选择 Regex Batch Renamer？",
+        "title": "为什么选择 Renamix？",
         "subtitle": "不再浪费时间在繁琐的手动文件整理上",
         "batch": {
             "title": "驾驭海量文件",
@@ -40,7 +40,7 @@
         "viewAll": "在 GitHub 查看所有版本"
     },
     "footer": {
-        "copyright": "© 2024 Regex Batch Renamer。MIT 许可。",
+        "copyright": "© 2026 Renamix。MIT 许可。",
         "github": "GitHub",
         "releases": "发布页面"
     }

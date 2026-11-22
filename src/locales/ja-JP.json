@@ -83,7 +83,7 @@
         "reloadModels": "再読み込み"
     },
     "app": {
-        "title": "Regex Batch Renamer",
+        "title": "Renamix",
         "subtitle": "一括リネームツール",
         "showSidebar": "サイドバーを表示",
         "hideSidebar": "サイドバーを隠す",
@@ -182,7 +182,11 @@
         "tipToggleDesc": "無効なルールは適用されませんが、設定は残ります。",
         "tipRemove": "このルールを削除",
         "tipReorderTitle": "ドラッグで並べ替え",
-        "tipReorderDesc": "ルールは上から順に適用されます。"
+        "tipReorderDesc": "ルールは上から順に適用されます。",
+        "helpButton": "ガイド",
+        "emptyHelpLink": "はじめての方へ：使い方と正規表現ガイド",
+        "seeSyntaxHelp": "構文ヘルプを見る",
+        "tipRegexHelp": "正規表現に不慣れなら {key} でガイドを開けます。"
     },
     "preview": {
         "title": "プレビュー ({n} ファイル)",
@@ -316,7 +320,18 @@
                 "replace": "置換:"
             }
         },
-        "close": "閉じる"
+        "close": "閉じる",
+        "shortcuts": {
+            "title": "キーボードショートカット",
+            "rename": "名前を変更",
+            "undo": "直前の名前変更を元に戻す",
+            "addFiles": "ファイルを追加",
+            "help": "このガイドを開く（F1 でも可）",
+            "zoomIn": "拡大",
+            "zoomOut": "縮小",
+            "zoomReset": "ズームをリセット",
+            "close": "ダイアログを閉じる"
+        }
     },
     "templates": {
         "sectionBuiltIn": "クイックテンプレート",

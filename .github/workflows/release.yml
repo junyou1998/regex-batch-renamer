@@ -98,15 +98,15 @@ jobs:
                   mkdir -p release-assets/macos
                   for file in src-tauri/target/release/bundle/dmg/*.dmg; do
                     [ -e "$file" ] || continue
-                    cp "$file" "release-assets/macos/Regex.Batch.Renamer_${GITHUB_REF_NAME#v}_${{ matrix.arch_suffix }}.dmg"
+                    cp "$file" "release-assets/macos/Renamix_${GITHUB_REF_NAME#v}_${{ matrix.arch_suffix }}.dmg"
                   done
                   for file in src-tauri/target/release/bundle/macos/*.app.tar.gz; do
                     [ -e "$file" ] || continue
-                    cp "$file" "release-assets/macos/Regex.Batch.Renamer_${{ matrix.arch_suffix }}.app.tar.gz"
+                    cp "$file" "release-assets/macos/Renamix_${{ matrix.arch_suffix }}.app.tar.gz"
                   done
                   for file in src-tauri/target/release/bundle/macos/*.app.tar.gz.sig; do
                     [ -e "$file" ] || continue
-                    cp "$file" "release-assets/macos/Regex.Batch.Renamer_${{ matrix.arch_suffix }}.app.tar.gz.sig"
+                    cp "$file" "release-assets/macos/Renamix_${{ matrix.arch_suffix }}.app.tar.gz.sig"
                   done
                   test -n "$(find release-assets/macos -type f -maxdepth 1 | head -n 1)"
 
@@ -116,23 +116,23 @@ jobs:
                   mkdir -p release-assets/linux
                   for file in src-tauri/target/release/bundle/appimage/*.AppImage; do
                     [ -e "$file" ] || continue
-                    cp "$file" "release-assets/linux/Regex.Batch.Renamer_${GITHUB_REF_NAME#v}_${{ matrix.arch_suffix }}.AppImage"
+                    cp "$file" "release-assets/linux/Renamix_${GITHUB_REF_NAME#v}_${{ matrix.arch_suffix }}.AppImage"
                   done
                   for file in src-tauri/target/release/bundle/appimage/*.AppImage.sig; do
                     [ -e "$file" ] || continue
-                    cp "$file" "release-assets/linux/Regex.Batch.Renamer_${GITHUB_REF_NAME#v}_${{ matrix.arch_suffix }}.AppImage.sig"
+                    cp "$file" "release-assets/linux/Renamix_${GITHUB_REF_NAME#v}_${{ matrix.arch_suffix }}.AppImage.sig"
                   done
                   for file in src-tauri/target/release/bundle/appimage/*.AppImage.tar.gz; do
                     [ -e "$file" ] || continue
-                    cp "$file" "release-assets/linux/Regex.Batch.Renamer_${GITHUB_REF_NAME#v}_${{ matrix.arch_suffix }}.AppImage.tar.gz"
+                    cp "$file" "release-assets/linux/Renamix_${GITHUB_REF_NAME#v}_${{ matrix.arch_suffix }}.AppImage.tar.gz"
                   done
                   for file in src-tauri/target/release/bundle/appimage/*.AppImage.tar.gz.sig; do
                     [ -e "$file" ] || continue
-                    cp "$file" "release-assets/linux/Regex.Batch.Renamer_${GITHUB_REF_NAME#v}_${{ matrix.arch_suffix }}.AppImage.tar.gz.sig"
+                    cp "$file" "release-assets/linux/Renamix_${GITHUB_REF_NAME#v}_${{ matrix.arch_suffix }}.AppImage.tar.gz.sig"
                   done
                   for file in src-tauri/target/release/bundle/deb/*.deb; do
                     [ -e "$file" ] || continue
-                    cp "$file" "release-assets/linux/Regex.Batch.Renamer_${GITHUB_REF_NAME#v}_${{ matrix.arch_suffix }}.deb"
+                    cp "$file" "release-assets/linux/Renamix_${GITHUB_REF_NAME#v}_${{ matrix.arch_suffix }}.deb"
                   done
                   test -n "$(find release-assets/linux -type f -maxdepth 1 | head -n 1)"
 
@@ -142,10 +142,10 @@ jobs:
               run: |
                   New-Item -ItemType Directory -Force -Path release-assets/windows | Out-Null
                   Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" -File -Filter "*.exe" | ForEach-Object {
-                    Copy-Item $_.FullName -Destination "release-assets/windows/Regex.Batch.Renamer_$($env:GITHUB_REF_NAME.TrimStart('v'))_${{ matrix.arch_suffix }}-setup.exe"
+                    Copy-Item $_.FullName -Destination "release-assets/windows/Renamix_$($env:GITHUB_REF_NAME.TrimStart('v'))_${{ matrix.arch_suffix }}-setup.exe"
                   }
                   Get-ChildItem -Path "src-tauri/target/release/bundle/nsis" -File -Filter "*.exe.sig" | ForEach-Object {
-                    Copy-Item $_.FullName -Destination "release-assets/windows/Regex.Batch.Renamer_$($env:GITHUB_REF_NAME.TrimStart('v'))_${{ matrix.arch_suffix }}-setup.exe.sig"
+                    Copy-Item $_.FullName -Destination "release-assets/windows/Renamix_$($env:GITHUB_REF_NAME.TrimStart('v'))_${{ matrix.arch_suffix }}-setup.exe.sig"
                   }
                   if (-not (Get-ChildItem -Path "release-assets/windows" -File -Filter "*-setup.exe" | Select-Object -First 1)) {
                     throw "Windows NSIS installer was not collected."

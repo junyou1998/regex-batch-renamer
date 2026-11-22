@@ -1,7 +1,7 @@
 {
     "name": "regex-batch-renamer",
-    "productName": "Regex Batch Renamer",
-    "description": "A powerful tool for batch renaming files using regular expressions.",
+    "productName": "Renamix",
+    "description": "Renamix — batch file renamer with regex, plugins and AI.",
     "author": {
         "name": "junyou",
         "email": "junyou1998@gmail.com"

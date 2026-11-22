@@ -10,7 +10,7 @@ use std::net::IpAddr;
 use std::time::Duration;
 
 const MAX_RESPONSE_BYTES: usize = 32 * 1024 * 1024;
-const USER_AGENT: &str = concat!("RegexBatchRenamer/", env!("CARGO_PKG_VERSION"));
+const USER_AGENT: &str = concat!("Renamix/", env!("CARGO_PKG_VERSION"));
 
 fn is_private_ip(ip: &IpAddr) -> bool {
     match ip {

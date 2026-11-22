@@ -174,7 +174,7 @@ onMounted(async () => {
             </div>
             <div
               class="relative rounded-sm md:rounded-lg lg:rounded-2xl shadow-2xl ring-1 ring-slate-900/5 lg:w-[140%] lg:max-w-none hover:scale-[1.02] transition-transform duration-500 overflow-hidden bg-slate-50">
-              <img src="/screenshot.png" alt="Regex Batch Renamer Screenshot" class="w-full scale-[1.01]">
+              <img src="/screenshot.png" alt="Renamix screenshot" class="w-full scale-[1.01]">
             </div>
           </div>
         </div>
@@ -349,7 +349,7 @@ onMounted(async () => {
     <footer class="py-12 bg-slate-900 border-t border-slate-800 text-sm">
       <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
         <div class="flex flex-col md:flex-row items-center gap-4 md:gap-8">
-          <span class="text-slate-500 font-medium">© 2026 Regex Batch Renamer.</span>
+          <span class="text-slate-500 font-medium">© 2026 Renamix.</span>
           <div class="flex items-center gap-6">
             <a :href="githubUrl" target="_blank"
               class="text-slate-400 hover:text-white transition-colors flex items-center gap-2">

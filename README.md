@@ -1,4 +1,6 @@
-# Regex Batch Renamer
+# Renamix
+
+> Batch File Renamer with Regex, Plugins & AI · Formerly **Regex Batch Renamer**.
 
 [繁體中文](README.zh-TW.md) | [简体中文](README.zh-CN.md) | **English**
 
@@ -51,7 +53,7 @@ Download the latest release from [GitHub Releases](https://github.com/junyou1998
 If an unsigned macOS build triggers a Gatekeeper warning, clear the quarantine attribute via terminal:
 
 ```bash
-xattr -r -d com.apple.quarantine "/Applications/Regex Batch Renamer.app"
+xattr -r -d com.apple.quarantine "/Applications/Renamix.app"
 ```
 
 ## 🚀 Quick Start

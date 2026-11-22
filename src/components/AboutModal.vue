@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useEscapeToClose } from '../composables/useEscapeToClose'
 import { computed, ref, watch } from 'vue'
 import { renderSafeMarkdown } from '../utils/markdown'
 import { useToastStore } from '../stores/toastStore'
@@ -22,9 +23,11 @@ const props = defineProps<{
     postUpdateVersion?: string | null
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
     (e: 'update:modelValue', value: boolean): void
 }>()
+
+useEscapeToClose(() => props.modelValue, () => emit('update:modelValue', false))
 
 const showChangelog = ref(props.initialView === 'changelog')
 const releases = ref<ReleaseInfo[]>([])
@@ -348,7 +351,7 @@ async function openChangelogForTag(tagName: string) {
                                 <a href="#" @click.prevent="openExternal('https://renamer.junyou.tw')"
                                     class="inline-block hover:underline decoration-slate-400 dark:decoration-slate-600 underline-offset-4 cursor-pointer"
                                     v-tooltip="'https://renamer.junyou.tw'">
-                                    <h4 class="text-xl font-bold text-slate-800 dark:text-white">Regex Batch Renamer
+                                    <h4 class="text-xl font-bold text-slate-800 dark:text-white">Renamix
                                     </h4>
                                 </a>
                                 <div

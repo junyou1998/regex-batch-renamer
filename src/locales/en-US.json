@@ -83,7 +83,7 @@
         "reloadModels": "Reload"
     },
     "app": {
-        "title": "Regex Batch Renamer",
+        "title": "Renamix",
         "subtitle": "Batch Renaming Tool",
         "showSidebar": "Show Sidebar",
         "hideSidebar": "Hide Sidebar",
@@ -182,7 +182,11 @@
         "tipToggleDesc": "Turned-off rules are skipped but keep their settings.",
         "tipRemove": "Delete this rule",
         "tipReorderTitle": "Drag to reorder",
-        "tipReorderDesc": "Rules run from top to bottom."
+        "tipReorderDesc": "Rules run from top to bottom.",
+        "helpButton": "Guide",
+        "emptyHelpLink": "New here? Read the guide and regex basics",
+        "seeSyntaxHelp": "See syntax help",
+        "tipRegexHelp": "New to regex? Press {key} for the guide."
     },
     "preview": {
         "title": "Preview Changes ({n} files)",
@@ -316,7 +320,18 @@
                 "replace": "Replace:"
             }
         },
-        "close": "Close"
+        "close": "Close",
+        "shortcuts": {
+            "title": "Keyboard shortcuts",
+            "rename": "Rename",
+            "undo": "Undo the last rename",
+            "addFiles": "Add files",
+            "help": "Open this guide (or F1)",
+            "zoomIn": "Zoom in",
+            "zoomOut": "Zoom out",
+            "zoomReset": "Reset zoom",
+            "close": "Close a dialog"
+        }
     },
     "templates": {
         "sectionBuiltIn": "Quick Templates",

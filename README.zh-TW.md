@@ -1,4 +1,6 @@
-# Regex Batch Renamer
+# Renamix
+
+> 支援 Regex、外掛與 AI 的批次檔案更名工具 · 原名 **Regex Batch Renamer**。
 
 **繁體中文** | [简体中文](README.zh-CN.md) | [English](README.md)
 
@@ -51,7 +53,7 @@
 若安裝未簽章的 macOS 版本觸發 Gatekeeper 提示，可於終端機執行指令手動解除隔離：
 
 ```bash
-xattr -r -d com.apple.quarantine "/Applications/Regex Batch Renamer.app"
+xattr -r -d com.apple.quarantine "/Applications/Renamix.app"
 ```
 
 ## 🚀 快速開始

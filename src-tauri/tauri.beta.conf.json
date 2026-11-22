@@ -1,11 +1,11 @@
 {
-  "productName": "Regex Batch Renamer Beta",
+  "productName": "Renamix Beta",
   "identifier": "com.junyou.regexbatchrenamer.beta",
   "app": {
     "windows": [
       {
         "label": "main",
-        "title": "Regex Batch Renamer Beta",
+        "title": "Renamix Beta",
         "width": 1200,
         "height": 800,
         "dragDropEnabled": true,

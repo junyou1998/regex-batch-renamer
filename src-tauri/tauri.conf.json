@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Regex Batch Renamer",
+  "productName": "Renamix",
   "version": "0.7.1",
   "identifier": "com.junyou.regexbatchrenamer",
   "build": {
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Regex Batch Renamer",
+        "title": "Renamix",
         "width": 1200,
         "height": 800,
         "dragDropEnabled": true,

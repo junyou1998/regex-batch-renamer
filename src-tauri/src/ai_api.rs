@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::time::Duration;
 
-pub const USER_AGENT: &str = concat!("RegexBatchRenamer/", env!("CARGO_PKG_VERSION"));
+pub const USER_AGENT: &str = concat!("Renamix/", env!("CARGO_PKG_VERSION"));
 
 pub const DEFAULT_ANTHROPIC_MODEL: &str = "claude-opus-5-5";
 pub const DEFAULT_OPENAI_MODEL: &str = "gpt-5.5";

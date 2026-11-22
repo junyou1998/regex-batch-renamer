@@ -23,14 +23,14 @@ test('buildManifest uses the Windows NSIS installer asset for stable manifests',
   const assetsDir = await makeAssets()
   const output = path.join(assetsDir, 'out', 'stable.json')
 
-  await writeFile(path.join(assetsDir, 'macos', 'Regex.Batch.Renamer_aarch64.app.tar.gz'))
-  await writeFile(path.join(assetsDir, 'macos', 'Regex.Batch.Renamer_aarch64.app.tar.gz.sig'), 'mac-arm')
-  await writeFile(path.join(assetsDir, 'macos', 'Regex.Batch.Renamer_x64.app.tar.gz'))
-  await writeFile(path.join(assetsDir, 'macos', 'Regex.Batch.Renamer_x64.app.tar.gz.sig'), 'mac-x64')
-  await writeFile(path.join(assetsDir, 'linux', 'Regex.Batch.Renamer_0.5.1_amd64.AppImage'))
-  await writeFile(path.join(assetsDir, 'linux', 'Regex.Batch.Renamer_0.5.1_amd64.AppImage.sig'), 'linux')
-  await writeFile(path.join(assetsDir, 'windows', 'Regex.Batch.Renamer_0.5.1_x64-setup.exe'))
-  await writeFile(path.join(assetsDir, 'windows', 'Regex.Batch.Renamer_0.5.1_x64-setup.exe.sig'), 'windows')
+  await writeFile(path.join(assetsDir, 'macos', 'Renamix_aarch64.app.tar.gz'))
+  await writeFile(path.join(assetsDir, 'macos', 'Renamix_aarch64.app.tar.gz.sig'), 'mac-arm')
+  await writeFile(path.join(assetsDir, 'macos', 'Renamix_x64.app.tar.gz'))
+  await writeFile(path.join(assetsDir, 'macos', 'Renamix_x64.app.tar.gz.sig'), 'mac-x64')
+  await writeFile(path.join(assetsDir, 'linux', 'Renamix_0.5.1_amd64.AppImage'))
+  await writeFile(path.join(assetsDir, 'linux', 'Renamix_0.5.1_amd64.AppImage.sig'), 'linux')
+  await writeFile(path.join(assetsDir, 'windows', 'Renamix_0.5.1_x64-setup.exe'))
+  await writeFile(path.join(assetsDir, 'windows', 'Renamix_0.5.1_x64-setup.exe.sig'), 'windows')
 
   await buildManifest({
     assetsDir,
@@ -43,7 +43,7 @@ test('buildManifest uses the Windows NSIS installer asset for stable manifests',
   const manifest = JSON.parse(await fs.readFile(output, 'utf8'))
   assert.equal(
     manifest.platforms['windows-x86_64'].url,
-    'https://github.com/junyou1998/regex-batch-renamer/releases/download/v0.5.1/Regex.Batch.Renamer_0.5.1_x64-setup.exe',
+    'https://github.com/junyou1998/regex-batch-renamer/releases/download/v0.5.1/Renamix_0.5.1_x64-setup.exe',
   )
   assert.equal(manifest.platforms['windows-x86_64'].signature, 'windows')
 })
@@ -52,12 +52,12 @@ test('buildManifest fails when the Windows NSIS installer asset is missing', asy
   const assetsDir = await makeAssets()
   const output = path.join(assetsDir, 'out', 'stable.json')
 
-  await writeFile(path.join(assetsDir, 'macos', 'Regex.Batch.Renamer_aarch64.app.tar.gz'))
-  await writeFile(path.join(assetsDir, 'macos', 'Regex.Batch.Renamer_aarch64.app.tar.gz.sig'), 'mac-arm')
-  await writeFile(path.join(assetsDir, 'macos', 'Regex.Batch.Renamer_x64.app.tar.gz'))
-  await writeFile(path.join(assetsDir, 'macos', 'Regex.Batch.Renamer_x64.app.tar.gz.sig'), 'mac-x64')
-  await writeFile(path.join(assetsDir, 'linux', 'Regex.Batch.Renamer_0.5.1_amd64.AppImage'))
-  await writeFile(path.join(assetsDir, 'linux', 'Regex.Batch.Renamer_0.5.1_amd64.AppImage.sig'), 'linux')
+  await writeFile(path.join(assetsDir, 'macos', 'Renamix_aarch64.app.tar.gz'))
+  await writeFile(path.join(assetsDir, 'macos', 'Renamix_aarch64.app.tar.gz.sig'), 'mac-arm')
+  await writeFile(path.join(assetsDir, 'macos', 'Renamix_x64.app.tar.gz'))
+  await writeFile(path.join(assetsDir, 'macos', 'Renamix_x64.app.tar.gz.sig'), 'mac-x64')
+  await writeFile(path.join(assetsDir, 'linux', 'Renamix_0.5.1_amd64.AppImage'))
+  await writeFile(path.join(assetsDir, 'linux', 'Renamix_0.5.1_amd64.AppImage.sig'), 'linux')
 
   await assert.rejects(
     buildManifest({

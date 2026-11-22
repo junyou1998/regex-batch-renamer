@@ -1,7 +1,7 @@
 [package]
 name = "regex-batch-renamer-beta"
 version = "0.7.1"
-description = "Tauri beta shell for Regex Batch Renamer"
+description = "Renamix — batch file renamer with regex, plugins and AI"
 authors = ["junyou"]
 edition = "2021"
 
