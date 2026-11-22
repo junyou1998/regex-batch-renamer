@@ -141,8 +141,9 @@ async function checkForUpdates() {
             if (update?.available && update.version) {
                 hasUpdate.value = true
                 latestVersion.value = normalizeReleaseVersion(update.version)
-                return
             }
+            // The updater already answered; no need to also ask the GitHub API.
+            if (update) return
         }
 
         const release = await getLatestRelease({ channel: runtimeInfo.value?.channel })
@@ -159,11 +160,11 @@ async function checkForUpdates() {
     }
 }
 
-async function fetchChangelog() {
+async function fetchChangelog(force = false) {
     isLoading.value = true
     error.value = ''
     try {
-        const history = await getReleases({ channel: runtimeInfo.value?.channel })
+        const history = await getReleases({ channel: runtimeInfo.value?.channel, force })
         releases.value = history
         if (!focusedReleaseTag.value && history.length > 0) {
             focusedReleaseTag.value = history[0].tagName
@@ -282,12 +283,21 @@ async function openChangelogForTag(tagName: string) {
                                 <LoaderCircle class="animate-spin h-6 w-6" />
                                 <span class="ml-2">{{ $t('about.changelogLoading') }}</span>
                             </div>
-                            <div v-else-if="error" class="text-center text-red-500 py-8">
-                                {{ $t('about.changelogError') }}
-                            </div>
-                            <div v-else-if="releases.length === 0"
-                                class="text-center text-slate-500 dark:text-slate-400 py-8">
-                                {{ $t('about.changelogEmpty') }}
+                            <div v-else-if="error || releases.length === 0"
+                                class="flex flex-col items-center gap-3 py-8 text-center">
+                                <p class="text-sm text-slate-600 dark:text-slate-300">
+                                    {{ error ? $t('about.changelogError') : $t('about.changelogEmpty') }}
+                                </p>
+                                <div class="flex gap-2">
+                                    <button @click="fetchChangelog(true)"
+                                        class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-control font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 cursor-pointer">
+                                        <RefreshCw class="h-3.5 w-3.5" /> {{ $t('about.retry') }}
+                                    </button>
+                                    <button @click="openExternal(getReleasePageUrl())"
+                                        class="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-control font-medium text-white hover:bg-blue-700 cursor-pointer">
+                                        <ExternalLink class="h-3.5 w-3.5" /> {{ $t('about.viewOnGithub') }}
+                                    </button>
+                                </div>
                             </div>
                             <div v-else class="space-y-4">
                                 <div v-if="postUpdateVersion && highlightedRelease"
@@ -332,7 +342,7 @@ async function openChangelogForTag(tagName: string) {
 
                                 <div class="text-center pt-2">
                                     <a href="#"
-                                        @click.prevent="openExternal('https://github.com/junyou1998/regex-batch-renamer/releases')"
+                                        @click.prevent="openExternal(getReleasePageUrl())"
                                         class="text-blue-500 hover:underline text-sm cursor-pointer">{{
                                             $t('about.viewOnGithub') }}</a>
                                 </div>
@@ -386,7 +396,7 @@ async function openChangelogForTag(tagName: string) {
                                     {{ isInstallingUpdate ? $t('about.installingUpdate') : $t('about.installUpdate') }}
                                 </button>
                                 <a v-else-if="hasUpdate" href="#"
-                                    @click.prevent="openExternal('https://github.com/junyou1998/regex-batch-renamer/releases')"
+                                    @click.prevent="openExternal(getReleasePageUrl())"
                                     class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2 cursor-pointer">
                                     <RefreshCw class="h-4 w-4" /> {{ $t('about.downloadUpdate') }}
                                 </a>

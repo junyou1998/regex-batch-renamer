@@ -1,6 +1,14 @@
+import { desktop } from './desktop'
+
+/** GitHub repository that hosts releases. GitHub redirects the old name after a rename. */
+export const REPO = 'junyou1998/regex-batch-renamer'
+export const REPO_URL = `https://github.com/${REPO}`
+
 const CACHE_TTL_MS = 5 * 60 * 1000
-const RELEASES_API = 'https://api.github.com/repos/junyou1998/regex-batch-renamer/releases'
-const RELEASES_PAGE = 'https://github.com/junyou1998/regex-batch-renamer/releases'
+const RELEASES_API = `https://api.github.com/repos/${REPO}/releases`
+const RELEASES_PAGE = `${REPO_URL}/releases`
+const RELEASES_ATOM = `${REPO_URL}/releases.atom`
+const STORED_RELEASES_KEY = 'renamix:releases:'
 
 type ReleaseChannel = 'stable' | 'beta'
 
@@ -115,12 +123,73 @@ export function isNewerVersion(currentVersion: string, nextVersion: string) {
 
 async function fetchReleasesFromApi(): Promise<ReleaseInfo[]> {
   const res = await fetch(`${RELEASES_API}?per_page=20`)
-  if (!res.ok) return []
+  // 403/429 usually means the unauthenticated rate limit (60 requests/hour per IP).
+  if (!res.ok) throw new Error(`GitHub API HTTP ${res.status}`)
 
   const data = await res.json()
-  if (!Array.isArray(data)) return []
+  if (!Array.isArray(data)) throw new Error('Unexpected GitHub API response')
 
   return data.map(mapRelease)
+}
+
+/** Parse GitHub's releases Atom feed. It is not rate limited like the REST API, but has no assets. */
+export function parseReleasesAtom(xml: string): ReleaseInfo[] {
+  const doc = new DOMParser().parseFromString(xml, 'application/xml')
+  if (doc.querySelector('parsererror')) throw new Error('Invalid releases feed')
+
+  return Array.from(doc.getElementsByTagName('entry')).flatMap((entry) => {
+    const link = entry.getElementsByTagName('link')[0]?.getAttribute('href') ?? ''
+    const tagName = decodeURIComponent(link.split('/releases/tag/')[1] ?? '')
+    if (!tagName) return []
+    return [{
+      tagName,
+      htmlUrl: link,
+      // Atom carries the release notes as rendered HTML; renderSafeMarkdown sanitizes it.
+      body: entry.getElementsByTagName('content')[0]?.textContent ?? '',
+      publishedAt: entry.getElementsByTagName('updated')[0]?.textContent ?? '',
+      prerelease: tagName.startsWith('beta-v'),
+      assets: [],
+    }]
+  })
+}
+
+async function fetchReleasesFromAtom(): Promise<ReleaseInfo[]> {
+  return parseReleasesAtom(await desktop.fetchRemoteText(RELEASES_ATOM))
+}
+
+function readStoredReleases(channel: ReleaseChannel): ReleaseInfo[] | null {
+  try {
+    const raw = localStorage.getItem(STORED_RELEASES_KEY + channel)
+    const data = raw ? JSON.parse(raw) : null
+    return Array.isArray(data) && data.length > 0 ? data : null
+  } catch {
+    return null
+  }
+}
+
+function storeReleases(channel: ReleaseChannel, releases: ReleaseInfo[]) {
+  try {
+    if (releases.length > 0) localStorage.setItem(STORED_RELEASES_KEY + channel, JSON.stringify(releases))
+  } catch {
+    // Storage full or unavailable: the in-memory cache still works.
+  }
+}
+
+/** REST API first, then the Atom feed, then the last list we saw. Throws only when all three fail. */
+async function loadReleases(channel: ReleaseChannel): Promise<ReleaseInfo[]> {
+  const pick = (releases: ReleaseInfo[]) => sortByPublishedAtDesc(filterChannelReleases(releases, channel))
+  for (const source of [fetchReleasesFromApi, fetchReleasesFromAtom]) {
+    try {
+      const releases = pick(await source())
+      storeReleases(channel, releases)
+      return releases
+    } catch (error) {
+      console.warn('Release source failed', error)
+    }
+  }
+  const stored = readStoredReleases(channel)
+  if (stored) return stored
+  throw new Error('Could not load releases')
 }
 
 export async function getReleases(options?: { force?: boolean; channel?: ReleaseChannel }): Promise<ReleaseInfo[]> {
@@ -134,8 +203,7 @@ export async function getReleases(options?: { force?: boolean; channel?: Release
     if (inflight[channel]) return inflight[channel]!
   }
 
-  const request = fetchReleasesFromApi()
-    .then((releases) => sortByPublishedAtDesc(filterChannelReleases(releases, channel)))
+  const request = loadReleases(channel)
     .finally(() => {
       inflight[channel] = null
     })
