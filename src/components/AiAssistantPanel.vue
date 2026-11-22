@@ -223,7 +223,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
             v-if="aiStore.messages.length > 0"
             @click="aiStore.clearHistory"
             class="p-1.5 rounded-md text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-            :title="$t('ai.clearChat')"
+            v-tooltip="{ title: $t('ai.clearChat'), placement: 'bottom' }"
           >
             <Trash2 class="w-3.5 h-3.5" />
           </button>
@@ -231,7 +231,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
           <button
             @click="aiStore.closeDrawer"
             class="p-1.5 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-            :title="$t('ai.closePanel')"
+            v-tooltip="{ title: $t('ai.closePanel'), placement: 'bottom' }"
           >
             <X class="w-4 h-4" />
           </button>
@@ -271,7 +271,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
             @click="aiStore.checkStatus()"
             :disabled="aiStore.isCheckingStatus"
             class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5 rounded-sm transition-colors cursor-pointer shrink-0 ml-0.5"
-            :title="$t('ai.refreshStatus')"
+            v-tooltip="{ title: $t('ai.refreshStatus'), placement: 'bottom' }"
           >
             <RefreshCw
               class="w-3 h-3"
@@ -283,7 +283,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
         <!-- Auto Apply Checkbox -->
         <label
           class="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300 cursor-pointer select-none shrink-0"
-          :title="$t('ai.autoApplyDesc')"
+          v-tooltip="{ title: $t('ai.autoApplyDesc'), placement: 'bottom' }"
         >
           <input
             type="checkbox"
@@ -668,7 +668,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
             type="button"
             @click="aiStore.stopGeneration()"
             class="px-2 py-0.5 rounded-md text-[11px] font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 border border-red-200 dark:border-red-800/60 transition-colors flex items-center gap-1 cursor-pointer shrink-0 ml-1"
-            :title="$t('ai.stopGenerating')"
+            v-tooltip="$t('ai.stopGenerating')"
           >
             <Square class="w-2.5 h-2.5 fill-current" />
             <span>{{ $t('ai.stopGenerating') }}</span>
@@ -723,7 +723,7 @@ function handleApplyPipeline(msg: AiMessageItem) {
             type="button"
             @click="aiStore.stopGeneration()"
             class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer flex items-center gap-1.5 animate-pulse"
-            :title="$t('ai.stopGenerating')"
+            v-tooltip="$t('ai.stopGenerating')"
           >
             <Square class="w-3.5 h-3.5 fill-current" />
             <span>{{ $t('ai.stopGenerating') }}</span>

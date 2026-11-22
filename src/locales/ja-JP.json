@@ -424,7 +424,7 @@
         "foldersCount": "{n} 個のフォルダ",
         "changedCount": "{n} 件変更予定",
         "noChanges": "変更なし",
-        "activeRules": "{active}/{total} ルール有効",
+        "activeRules": "{total} 件中 {active} 件のルールが有効",
         "noRules": "ルールなし",
         "conflictWarning": "{n} 件の競合",
         "scopeFilename": "ファイル名のみ",
@@ -435,7 +435,8 @@
         "aiReady": "準備完了",
         "aiOffline": "未準備",
         "history": "履歴 ({n})",
-        "plugins": "プラグイン ({n})"
+        "plugins": "プラグイン ({n})",
+        "filesInFolders": "{files} 件のファイル（{folders} フォルダ）"
     },
     "history": {
         "title": "変更履歴と監査ログ",
@@ -487,7 +488,11 @@
         "jsonFormat": "JSON データファイル (.json)",
         "collapse": "折りたたむ",
         "expand": "展開",
-        "noMatchingFiles": "該当するファイル記録はありません"
+        "noMatchingFiles": "該当するファイル記録はありません",
+        "fileSuccess": "成功",
+        "fileUndone": "元に戻しました",
+        "fileConflict": "競合",
+        "fileFailed": "失敗"
     },
     "plugins": {
         "title": "プラグイン",

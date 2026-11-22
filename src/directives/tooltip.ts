@@ -45,7 +45,7 @@ function ensureTip(): HTMLDivElement {
   tipEl.id = 'app-tooltip'
   tipEl.className =
     'app-tooltip pointer-events-none fixed z-[100001] max-w-[260px] rounded-lg bg-slate-900/95 dark:bg-slate-700/95 ' +
-    'px-2.5 py-1.5 text-[11.5px] leading-snug text-white shadow-xl ring-1 ring-white/10 backdrop-blur-sm ' +
+    'px-2.5 py-1.5 text-[11.5px] leading-snug text-white shadow-xl ring-1 ring-white/10 backdrop-blur-sm [overflow-wrap:anywhere] ' +
     'opacity-0 transition-opacity duration-100'
   document.body.appendChild(tipEl)
   return tipEl

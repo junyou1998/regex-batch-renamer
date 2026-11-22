@@ -167,15 +167,15 @@ function formatDate(ts: number): string {
                             <!-- Actions -->
                             <div
                                 class="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button @click="handleLoad(preset)" :title="$t('templates.load')"
+                                <button @click="handleLoad(preset)" v-tooltip="$t('templates.load')"
                                     class="p-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-md transition-colors cursor-pointer">
                                     <Download class="h-4 w-4" />
                                 </button>
-                                <button @click="startRename(preset)" :title="$t('templates.rename')"
+                                <button @click="startRename(preset)" v-tooltip="$t('templates.rename')"
                                     class="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-md transition-colors cursor-pointer">
                                     <Pencil class="h-4 w-4" />
                                 </button>
-                                <button @click="handleDelete(preset)" :title="$t('templates.delete')"
+                                <button @click="handleDelete(preset)" v-tooltip="$t('templates.delete')"
                                     class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-md transition-colors cursor-pointer">
                                     <Trash2 class="h-4 w-4" />
                                 </button>

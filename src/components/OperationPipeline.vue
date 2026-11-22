@@ -626,13 +626,13 @@ function confirmPrefixSuffix() {
 
         <button type="button" @click="showHelp = true"
           class="text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer"
-          :title="$t('operations.helpTitle')">
+          v-tooltip="{ title: $t('operations.helpTitle'), placement: 'bottom' }">
           <HelpCircle class="h-4 w-4" />
         </button>
 
         <button type="button" v-if="canUndo" @click="emit('undo')"
           class="text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer ml-1"
-          :title="$t('app.undo')">
+          v-tooltip="{ title: $t('app.undo'), placement: 'bottom' }">
           <Undo2 class="h-4 w-4" />
         </button>
       </h2>
@@ -848,7 +848,7 @@ function confirmPrefixSuffix() {
                 'bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800/60 hover:bg-red-100 dark:hover:bg-red-900/60': pluginStore.getPluginHealth(op.params?.pluginId).status === 'unhealthy',
                 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700': pluginStore.getPluginHealth(op.params?.pluginId).status === 'unknown' || pluginStore.getPluginHealth(op.params?.pluginId).status === 'checking'
               }"
-              :title="pluginStore.getPluginHealth(op.params?.pluginId).message || $t('plugins.clickToCheckHealth')"
+              v-tooltip="pluginStore.getPluginHealth(op.params?.pluginId).message || $t('plugins.clickToCheckHealth')"
             >
               <span
                 v-if="pluginStore.getPluginHealth(op.params?.pluginId).status === 'healthy'"
@@ -1016,7 +1016,7 @@ function confirmPrefixSuffix() {
                           ? 'bg-blue-600 text-white shadow-xs'
                           : 'bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950/70 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 border border-slate-200 dark:border-slate-700'
                       ]"
-                      :title="$t('plugins.showVariables')"
+                      v-tooltip="$t('plugins.showVariables')"
                     >
                       <Braces class="w-3 h-3" :class="{ 'text-white': activeVarPicker?.opId === op.id && activeVarPicker?.key === option.key, 'text-blue-500': activeVarPicker?.opId !== op.id || activeVarPicker?.key !== option.key }" />
                       <span>{{ $t('plugins.variables') }}</span>

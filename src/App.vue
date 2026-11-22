@@ -762,7 +762,7 @@ async function handleCopyTo() {
           <!-- Sidebar Brand Title (Fixed Header 1) -->
           <div class="p-4 border-b border-slate-200 dark:border-slate-800 shrink-0">
             <a href="#" @click.prevent="openExternal('https://renamer.junyou.tw')"
-              class="block transition-opacity hover:opacity-80 cursor-pointer" title="https://renamer.junyou.tw">
+              class="block transition-opacity hover:opacity-80 cursor-pointer" v-tooltip="'https://renamer.junyou.tw'">
               <h1
                 class="text-lg font-bold bg-linear-to-r from-blue-600 to-cyan-500 dark:from-blue-400 dark:to-cyan-300 bg-clip-text text-transparent leading-snug">
                 {{ $t('app.title') }}
@@ -783,7 +783,7 @@ async function handleCopyTo() {
               {{ conflictMessage }}
             </div>
             <div class="grid grid-cols-2 gap-3">
-              <button @click="handleRename" :disabled="!canRename" :title="$t('app.renameShortcut')"
+              <button @click="handleRename" :disabled="!canRename" v-tooltip="$t('app.renameShortcut')"
                 class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2">
                 <LoaderCircle v-if="isProcessing" class="w-4 h-4 animate-spin" />
                 {{ isProcessing ? $t('app.processing') : $t('app.rename') }}

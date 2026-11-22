@@ -424,7 +424,7 @@
         "foldersCount": "{n} folders",
         "changedCount": "{n} to change",
         "noChanges": "No changes",
-        "activeRules": "{active}/{total} rules active",
+        "activeRules": "{active} of {total} rules active",
         "noRules": "No rules",
         "conflictWarning": "{n} conflicts",
         "scopeFilename": "Name only",
@@ -435,7 +435,8 @@
         "aiReady": "Ready",
         "aiOffline": "Offline",
         "history": "History ({n})",
-        "plugins": "Plugins ({n})"
+        "plugins": "Plugins ({n})",
+        "filesInFolders": "{files} files in {folders} folders"
     },
     "history": {
         "title": "Renaming History & Audit Log",
@@ -487,7 +488,11 @@
         "jsonFormat": "JSON Data File (.json)",
         "collapse": "Collapse",
         "expand": "Expand",
-        "noMatchingFiles": "No matching file records"
+        "noMatchingFiles": "No matching file records",
+        "fileSuccess": "Done",
+        "fileUndone": "Undone",
+        "fileConflict": "Conflict",
+        "fileFailed": "Failed"
     },
     "plugins": {
         "title": "Plugins",

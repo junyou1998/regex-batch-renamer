@@ -844,7 +844,7 @@ function handleThemeChange(event: MouseEvent, value: 'auto' | 'light' | 'dark') 
                         type="button"
                         @click="showApiKey = !showApiKey"
                         class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                        :title="showApiKey ? $t('settings.hideApiKey') : $t('settings.showApiKey')"
+                        v-tooltip="showApiKey ? $t('settings.hideApiKey') : $t('settings.showApiKey')"
                         :aria-label="showApiKey ? $t('settings.hideApiKey') : $t('settings.showApiKey')"
                       >
                         <EyeOff v-if="showApiKey" class="w-4 h-4" />

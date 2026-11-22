@@ -102,7 +102,7 @@ const themeTooltip = computed(() => {
 </script>
 
 <template>
-    <button @click="cycleTheme" :title="themeTooltip"
+    <button @click="cycleTheme" v-tooltip="themeTooltip"
         class="p-1.5 rounded-md text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
         <Monitor v-if="themeStore.themeMode === 'auto'" class="w-5 h-5" />
         <Sun v-else-if="themeStore.themeMode === 'light'" class="w-5 h-5" />

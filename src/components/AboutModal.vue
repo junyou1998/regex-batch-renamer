@@ -342,12 +342,12 @@ async function openChangelogForTag(tagName: string) {
                             <div class="text-center space-y-2">
                                 <a href="#" @click.prevent="openExternal('https://renamer.junyou.tw')"
                                     class="block transition-transform hover:scale-105 active:scale-95 cursor-pointer w-fit mx-auto"
-                                    title="https://renamer.junyou.tw">
+                                    v-tooltip="'https://renamer.junyou.tw'">
                                     <img src="/icon.png" alt="App Icon" class="w-24 h-24 mx-auto mb-4" />
                                 </a>
                                 <a href="#" @click.prevent="openExternal('https://renamer.junyou.tw')"
                                     class="inline-block hover:underline decoration-slate-400 dark:decoration-slate-600 underline-offset-4 cursor-pointer"
-                                    title="https://renamer.junyou.tw">
+                                    v-tooltip="'https://renamer.junyou.tw'">
                                     <h4 class="text-xl font-bold text-slate-800 dark:text-white">Regex Batch Renamer
                                     </h4>
                                 </a>

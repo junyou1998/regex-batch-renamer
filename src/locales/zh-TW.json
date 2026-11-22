@@ -424,7 +424,7 @@
         "foldersCount": "{n} 個資料夾",
         "changedCount": "{n} 個將變更",
         "noChanges": "無變更",
-        "activeRules": "{active}/{total} 規則啟用",
+        "activeRules": "{active} 條規則啟用中，共 {total} 條",
         "noRules": "無規則",
         "conflictWarning": "{n} 個衝突",
         "scopeFilename": "僅檔名",
@@ -435,7 +435,8 @@
         "aiReady": "就緒",
         "aiOffline": "未就緒",
         "history": "歷程 ({n})",
-        "plugins": "插件 ({n})"
+        "plugins": "插件 ({n})",
+        "filesInFolders": "{files} 個檔案，分布在 {folders} 個資料夾"
     },
     "history": {
         "title": "更名歷程日誌",
@@ -487,7 +488,11 @@
         "jsonFormat": "JSON 資料檔案 (.json)",
         "collapse": "收合",
         "expand": "展開",
-        "noMatchingFiles": "沒有符合條件的檔案紀錄"
+        "noMatchingFiles": "沒有符合條件的檔案紀錄",
+        "fileSuccess": "成功",
+        "fileUndone": "已復原",
+        "fileConflict": "衝突",
+        "fileFailed": "失敗"
     },
     "plugins": {
         "title": "外掛插件",

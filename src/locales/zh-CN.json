@@ -424,7 +424,7 @@
         "foldersCount": "{n} 个文件夹",
         "changedCount": "{n} 个将变更",
         "noChanges": "无变更",
-        "activeRules": "{active}/{total} 规则启用",
+        "activeRules": "{active} 条规则启用中，共 {total} 条",
         "noRules": "无规则",
         "conflictWarning": "{n} 个冲突",
         "scopeFilename": "仅文件名",
@@ -435,7 +435,8 @@
         "aiReady": "就绪",
         "aiOffline": "未就绪",
         "history": "历程 ({n})",
-        "plugins": "插件 ({n})"
+        "plugins": "插件 ({n})",
+        "filesInFolders": "{files} 个文件，分布在 {folders} 个文件夹"
     },
     "history": {
         "title": "重命名历程日志",
@@ -487,7 +488,11 @@
         "jsonFormat": "JSON 数据文件 (.json)",
         "collapse": "收起",
         "expand": "展开",
-        "noMatchingFiles": "没有符合条件的文件记录"
+        "noMatchingFiles": "没有符合条件的文件记录",
+        "fileSuccess": "成功",
+        "fileUndone": "已撤销",
+        "fileConflict": "冲突",
+        "fileFailed": "失败"
     },
     "plugins": {
         "title": "扩展插件",

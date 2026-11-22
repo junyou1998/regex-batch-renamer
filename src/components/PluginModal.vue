@@ -331,7 +331,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
               type="button"
               @click="closeDetail"
               class="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer mr-1 flex items-center gap-1 text-xs font-semibold"
-              :title="$t('plugins.backToList')"
+              v-tooltip="{ title: $t('plugins.backToList'), placement: 'bottom' }"
             >
               <ArrowLeft class="w-4 h-4" />
               <span>{{ $t('plugins.backToList') }}</span>
@@ -544,7 +544,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
                 type="button"
                 @click="handleRefreshMarketplace"
                 :disabled="pluginStore.isFetchingMarketplace"
-                :title="$t('plugins.refresh')"
+                v-tooltip="{ title: $t('plugins.refresh'), placement: 'bottom' }"
                 class="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer"
               >
                 <RefreshCw class="w-3.5 h-3.5" :class="{ 'animate-spin': pluginStore.isFetchingMarketplace }" />
@@ -586,14 +586,14 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
                       <div
                         @click="openPluginDetail(plugin)"
                         class="flex items-center gap-2.5 min-w-0 cursor-pointer"
-                        :title="$t('plugins.viewDetails')"
+                        v-tooltip="$t('plugins.viewDetails')"
                       >
                         <div class="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple-950/60 border border-purple-200/60 dark:border-purple-800/60 flex items-center justify-center text-purple-600 dark:text-purple-400 font-bold shrink-0 group-hover:scale-105 transition-transform">
                           <Sparkles class="w-4 h-4" />
                         </div>
                         <div class="min-w-0">
                           <div class="flex items-center gap-1.5">
-                            <h4 class="text-sm font-bold text-slate-900 dark:text-slate-100 truncate hover:text-blue-600 dark:hover:text-blue-400 transition-colors" :title="plugin.manifest.name">
+                            <h4 class="text-sm font-bold text-slate-900 dark:text-slate-100 truncate hover:text-blue-600 dark:hover:text-blue-400 transition-colors" v-tooltip="plugin.manifest.name">
                               {{ plugin.manifest.name }}
                             </h4>
                             <span v-if="plugin.isBuiltin" class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 shrink-0">
@@ -657,7 +657,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
                         type="button"
                         @click="openPluginDetail(plugin)"
                         class="hover:text-blue-500 transition-colors flex items-center gap-1 cursor-pointer"
-                        :title="$t('plugins.viewDetails')"
+                        v-tooltip="$t('plugins.viewDetails')"
                       >
                         <BookOpen class="w-3 h-3" />
                         <span class="font-mono">{{ plugin.manifest.id }}</span>
@@ -675,7 +675,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
                           'bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800/60 hover:bg-red-100 dark:hover:bg-red-900/60': pluginStore.getPluginHealth(plugin.manifest.id).status === 'unhealthy',
                           'bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700': pluginStore.getPluginHealth(plugin.manifest.id).status === 'unknown' || pluginStore.getPluginHealth(plugin.manifest.id).status === 'checking'
                         }"
-                        :title="pluginStore.getPluginHealth(plugin.manifest.id).message || $t('plugins.clickToCheckHealth')"
+                        v-tooltip="pluginStore.getPluginHealth(plugin.manifest.id).message || $t('plugins.clickToCheckHealth')"
                       >
                         <span v-if="pluginStore.getPluginHealth(plugin.manifest.id).status === 'healthy'" class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
                         <span v-else-if="pluginStore.getPluginHealth(plugin.manifest.id).status === 'unhealthy'" class="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0"></span>
@@ -703,7 +703,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
                         v-if="!plugin.isBuiltin"
                         type="button"
                         @click="handleDeletePlugin(plugin)"
-                        :title="$t('plugins.uninstall')"
+                        v-tooltip="$t('plugins.uninstall')"
                         class="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/50 text-red-500 hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer"
                       >
                         <Trash2 class="w-3.5 h-3.5" />
@@ -729,13 +729,13 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
                       <div
                         @click="openPluginDetail(item)"
                         class="flex items-center gap-2.5 min-w-0 cursor-pointer"
-                        :title="$t('plugins.viewDetails')"
+                        v-tooltip="$t('plugins.viewDetails')"
                       >
                         <div class="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200/60 dark:border-blue-800/60 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold shrink-0 group-hover:scale-105 transition-transform">
                           <Puzzle class="w-4 h-4" />
                         </div>
                         <div class="min-w-0">
-                          <h4 class="text-sm font-bold text-slate-900 dark:text-slate-100 truncate hover:text-blue-600 dark:hover:text-blue-400 transition-colors" :title="item.name">
+                          <h4 class="text-sm font-bold text-slate-900 dark:text-slate-100 truncate hover:text-blue-600 dark:hover:text-blue-400 transition-colors" v-tooltip="item.name">
                             {{ item.name }}
                           </h4>
                           <p class="text-[11px] text-slate-400 font-mono">
@@ -776,7 +776,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
                       type="button"
                       @click="openPluginDetail(item)"
                       class="text-slate-400 hover:text-blue-500 text-[11px] font-mono flex items-center gap-1 cursor-pointer transition-colors"
-                      :title="$t('plugins.viewDetails')"
+                      v-tooltip="$t('plugins.viewDetails')"
                     >
                       <BookOpen class="w-3 h-3" />
                       <span>{{ item.id }}</span>
@@ -798,7 +798,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
                         type="button"
                         @click="openPluginDetail(item)"
                         class="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300 text-xs font-medium flex items-center gap-1 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-colors cursor-pointer"
-                        :title="$t('plugins.viewDetails')"
+                        v-tooltip="$t('plugins.viewDetails')"
                       >
                         <Check class="w-3.5 h-3.5 text-emerald-600" />
                         <span>{{ $t('plugins.installed') }}</span>

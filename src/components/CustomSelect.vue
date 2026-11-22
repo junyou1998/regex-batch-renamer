@@ -85,7 +85,7 @@ onUnmounted(() => {
       type="button"
       @click="toggleDropdown"
       :disabled="disabled"
-      :title="displayLabel"
+      v-tooltip="displayLabel"
       class="w-full bg-white dark:bg-slate-900/60 border rounded-lg px-3 text-slate-800 dark:text-slate-100 flex items-center justify-between transition-all cursor-pointer shadow-2xs hover:border-slate-400 dark:hover:border-slate-600 focus:outline-hidden"
       :class="[
         isOpen
@@ -115,7 +115,7 @@ onUnmounted(() => {
           :key="opt.value"
           type="button"
           @click="selectOption(opt)"
-          :title="opt.label"
+          v-tooltip="opt.label"
           class="w-full px-3 py-2 text-left text-xs flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-colors cursor-pointer"
           :class="[
             opt.value === modelValue

@@ -434,7 +434,7 @@ onBeforeUnmount(() => {
             @click="copyToClipboard(file.originalName)"
             @mouseenter="(e) => showTooltip(e, $t('preview.clickToCopy', { text: file.originalName }))"
             @mouseleave="hideTooltip">
-            <div class="truncate" :title="file.originalName">
+            <div class="truncate" v-tooltip="file.originalName">
               {{ file.originalName }}
             </div>
           </div>

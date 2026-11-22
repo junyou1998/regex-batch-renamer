@@ -80,7 +80,7 @@ function toggleProcessFilenameOnly() {
       <button
         type="button"
         @click="emit('toggleSidebar')"
-        :title="$t('statusBar.toggleSidebar')"
+        v-tooltip="$t('statusBar.toggleSidebar')"
         class="flex items-center justify-center p-0.5 rounded hover:bg-slate-200/80 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 transition-colors cursor-pointer shrink-0"
         :class="{ 'text-blue-600 dark:text-blue-400': !isSidebarCollapsed }"
       >
@@ -92,7 +92,7 @@ function toggleProcessFilenameOnly() {
       <!-- Files & Folders Count -->
       <div
         class="flex items-center gap-1 px-1 py-0.5 rounded text-slate-700 dark:text-slate-300 shrink-0 font-sans"
-        :title="`${fileCount} files in ${folderCount} folders`"
+        v-tooltip="$t('statusBar.filesInFolders', { files: fileCount, folders: folderCount })"
       >
         <Files class="w-3 h-3 text-slate-400 dark:text-slate-500 shrink-0" />
         <span>{{ $t('statusBar.filesCount', { n: fileCount }) }}</span>
@@ -118,7 +118,7 @@ function toggleProcessFilenameOnly() {
       <div
         v-if="hasConflicts"
         class="flex items-center gap-1 px-1.5 py-0.5 rounded bg-red-100/90 dark:bg-red-950/60 text-red-600 dark:text-red-400 font-semibold border border-red-300 dark:border-red-800/60 shrink-0 animate-pulse font-sans"
-        :title="conflictMessage || $t('statusBar.conflictWarning', { n: '!' })"
+        v-tooltip="conflictMessage || $t('statusBar.conflictWarning', { n: '!' })"
       >
         <AlertTriangle class="w-3 h-3 text-red-500" />
         <span class="truncate max-w-40 sm:max-w-xs">{{ conflictMessage || $t('statusBar.conflictWarning', { n: '' }) }}</span>
@@ -127,7 +127,7 @@ function toggleProcessFilenameOnly() {
       <!-- Pipeline Rules Count -->
       <div
         class="hidden md:flex items-center gap-1 px-1 py-0.5 rounded text-slate-600 dark:text-slate-400 shrink-0 font-sans"
-        :title="`${activeRules} active of ${totalRules} total rules`"
+        v-tooltip="$t('statusBar.activeRules', { active: activeRules, total: totalRules })"
       >
         <Layers class="w-3 h-3 text-slate-400 dark:text-slate-500" />
         <span>{{ totalRules > 0 ? $t('statusBar.activeRules', { active: activeRules, total: totalRules }) : $t('statusBar.noRules') }}</span>
@@ -141,7 +141,7 @@ function toggleProcessFilenameOnly() {
         v-if="canUndo"
         type="button"
         @click="emit('undo')"
-        :title="$t('statusBar.undoAvailable')"
+        v-tooltip="$t('statusBar.undoAvailable')"
         class="flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-100/80 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-300/80 dark:border-amber-800/50 hover:bg-amber-200 dark:hover:bg-amber-900/60 transition-colors cursor-pointer text-[10.5px] font-medium"
       >
         <RotateCcw class="w-2.5 h-2.5" />
@@ -152,7 +152,7 @@ function toggleProcessFilenameOnly() {
       <button
         type="button"
         @click="emit('openHistory')"
-        :title="$t('history.title')"
+        v-tooltip="$t('history.title')"
         class="flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-slate-200/80 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 transition-colors cursor-pointer text-slate-600 dark:text-slate-400 text-[10.5px]"
       >
         <History class="w-2.5 h-2.5 opacity-70" />
@@ -163,7 +163,7 @@ function toggleProcessFilenameOnly() {
       <button
         type="button"
         @click="emit('openPlugins')"
-        :title="$t('plugins.title')"
+        v-tooltip="$t('plugins.title')"
         class="flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-slate-200/80 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 transition-colors cursor-pointer text-slate-600 dark:text-slate-400 text-[10.5px]"
         :class="{ 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40': pluginStore.isAnyPluginBusy }"
       >
@@ -176,7 +176,7 @@ function toggleProcessFilenameOnly() {
       <button
         type="button"
         @click="toggleProcessFilenameOnly"
-        :title="$t('statusBar.scopeTooltip')"
+        v-tooltip="$t('statusBar.scopeTooltip')"
         class="flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-slate-200/80 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 transition-colors cursor-pointer text-slate-600 dark:text-slate-400 text-[10.5px]"
       >
         <Tag class="w-2.5 h-2.5 opacity-70" />
@@ -189,7 +189,7 @@ function toggleProcessFilenameOnly() {
       <button
         type="button"
         @click="aiStore.toggleOpen"
-        :title="aiStore.isOpen ? $t('ai.closePanel') : $t('ai.title')"
+        v-tooltip="aiStore.isOpen ? $t('ai.closePanel') : $t('ai.title')"
         class="flex items-center gap-1 px-1.5 py-0.5 rounded hover:bg-slate-200/80 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200 transition-colors cursor-pointer text-[10.5px]"
         :class="{ 'bg-blue-100/60 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium': aiStore.isOpen }"
       >
