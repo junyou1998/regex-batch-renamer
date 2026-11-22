@@ -1,23 +1,23 @@
 {
-  "version": "0.8.1",
-  "notes": "Stable update 0.8.1",
-  "pub_date": "2026-11-22T06:44:14.532Z",
+  "version": "0.8.2",
+  "notes": "Stable update 0.8.2",
+  "pub_date": "2026-11-22T07:05:34.860Z",
   "platforms": {
     "darwin-aarch64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUY0ZXSFZBL3ZnVFJhVFNSWHcrWHlibXFPVnN0YnpCV1NRdS8vbGh6cHhEdXJuc0tqSDBWSzNiTXo0ZkdFZmRjSnIvczNYTEdEV2RmSjd3UVNBQ3NjdlBVUDRtOW5TUkFBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk1MzI5NjA3CWZpbGU6UmVuYW1peC5hcHAudGFyLmd6Ckk2ZjFrMi9SSnJlZmRhL2crNmF3Vi9Jd2Z0eVVBY012bWRUbVF0Zit6Y0p0YU43ZlNRK0NORHZwdytzSG5RTnNMVXdZdkFDRTVOZjM3Tm03cXJTdERRPT0K",
-      "url": "https://github.com/junyou1998/renamix/releases/download/v0.8.1/Renamix_aarch64.app.tar.gz"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUY0ZXSFZBL3ZnVGJ0cUZwcHc0bEh3N1o4Z1J6VXN0ZGMwdXJuVUc0STN2b25EcC9LN2JSRk9oMzU0TmUwTHlQQldodE1PVEdBNnphcDRBdUlTU29MdmwwN21IeWh3Nnd3PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk1MzMwNjA4CWZpbGU6UmVuYW1peC5hcHAudGFyLmd6ClVrUERjblV3TVc0akp6ZTV0MjJBQlJDUG1aeDYwYVRZT09NM056V1VSUjhxM0xWMUdXVWg2djdnT2hnVVYzcXZmcUJSRnBoTU5TNVdHOURQcmtrV0JBPT0K",
+      "url": "https://github.com/junyou1998/renamix/releases/download/v0.8.2/Renamix_aarch64.app.tar.gz"
     },
     "darwin-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUY0ZXSFZBL3ZnVFhzUWh4MjdtSFpwS0Jmckdrdm5pOG9KRzg4V2tTU3dyM1UvSWFkU0xxRmZqL0pobGphZEVmNCtwbFpxZGgveTBOWisxM3FrRi9nOFRQeHFIM0ZuT2dnPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk1MzI5ODE5CWZpbGU6UmVuYW1peC5hcHAudGFyLmd6CnUxSW15MC8zRFNiSW0rbHVIQ0txMHdNTTYxU0FlVjhaeC9Sa09WaVgzOTdJT1RDK0hMbGFlZVZjR0EveDZWYUNteXNRdkVhU3RmVEw3dDBsZFJFQkFBPT0K",
-      "url": "https://github.com/junyou1998/renamix/releases/download/v0.8.1/Renamix_x64.app.tar.gz"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUY0ZXSFZBL3ZnVGJSWFFMUXh0TnA1MXUySkpzQmFyMUtTOTJ2ZGVqYXFvb1ZTM0ZTRnRnNFRDVU11ck5sNkVhTS9WZFVzUG1jRGQ5SE5ubDltc1VDSDdYVzMxamU5N0FJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk1MzMxMTA1CWZpbGU6UmVuYW1peC5hcHAudGFyLmd6CllRM0pVaXBKTWxKVUYxSng1eHRjME54ZmptWWp2RkNPckhrUUcvZWZ3dm9OT1U3M3VyVEZka0dPbmNtV0ZwSlQ1cHB5Qy9KVzVwSE9LWFUwNmVad0J3PT0K",
+      "url": "https://github.com/junyou1998/renamix/releases/download/v0.8.2/Renamix_x64.app.tar.gz"
     },
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUY0ZXSFZBL3ZnVGZnSHBaeVZzakhIS3ZCSU9oVi9NUVYzUUI5S3ArTVZlQkJxQ3hab1hJZkZDZE5Gd21MZWRsbktlRHhVTDhOY3l0QVBBc3RhUDdSWW5XTFo4dHhqdUFzPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk1MzI5NjA2CWZpbGU6UmVuYW1peF8wLjguMV94NjQtc2V0dXAuZXhlClVpeUhRWlc5aTgvU3BFTEFaWm5UOTdMTXNEOUVUY1JUTXorNkF6YVV3eEpsWUxHeHc5WDFNVmZIZW8zaDBveXBPTDQ1YitWWGFXRW1nb2tIak8wSERBPT0K",
-      "url": "https://github.com/junyou1998/renamix/releases/download/v0.8.1/Renamix_0.8.1_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUY0ZXSFZBL3ZnVFpoQkNTeGc3TElMZHpwWWpHSDZaYnFiVUhzVVhpUSsvWW4xdFVSdjVtY01RZDB2TkhaUSs2dzIyZ2M1S3MrM2o3b0xhcWtaWDFoWEh3dlFMNXVNVEFNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk1MzMwNzg3CWZpbGU6UmVuYW1peF8wLjguMl94NjQtc2V0dXAuZXhlCkk1ckxRT3ozMWxldkNqdVlZckwvaXd1WkNneVlhS0QwMW56RlFkNU13ZklEWU8zeFh2cUhqSUljeFZ0MlV5b3UyWU5tbnBOV3BTSEppeEphaWtJTENRPT0K",
+      "url": "https://github.com/junyou1998/renamix/releases/download/v0.8.2/Renamix_0.8.2_x64-setup.exe"
     },
     "linux-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUY0ZXSFZBL3ZnVFhDaDVIQkNOQTlvOVFlVWt6QXdFckk0ZDhjYXlkeUpOSmxPY1NNaFpIcTNya0M5QkJDbVE3NUtid0QzM1p2a1YyS2pNdGxSTFVISnUxU1FpYUlPZlFnPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk1MzI5NjkyCWZpbGU6UmVuYW1peF8wLjguMV9hbWQ2NC5BcHBJbWFnZQpGNlJTeGJndUZBSjJaNVR6YVE1VXQxVHlCUVBXMFQ5d3l1WFVRdEJzUXJ4N2NyUk5OQWswMk5ERU5INExVcHpXbWplZE5JSzhleGZ1SFhpME9iWDJDUT09Cg==",
-      "url": "https://github.com/junyou1998/renamix/releases/download/v0.8.1/Renamix_0.8.1_amd64.AppImage"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUY0ZXSFZBL3ZnVFFSUzh3TWVDbkV3UGZxaHdGTks4NjZ3ZEc0MGlHQXhQZUxzSzdNb3pHSnV5NkNZNi83b1p5ZFljYzhWTS82UUs3MzFvangwY052ODl4V254UnZPZmdjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk1MzMwNzAwCWZpbGU6UmVuYW1peF8wLjguMl9hbWQ2NC5BcHBJbWFnZQpBNy9kTFdxbmcvUHJQUjJhNVlUQzNhbEp2UUdtc0xEUkJCN1crbUVCNzhoSVVCWjVqUTNmL1Y3L1FBOFZGRTNPaWxZaDVGcVdURUkyYjdMVW5ERmtBQT09Cg==",
+      "url": "https://github.com/junyou1998/renamix/releases/download/v0.8.2/Renamix_0.8.2_amd64.AppImage"
     }
   }
 }
