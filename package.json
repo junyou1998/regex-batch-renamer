@@ -17,7 +17,6 @@
         "tauri:build": "vue-tsc && node scripts/run-tauri-build.mjs",
         "tauri:build:release": "node scripts/run-tauri-release-build.mjs",
         "tauri:ci": "vue-tsc && vite build",
-        "beta:ci": "pnpm run tauri:ci",
         "updater:serve": "node scripts/test-local-updater.mjs serve",
         "updater:stage": "node scripts/test-local-updater.mjs generate-manifest",
         "updater:clean": "node scripts/test-local-updater.mjs clean"
