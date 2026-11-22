@@ -66,7 +66,9 @@ html:lang(zh-CN) .hero-title {
         transition-duration: 0.001ms !important;
     }
 }
-body { overflow-x: clip; }
+/* Decorative glows extend past the viewport. `overflow-x` on body doesn't propagate to the
+   viewport on mobile browsers, so the page would widen and zoom out; clip at <main> instead. */
+#main { overflow-x: clip; }
 
 /* App screenshots: a window with macOS-like corners, a hairline edge and a deep soft shadow. */
 .window-shot {
