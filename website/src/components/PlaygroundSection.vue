@@ -48,12 +48,12 @@ const presetKeys = Object.keys(PRESETS) as PresetKey[]
 <template>
   <section class="bg-ink py-20 text-white sm:py-24" aria-labelledby="playground-title">
     <div class="mx-auto max-w-6xl px-5 sm:px-8">
-      <div class="max-w-2xl">
+      <div v-reveal class="max-w-2xl">
         <h2 id="playground-title" class="text-3xl font-semibold tracking-[-0.02em] sm:text-4xl">{{ $t('playground.title') }}</h2>
         <p class="mt-4 text-lg leading-relaxed text-white/70">{{ $t('playground.lede') }}</p>
       </div>
 
-      <div class="mt-10 grid gap-6 lg:grid-cols-[minmax(0,4fr)_minmax(0,7fr)]">
+      <div v-reveal="120" class="mt-10 grid gap-6 lg:grid-cols-[minmax(0,4fr)_minmax(0,7fr)]">
         <!-- Rule editor, styled like the app's rule card -->
         <div class="rounded-2xl bg-ink-soft p-5 ring-1 ring-white/10">
           <label class="block text-sm font-medium text-white/70" for="pg-find">{{ $t('playground.find') }}</label>
@@ -81,7 +81,7 @@ const presetKeys = Object.keys(PRESETS) as PresetKey[]
           <p class="mt-6 text-sm font-medium text-white/70">{{ $t('playground.presetLabel') }}</p>
           <div class="mt-2 flex flex-wrap gap-2">
             <button v-for="key in presetKeys" :key="key" type="button" @click="usePreset(key)" :aria-pressed="active === key"
-              class="rounded-full px-3.5 py-1.5 text-sm transition-colors"
+              class="rounded-full px-3.5 py-1.5 text-sm transition-all duration-200 active:scale-95"
               :class="active === key ? 'bg-white text-ink' : 'bg-white/8 text-white/80 ring-1 ring-white/15 hover:bg-white/15'">
               {{ $t(`playground.presets.${key}`) }}
             </button>
@@ -92,12 +92,15 @@ const presetKeys = Object.keys(PRESETS) as PresetKey[]
         <div class="overflow-hidden rounded-2xl bg-white text-ink ring-1 ring-white/10">
           <div class="flex items-center justify-between border-b border-line px-5 py-3 text-sm">
             <span class="font-medium">{{ $t('playground.previewTitle') }}</span>
-            <span class="text-slate" aria-live="polite">{{ t('playground.changed', { n: changedCount, total: rows.length }) }}</span>
+            <span class="flex items-center gap-2 text-slate" aria-live="polite">
+              <span class="relative flex h-2 w-2"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-added/50" /><span class="relative inline-flex h-2 w-2 rounded-full bg-added" /></span>
+              {{ t('playground.changed', { n: changedCount, total: rows.length }) }}
+            </span>
           </div>
           <ul class="divide-y divide-line">
             <li v-for="row in rows" :key="row.name" class="px-5 py-3">
               <div class="truncate font-mono text-[13px] text-slate">{{ row.name }}</div>
-              <div class="mt-1 truncate font-mono text-[15px]">
+              <div class="row-result mt-1 truncate font-mono text-[15px]" :key="row.next">
                 <template v-if="row.changed">
                   <span>{{ row.parts.prefix }}</span><del v-if="row.parts.removed"
                     class="rounded bg-removed-bg px-0.5 text-removed decoration-removed/60">{{ row.parts.removed }}</del><ins
@@ -113,3 +116,17 @@ const presetKeys = Object.keys(PRESETS) as PresetKey[]
     </div>
   </section>
 </template>
+
+<style scoped>
+/* Each time a result changes, it slides in, so you can see what the rule did. */
+.row-result {
+  animation: result-in 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@keyframes result-in {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+}
+</style>

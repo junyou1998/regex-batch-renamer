@@ -3,7 +3,8 @@
         "features": "功能",
         "download": "下載",
         "language": "語言",
-        "skip": "跳到主要內容"
+        "skip": "跳到主要內容",
+        "support": "支持"
     },
     "platforms": {
         "mac": "macOS",
@@ -11,7 +12,6 @@
         "linux": "Linux"
     },
     "hero": {
-        "messy": "改檔名_最終版_v2 (1) 複本.txt",
         "title": "一次更名上百個檔案，改之前先看清楚。",
         "lede": "把簡單的「尋找與取代」規則串起來，看著即時預覽，一鍵完成更名。不熟 Regex 也沒關係：用一般的話描述，AI 助理會幫你寫好規則。",
         "download": "下載 {platform} 版",
@@ -21,7 +21,11 @@
         "screenshotAlt": "Renamix 套用兩條規則，即時預覽十二張照片改名前後的差異",
         "themeLabel": "截圖主題",
         "light": "淺色",
-        "dark": "深色"
+        "dark": "深色",
+        "titleStart": "一次更名上百個檔案",
+        "titleNoise": " (1) 最終版_v2.txt",
+        "titleEnd": "，改之前先看清楚。",
+        "replay": "再看一次"
     },
     "playground": {
         "title": "直接在這裡試試看",
@@ -158,5 +162,10 @@
         "feedback": "回報問題",
         "coffee": "請我喝咖啡",
         "license": "以 MIT 授權釋出。"
+    },
+    "support": {
+        "title": "Renamix 免費，以後也會一直免費",
+        "body": "這是利用業餘時間開發與維護的專案。如果它幫你省下了一整個下午的改名時間，請我喝杯咖啡就是最好的支持。",
+        "cta": "請我喝杯咖啡"
     }
 }

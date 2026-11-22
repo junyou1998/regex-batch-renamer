@@ -38,12 +38,12 @@ body {
 }
 
 /* CJK headlines: break only at punctuation, never mid-word, and size down a step. */
-html:lang(zh-TW) .hero-new,
-html:lang(zh-CN) .hero-new {
+html:lang(zh-TW) .hero-title,
+html:lang(zh-CN) .hero-title {
     word-break: keep-all;
     line-break: strict;
-    font-size: clamp(2rem, 3.3vw, 2.75rem);
-    line-height: 1.22;
+    font-size: clamp(2rem, 3.3vw, 2.75rem) !important;
+    line-height: 1.28;
     letter-spacing: 0;
 }
 
@@ -67,3 +67,37 @@ html:lang(zh-CN) .hero-new {
     }
 }
 body { overflow-x: clip; }
+
+/* ---- Motion helpers (see src/directives/motion.ts) ---- */
+.reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.reveal.is-visible {
+    opacity: 1;
+    transform: none;
+}
+
+.tilt {
+    position: relative;
+    transform: perspective(1400px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+    transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+    will-change: transform;
+}
+
+.tilt::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(600px circle at var(--glow-x, 50%) var(--glow-y, 50%), rgba(255, 255, 255, 0.18), transparent 45%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.tilt:hover::after {
+    opacity: 1;
+}

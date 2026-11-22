@@ -3,7 +3,8 @@
         "features": "Features",
         "download": "Download",
         "language": "Language",
-        "skip": "Skip to content"
+        "skip": "Skip to content",
+        "support": "Support"
     },
     "platforms": {
         "mac": "macOS",
@@ -11,7 +12,6 @@
         "linux": "Linux"
     },
     "hero": {
-        "messy": "rename_these_FINAL_v2 (1) copy.txt",
         "title": "Rename hundreds of files. See every new name first.",
         "lede": "Stack simple find-and-replace rules, check the live preview, and rename in one click. Not a regex person? Describe what you want and the AI assistant writes the rules.",
         "download": "Download for {platform}",
@@ -21,7 +21,11 @@
         "screenshotAlt": "Renamix with two rules and a live before-and-after preview of twelve photos",
         "themeLabel": "Screenshot theme",
         "light": "Light",
-        "dark": "Dark"
+        "dark": "Dark",
+        "titleStart": "Rename hundreds of files.",
+        "titleNoise": " FINAL_v2 (1).txt",
+        "titleEnd": " See every new name first.",
+        "replay": "Watch it again"
     },
     "playground": {
         "title": "Try a rule right here",
@@ -158,5 +162,10 @@
         "feedback": "Report an issue",
         "coffee": "Buy me a coffee",
         "license": "Released under the MIT License."
+    },
+    "support": {
+        "title": "Renamix is free and always will be",
+        "body": "It's built and maintained in spare time. If it saves you an afternoon of renaming, a coffee helps keep it going.",
+        "cta": "Buy me a coffee"
     }
 }

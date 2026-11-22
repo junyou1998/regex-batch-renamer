@@ -3,7 +3,8 @@
         "features": "功能",
         "download": "下载",
         "language": "语言",
-        "skip": "跳到主要内容"
+        "skip": "跳到主要内容",
+        "support": "支持"
     },
     "platforms": {
         "mac": "macOS",
@@ -11,7 +12,6 @@
         "linux": "Linux"
     },
     "hero": {
-        "messy": "改文件名_最终版_v2 (1) 副本.txt",
         "title": "一次重命名上百个文件，改之前先看清楚。",
         "lede": "把简单的“查找与替换”规则串起来，看着实时预览，一键完成重命名。不熟悉 Regex 也没关系：用普通的话描述，AI 助手会帮你写好规则。",
         "download": "下载 {platform} 版",
@@ -21,7 +21,11 @@
         "screenshotAlt": "Renamix 应用两条规则，实时预览十二张照片重命名前后的差异",
         "themeLabel": "截图主题",
         "light": "浅色",
-        "dark": "深色"
+        "dark": "深色",
+        "titleStart": "一次重命名上百个文件",
+        "titleNoise": " (1) 最终版_v2.txt",
+        "titleEnd": "，改之前先看清楚。",
+        "replay": "再看一次"
     },
     "playground": {
         "title": "直接在这里试试看",
@@ -158,5 +162,10 @@
         "feedback": "反馈问题",
         "coffee": "请我喝咖啡",
         "license": "以 MIT 许可证发布。"
+    },
+    "support": {
+        "title": "Renamix 免费，以后也会一直免费",
+        "body": "这是利用业余时间开发与维护的项目。如果它帮你省下了一整个下午的重命名时间，请我喝杯咖啡就是最好的支持。",
+        "cta": "请我喝杯咖啡"
     }
 }

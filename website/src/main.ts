@@ -3,4 +3,6 @@ import './style.css'
 import App from './App.vue'
 import i18n from './i18n'
 
-createApp(App).use(i18n).mount('#app')
+import { vReveal, vTilt } from './directives/motion'
+
+createApp(App).use(i18n).directive('reveal', vReveal).directive('tilt', vTilt).mount('#app')
