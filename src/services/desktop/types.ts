@@ -10,6 +10,7 @@ export type DesktopErrorCode =
   | 'NOT_FOUND'
   | 'ROLLED_BACK'
   | 'IS_DIRECTORY'
+  | 'CONTAINS_BATCH_ITEMS'
   | 'UNKNOWN'
 
 export interface FileOperationRequest {
@@ -168,8 +169,10 @@ export interface DesktopBridge {
   selectFiles(): Promise<string[]>
   /** `item`: add the folder itself to the list. `destination`: Copy To target. */
   selectDirectory(purpose: 'item' | 'destination'): Promise<string | undefined>
-  /** Pick a folder and return the visible files directly inside it. */
-  selectFolderContents(): Promise<string[]>
+  /** Pick a folder and return the visible files inside it (optionally including subfolders). */
+  selectFolderContents(options?: { recursive?: boolean }): Promise<string[]>
+  /** Pick a folder to rename the folder itself. */
+  selectFolderAsItem(): Promise<string[]>
   renameFiles(files: FileOperationRequest[]): Promise<FileOperationResult[]>
   copyRenameFiles(files: FileOperationRequest[], onConflict?: CopyConflictPolicy): Promise<FileOperationResult[]>
   readFileBinary(path: string, maxBytes?: number): Promise<Uint8Array>

@@ -71,6 +71,18 @@ export const useFileStore = defineStore('file', () => {
     }
   }
 
+  /** After a folder is renamed, point items inside it at the new location. */
+  function rebasePaths(oldFolder: string, newFolder: string) {
+    for (const file of files.value) {
+      for (const sep of ['/', '\\']) {
+        if (file.path.startsWith(oldFolder + sep)) {
+          file.path = newFolder + file.path.slice(oldFolder.length)
+          break
+        }
+      }
+    }
+  }
+
   function reorderFiles(fromIndex: number, toIndex: number) {
     if (fromIndex === toIndex) return
     if (fromIndex < 0 || fromIndex >= files.value.length || toIndex < 0 || toIndex >= files.value.length) return
@@ -102,6 +114,7 @@ export const useFileStore = defineStore('file', () => {
     updateNewName,
     updateFileAfterRename,
     reorderFiles,
+    rebasePaths,
     lastRenameBatch,
     setLastRenameBatch,
     clearUndo

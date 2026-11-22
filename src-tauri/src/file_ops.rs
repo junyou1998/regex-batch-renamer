@@ -23,6 +23,8 @@ pub const INVALID_PATH: &str = "INVALID_PATH";
 pub const NOT_FOUND: &str = "NOT_FOUND";
 pub const ROLLED_BACK: &str = "ROLLED_BACK";
 pub const IS_DIRECTORY: &str = "IS_DIRECTORY";
+/// A folder whose contents are renamed in the same batch; rename it in a second pass.
+pub const CONTAINS_BATCH_ITEMS: &str = "CONTAINS_BATCH_ITEMS";
 
 #[derive(Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -151,6 +153,17 @@ pub fn rename_batch(scope: &FsScope, files: Vec<FileOperationRequest>) -> Vec<Fi
         }
         planned.push(PlannedRename { index, old, new });
     }
+
+    // 1b. A folder renamed together with items inside it would invalidate their
+    //     paths. Keep the inner items and defer the folder to a second pass.
+    let sources: Vec<PathBuf> = planned.iter().map(|item| item.old.clone()).collect();
+    planned.retain(|item| {
+        let is_ancestor = sources.iter().any(|other| other != &item.old && other.starts_with(&item.old));
+        if is_ancestor {
+            results[item.index] = Some(FileOperationResult::err(&files[item.index].old_path, CONTAINS_BATCH_ITEMS));
+        }
+        !is_ancestor
+    });
 
     // 2. Reject targets that collide with each other.
     let mut target_count: HashMap<String, usize> = HashMap::new();
@@ -443,6 +456,22 @@ mod tests {
         let escape = dir.0.join("sub").join("b.txt");
         let results = rename_batch(&scope, vec![req(&a, &escape)]);
         assert_eq!(results[0].error.as_deref(), Some(INVALID_PATH));
+    }
+
+    #[test]
+    fn defers_a_folder_whose_contents_are_also_renamed() {
+        let dir = TempDir::new("nested");
+        let folder = dir.0.join("Trip");
+        fs::create_dir_all(&folder).unwrap();
+        let inner = folder.join("a.txt");
+        fs::write(&inner, "A").unwrap();
+        let scope = FsScope::default();
+        scope.allow_items([&folder, &inner]);
+
+        let results = rename_batch(&scope, vec![req(&folder, &dir.0.join("Trip 2026")), req(&inner, &folder.join("b.txt"))]);
+        assert_eq!(results[0].error.as_deref(), Some(CONTAINS_BATCH_ITEMS));
+        assert!(results[1].success, "{results:?}");
+        assert!(folder.join("b.txt").exists());
     }
 
     #[test]

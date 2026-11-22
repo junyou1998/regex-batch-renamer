@@ -186,7 +186,16 @@
         "copyFailed": "複製失敗",
         "statusSuccess": "成功",
         "statusPending": "待處理",
-        "clearConfirm": "清單中有 {n} 個檔案（含尚未套用的變更），確定要清空嗎？"
+        "clearConfirm": "清單中有 {n} 個檔案（含尚未套用的變更），確定要清空嗎？",
+        "addFolderHint": "加入資料夾內的檔案",
+        "folderOptions": "更多資料夾選項",
+        "addFolderFiles": "資料夾內的檔案",
+        "addFolderFilesDesc": "只加入第一層的檔案（拖放資料夾時也是這個行為）",
+        "addFolderRecursive": "包含所有子資料夾",
+        "addFolderRecursiveDesc": "一併加入各層子資料夾中的檔案（上限 10,000 個）",
+        "addFolderItself": "重新命名資料夾本身",
+        "addFolderItselfDesc": "把選取的資料夾加入清單，用規則修改資料夾名稱",
+        "folderEmpty": "這個資料夾內沒有可加入的檔案"
     },
     "errors": {
         "selectDirectoryFailed": "開啟資料夾選擇器失敗"
@@ -563,6 +572,7 @@
         "NOT_FOUND": "找不到檔案（可能已被移動或刪除）",
         "ROLLED_BACK": "因同批次其他檔案失敗，已自動還原",
         "IS_DIRECTORY": "資料夾無法複製",
-        "UNKNOWN": "發生未預期的錯誤 {detail}"
+        "UNKNOWN": "發生未預期的錯誤 {detail}",
+        "CONTAINS_BATCH_ITEMS": "此資料夾內的檔案也在這批更名中；檔案已先處理，請再執行一次以更名資料夾"
     }
 }

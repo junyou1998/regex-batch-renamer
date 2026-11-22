@@ -186,7 +186,16 @@
         "copyFailed": "Copy failed",
         "statusSuccess": "Done",
         "statusPending": "Pending",
-        "clearConfirm": "Clear all {n} files from the list? Changes that haven't been applied will be lost."
+        "clearConfirm": "Clear all {n} files from the list? Changes that haven't been applied will be lost.",
+        "addFolderHint": "Add the files in a folder",
+        "folderOptions": "More folder options",
+        "addFolderFiles": "Files in a folder",
+        "addFolderFilesDesc": "Only the files directly inside (same as dropping a folder)",
+        "addFolderRecursive": "Include subfolders",
+        "addFolderRecursiveDesc": "Also add files from every subfolder (up to 10,000)",
+        "addFolderItself": "Rename the folder itself",
+        "addFolderItselfDesc": "Add the folder to the list so rules rename the folder",
+        "folderEmpty": "No files to add in that folder"
     },
     "errors": {
         "selectDirectoryFailed": "Failed to open folder picker"
@@ -563,6 +572,7 @@
         "NOT_FOUND": "File not found (moved or deleted?)",
         "ROLLED_BACK": "Reverted because another file in this batch failed",
         "IS_DIRECTORY": "Folders can't be copied",
-        "UNKNOWN": "Unexpected error {detail}"
+        "UNKNOWN": "Unexpected error {detail}",
+        "CONTAINS_BATCH_ITEMS": "Files inside this folder were in the same batch and were renamed first — run Rename again to rename the folder"
     }
 }

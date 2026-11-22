@@ -186,7 +186,16 @@
         "copyFailed": "复制失败",
         "statusSuccess": "成功",
         "statusPending": "待处理",
-        "clearConfirm": "列表中有 {n} 个文件（含尚未应用的更改），确定要清空吗？"
+        "clearConfirm": "列表中有 {n} 个文件（含尚未应用的更改），确定要清空吗？",
+        "addFolderHint": "加入文件夹内的文件",
+        "folderOptions": "更多文件夹选项",
+        "addFolderFiles": "文件夹内的文件",
+        "addFolderFilesDesc": "只加入第一层的文件（拖放文件夹时也是这个行为）",
+        "addFolderRecursive": "包含所有子文件夹",
+        "addFolderRecursiveDesc": "一并加入各层子文件夹中的文件（上限 10,000 个）",
+        "addFolderItself": "重命名文件夹本身",
+        "addFolderItselfDesc": "把选取的文件夹加入列表，用规则修改文件夹名称",
+        "folderEmpty": "这个文件夹内没有可加入的文件"
     },
     "errors": {
         "selectDirectoryFailed": "打开文件夹选择器失败"
@@ -563,6 +572,7 @@
         "NOT_FOUND": "找不到文件（可能已被移动或删除）",
         "ROLLED_BACK": "因同批次其他文件失败，已自动还原",
         "IS_DIRECTORY": "文件夹无法复制",
-        "UNKNOWN": "发生意外错误 {detail}"
+        "UNKNOWN": "发生意外错误 {detail}",
+        "CONTAINS_BATCH_ITEMS": "此文件夹内的文件也在这批重命名中；文件已先处理，请再执行一次以重命名文件夹"
     }
 }

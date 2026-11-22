@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import FolderAddButton from './FolderAddButton.vue'
 import { useFileStore } from '../stores/fileStore'
 import { useToastStore } from '../stores/toastStore'
 import { generateDiffHtml } from '../utils/diff'
@@ -96,17 +97,6 @@ async function clearList() {
   fileStore.clearFiles()
 }
 
-async function openDirectoryDialog() {
-  try {
-    const paths = await desktop.selectFolderContents()
-    if (paths.length > 0) {
-      addFiles(paths)
-    }
-  } catch (error) {
-    console.error('Failed to select directory:', error)
-    toastStore.addToast(t('errors.selectDirectoryFailed'), 'error')
-  }
-}
 
 const ROW_HEIGHT = 44
 
@@ -389,11 +379,7 @@ onBeforeUnmount(() => {
           <FilePlus class="w-3.5 h-3.5 text-blue-500" />
           <span class="hidden @xl:inline">{{ $t('preview.addFiles') }}</span>
         </button>
-        <button @click="openDirectoryDialog" :title="$t('preview.addFolder')" :aria-label="$t('preview.addFolder')"
-          class="whitespace-nowrap inline-flex items-center gap-1.5 text-xs font-medium bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 px-2.5 py-1 rounded-md border border-slate-300 dark:border-slate-600 shadow-2xs transition-colors cursor-pointer">
-          <FolderPlus class="w-3.5 h-3.5 text-blue-500" />
-          <span class="hidden @xl:inline">{{ $t('preview.addFolder') }}</span>
-        </button>
+        <FolderAddButton variant="toolbar" @add="addFiles" />
         <button @click="clearList" :title="$t('preview.clear')" :aria-label="$t('preview.clear')"
           class="whitespace-nowrap inline-flex items-center gap-1 text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 px-2.5 py-1 rounded-md hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors cursor-pointer">
           <Trash2 class="w-3.5 h-3.5" />
@@ -548,11 +534,7 @@ onBeforeUnmount(() => {
             <FilePlus class="w-3.5 h-3.5" />
             <span>{{ $t('preview.addFiles') }}</span>
           </button>
-          <button @click="openDirectoryDialog"
-            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-medium transition-colors cursor-pointer">
-            <FolderPlus class="w-3.5 h-3.5" />
-            <span>{{ $t('preview.addFolder') }}</span>
-          </button>
+          <FolderAddButton variant="empty" @add="addFiles" />
         </div>
       </div>
     </div>

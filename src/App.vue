@@ -411,6 +411,7 @@ async function handleRename() {
         fileLogs.push({ id: file.id, oldPath: file.path, newPath, originalName: file.originalName, newName: file.newName, status: 'success' })
         successCount++
         fileStore.updateFileAfterRename(file.id, newPath, file.newName, 'success')
+        fileStore.rebasePaths(res.path, newPath)
       } else {
         const conflict = isConflictCode(res.code)
         const message = describeFileError(res.code, res.error)
@@ -492,6 +493,7 @@ async function handleUndo() {
         if (file) {
           fileStore.updateFileAfterRename(file.id, historyItem.oldPath, historyItem.originalName)
         }
+        fileStore.rebasePaths(historyItem.newPath, historyItem.oldPath)
         fileLogs.push({
           id: historyItem.id,
           oldPath: historyItem.newPath,

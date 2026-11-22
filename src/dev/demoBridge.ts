@@ -137,6 +137,9 @@ export const demoDesktopBridge: DesktopBridge = {
   async selectFolderContents() {
     return DEMO_FILE_SETS.docs
   },
+  async selectFolderAsItem() {
+    return ['/Users/demo/Pictures/Tokyo 2026']
+  },
   async renameFiles(files) {
     await sleep(250)
     return demoRename(files)

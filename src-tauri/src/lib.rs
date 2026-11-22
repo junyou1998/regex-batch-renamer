@@ -136,23 +136,62 @@ enum FolderPurpose {
     Item,
     /// Use the folder as a "Copy To" destination.
     Destination,
-    /// Add the files directly inside the folder (not recursive, no hidden files).
+    /// Add the files directly inside the folder (no hidden files).
     Contents,
+    /// Add the files inside the folder and all of its subfolders.
+    ContentsRecursive,
 }
 
-fn visible_files_in(dir: &Path) -> Vec<PathBuf> {
-    let mut files: Vec<PathBuf> = fs::read_dir(dir)
-        .map(|entries| {
-            entries
-                .flatten()
-                .filter(|entry| entry.file_type().map(|t| t.is_file()).unwrap_or(false))
-                .filter(|entry| !entry.file_name().to_string_lossy().starts_with('.'))
-                .map(|entry| entry.path())
-                .collect()
-        })
-        .unwrap_or_default();
+/// Upper bound on files collected from one folder, so dropping a huge tree
+/// can't freeze the app.
+const MAX_FOLDER_FILES: usize = 10_000;
+
+fn is_hidden(path: &Path) -> bool {
+    path.file_name()
+        .map(|n| n.to_string_lossy().starts_with('.'))
+        .unwrap_or(false)
+}
+
+/// Visible files inside `dir` (skipping hidden entries and symlinks), sorted.
+/// With `recursive`, subfolders are walked too.
+fn visible_files_in(dir: &Path, recursive: bool) -> Vec<PathBuf> {
+    let mut files = Vec::new();
+    let mut pending = vec![dir.to_path_buf()];
+    while let Some(current) = pending.pop() {
+        let Ok(entries) = fs::read_dir(&current) else { continue };
+        for entry in entries.flatten() {
+            let path = entry.path();
+            let Ok(kind) = entry.file_type() else { continue };
+            if is_hidden(&path) || kind.is_symlink() {
+                continue;
+            }
+            if kind.is_file() {
+                files.push(path);
+                if files.len() >= MAX_FOLDER_FILES {
+                    files.sort();
+                    return files;
+                }
+            } else if kind.is_dir() && recursive {
+                pending.push(path);
+            }
+        }
+    }
     files.sort();
     files
+}
+
+/// Dropped items: files stay as they are, folders are replaced by the files
+/// directly inside them (renaming folders themselves is an explicit menu choice).
+fn expand_dropped(paths: &[PathBuf]) -> Vec<PathBuf> {
+    let mut out = Vec::new();
+    for path in paths {
+        if path.is_dir() {
+            out.extend(visible_files_in(path, false));
+        } else {
+            out.push(path.clone());
+        }
+    }
+    out
 }
 
 #[tauri::command]
@@ -177,8 +216,8 @@ async fn select_directory(
             scope.allow_destination(&path);
             vec![path]
         }
-        FolderPurpose::Contents => {
-            let files = visible_files_in(&path);
+        FolderPurpose::Contents | FolderPurpose::ContentsRecursive => {
+            let files = visible_files_in(&path, purpose == FolderPurpose::ContentsRecursive);
             scope.allow_items(&files);
             files
         }
@@ -422,8 +461,9 @@ pub fn run() {
             // Register dropped paths before the frontend sees them, then hand
             // them over through our own event.
             if let tauri::WindowEvent::DragDrop(tauri::DragDropEvent::Drop { paths, .. }) = event {
-                window.state::<FsScope>().allow_items(paths);
-                let _ = window.emit("app://files-dropped", paths_to_strings(paths));
+                let expanded = expand_dropped(paths);
+                window.state::<FsScope>().allow_items(&expanded);
+                let _ = window.emit("app://files-dropped", paths_to_strings(&expanded));
             }
         })
         .invoke_handler(tauri::generate_handler![
@@ -458,7 +498,25 @@ pub fn run() {
 
 #[cfg(test)]
 mod tests {
-    use super::is_supported_windows_update_asset;
+    use super::{expand_dropped, is_supported_windows_update_asset, visible_files_in};
+    use std::fs;
+
+    #[test]
+    fn folders_expand_to_visible_files() {
+        let root = std::env::temp_dir().join(format!("rbr-expand-{}", std::process::id()));
+        let sub = root.join("sub");
+        fs::create_dir_all(&sub).unwrap();
+        fs::write(root.join("a.txt"), "").unwrap();
+        fs::write(root.join(".hidden"), "").unwrap();
+        fs::write(sub.join("b.txt"), "").unwrap();
+
+        assert_eq!(visible_files_in(&root, false), vec![root.join("a.txt")]);
+        assert_eq!(visible_files_in(&root, true), vec![root.join("a.txt"), sub.join("b.txt")]);
+        let loose = root.join("loose.txt");
+        fs::write(&loose, "").unwrap();
+        assert_eq!(expand_dropped(&[sub.clone(), loose.clone()]), vec![sub.join("b.txt"), loose]);
+        let _ = fs::remove_dir_all(&root);
+    }
 
     #[test]
     fn accepts_windows_nsis_setup_exe_assets() {

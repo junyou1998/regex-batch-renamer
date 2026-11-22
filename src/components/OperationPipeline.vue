@@ -31,7 +31,9 @@ import {
   Puzzle,
   AlertCircle,
   LoaderCircle,
-  Braces
+  Braces,
+  Search,
+  CornerDownRight
 } from 'lucide-vue-next'
 
 defineProps<{
@@ -777,7 +779,7 @@ function confirmPrefixSuffix() {
     <div class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3 min-h-0" ref="operationsList">
       <div class="space-y-3">
         <div v-for="(op, index) in operationsModel" :key="op.id" :data-operation-id="op.id"
-          class="relative bg-slate-200/50 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-300 dark:border-slate-700 rounded-xl p-4 shadow-2xs transition-colors hover:border-slate-400 dark:hover:border-slate-600 group"
+          class="relative bg-slate-200/50 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-300 dark:border-slate-700 rounded-xl px-3 pt-2 pb-3 shadow-2xs transition-colors hover:border-slate-400 dark:hover:border-slate-600 group"
           :style="{ zIndex: activeOperationDragId === op.id ? 1000 : (openDropdownOpId === op.id ? 100 : (operationsModel.length - index + 5)) }"
           :class="{
             'opacity-50 grayscale': !op.enabled,
@@ -785,10 +787,10 @@ function confirmPrefixSuffix() {
             '!border-t-4 !border-t-blue-500 dark:!border-t-blue-400': operationDropTargetId === op.id && operationDropPosition === 'before',
             '!border-b-4 !border-b-blue-500 dark:!border-b-blue-400': operationDropTargetId === op.id && operationDropPosition === 'after'
           }">
-          <div class="flex items-center justify-between mb-2.5 select-none group/header">
-            <div class="flex items-center gap-2 min-w-0">
+          <div class="flex items-center justify-between mb-1.5 select-none group/header">
+            <div class="flex items-center gap-1.5 min-w-0">
               <button type="button"
-                class="drag-handle inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-400 hover:bg-slate-300/70 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-700 dark:hover:text-slate-300 cursor-grab active:cursor-grabbing"
+                class="drag-handle -ml-1 inline-flex h-7 w-6 shrink-0 items-center justify-center rounded-md text-slate-400 hover:bg-slate-300/70 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-700 dark:hover:text-slate-300 cursor-grab active:cursor-grabbing"
                 @pointerdown.stop="startOperationReorder($event, op.id)"
                 :title="$t('operations.reorder')">
                 <GripVertical class="h-4 w-4" />
@@ -803,6 +805,12 @@ function confirmPrefixSuffix() {
                     : $t('operations.other')
                 }}
               </span>
+              <template v-if="op.type === 'regex'">
+                <span v-for="badge in getBadges(op).filter(b => !b.type.startsWith('mode-'))" :key="badge.type"
+                  class="text-[10px] font-bold px-1.5 py-px rounded-md shrink-0" :class="badge.color">
+                  {{ badge.isLiteral ? badge.label : $t(badge.label) }}
+                </span>
+              </template>
             </div>
             <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
               <button @click="operationStore.toggleOperation(op.id)"
@@ -820,7 +828,7 @@ function confirmPrefixSuffix() {
           </div>
 
           <!-- Smart Badges (Type badge first, then features) -->
-          <div v-if="getBadges(op).length" class="flex flex-wrap items-center gap-1.5 mb-3">
+          <div v-if="op.type === 'plugin' && getBadges(op).length" class="flex flex-wrap items-center gap-1.5 mb-3">
             <span v-for="badge in getBadges(op)" :key="badge.type"
               class="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded-md" :class="badge.color">
               {{ badge.isLiteral ? badge.label : $t(badge.label) }}
@@ -885,54 +893,58 @@ function confirmPrefixSuffix() {
             </div>
           </div>
 
-          <!-- REGEX OPERATION FORM -->
-          <div v-if="op.type === 'regex'" class="space-y-3">
-            <div class="space-y-1">
-              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mb-1">
-                <label class="text-xs font-medium text-slate-600 dark:text-slate-400 ml-0.5 mr-auto whitespace-nowrap">{{ $t('operations.patternLabel')
-                  }}</label>
-                <label class="flex items-center gap-1.5 cursor-pointer group/cb select-none">
-                  <div class="relative flex items-center justify-center shrink-0">
-                    <input type="checkbox" v-model="op.params.useRegex" class="sr-only peer">
-                    <div
-                      class="w-3.5 h-3.5 rounded-sm border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-500/40 transition-all flex items-center justify-center shadow-2xs group-hover/cb:border-slate-400 dark:group-hover/cb:border-slate-500">
-                      <Check v-if="op.params.useRegex" class="w-2.5 h-2.5 text-white stroke-[3.5]" />
-                    </div>
-                  </div>
-                  <span class="text-xs text-slate-500 dark:text-slate-400 group-hover/cb:text-slate-700 dark:group-hover/cb:text-slate-300 transition-colors leading-none pt-px whitespace-nowrap">{{ $t('operations.useRegex') }}</span>
-                </label>
-                <label class="flex items-center gap-1.5 cursor-pointer group/ci select-none" :title="$t('operations.caseInsensitiveDesc')">
-                  <div class="relative flex items-center justify-center shrink-0">
-                    <input type="checkbox" v-model="op.params.caseInsensitive" class="sr-only peer">
-                    <div
-                      class="w-3.5 h-3.5 rounded-sm border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-500/40 transition-all flex items-center justify-center shadow-2xs group-hover/ci:border-slate-400 dark:group-hover/ci:border-slate-500">
-                      <Check v-if="op.params.caseInsensitive" class="w-2.5 h-2.5 text-white stroke-[3.5]" />
-                    </div>
-                  </div>
-                  <span class="text-xs text-slate-500 dark:text-slate-400 group-hover/ci:text-slate-700 dark:group-hover/ci:text-slate-300 transition-colors leading-none pt-px whitespace-nowrap">{{ $t('operations.caseInsensitive') }}</span>
-                </label>
+          <!-- REGEX OPERATION FORM (compact: inline toggles like an editor's find bar) -->
+          <div v-if="op.type === 'regex'" class="space-y-1.5">
+            <div>
+              <div
+                class="flex items-center rounded-lg border bg-white dark:bg-slate-900/50 focus-within:ring-1 transition-all"
+                :class="operationStore.ruleErrors[op.id]
+                  ? 'border-red-400 dark:border-red-600 focus-within:ring-red-500/40'
+                  : 'border-slate-300 dark:border-slate-700 focus-within:border-blue-500 focus-within:ring-blue-500/50'">
+                <Search class="w-3.5 h-3.5 ml-2.5 shrink-0 text-slate-400" :title="$t('operations.patternLabel')" aria-hidden="true" />
+                <input v-model="op.params.pattern" type="text"
+                  :aria-label="$t('operations.patternLabel')"
+                  :placeholder="op.params.useRegex ? $t('operations.placeholderPatternRegex') : $t('operations.placeholderPatternText')"
+                  :aria-invalid="Boolean(operationStore.ruleErrors[op.id])"
+                  spellcheck="false"
+                  class="flex-1 min-w-0 bg-transparent px-2 py-1.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none font-mono" />
+                <div class="flex items-center gap-0.5 pr-1 shrink-0">
+                  <button type="button"
+                    @click="op.params.useRegex = !op.params.useRegex"
+                    :aria-pressed="Boolean(op.params.useRegex)"
+                    :title="$t('operations.useRegex')"
+                    class="h-6 min-w-6 px-1 rounded-md font-mono text-[11px] font-bold transition-colors cursor-pointer"
+                    :class="op.params.useRegex
+                      ? 'bg-blue-600 text-white'
+                      : 'text-slate-400 hover:text-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 dark:hover:text-slate-200'">.*</button>
+                  <button type="button"
+                    @click="op.params.caseInsensitive = !op.params.caseInsensitive"
+                    :aria-pressed="Boolean(op.params.caseInsensitive)"
+                    :title="$t('operations.caseInsensitiveDesc')"
+                    class="h-6 min-w-6 px-1 rounded-md text-[11px] font-bold transition-colors cursor-pointer"
+                    :class="op.params.caseInsensitive
+                      ? 'bg-blue-600 text-white'
+                      : 'text-slate-400 hover:text-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 dark:hover:text-slate-200'">Aa</button>
+                </div>
               </div>
-              <input v-model="op.params.pattern" type="text"
-                :placeholder="op.params.useRegex ? $t('operations.placeholderPatternRegex') : $t('operations.placeholderPatternText')"
-                :aria-invalid="Boolean(operationStore.ruleErrors[op.id])"
-                :class="operationStore.ruleErrors[op.id] ? '!border-red-400 dark:!border-red-600 focus:!ring-red-500/40' : ''"
-                class="w-full bg-white dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all font-mono" />
-              <p v-if="operationStore.ruleErrors[op.id]" class="text-[11px] text-red-600 dark:text-red-400 ml-0.5 break-all" role="alert">
+              <p v-if="operationStore.ruleErrors[op.id]" class="mt-1 text-[11px] text-red-600 dark:text-red-400 ml-0.5 break-all" role="alert">
                 {{ $t('operations.invalidRegex', { detail: operationStore.ruleErrors[op.id] }) }}
               </p>
             </div>
-            <div class="space-y-1">
-              <div class="text-xs text-slate-600 dark:text-slate-400 ml-1 flex justify-between items-center">
-                <span>{{ $t('operations.replacementLabel') }}</span>
-                <button @click="openHelper(op.id)"
-                  class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium flex items-center gap-1 cursor-pointer">
-                  <Zap class="h-3.5 w-3.5" />
-                  <span>{{ $t('operations.variableHelper') }}</span>
-                </button>
-              </div>
+            <div
+              class="flex items-center rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/50 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500/50 transition-all">
+              <CornerDownRight class="w-3.5 h-3.5 ml-2.5 shrink-0 text-slate-400" aria-hidden="true" />
               <input :ref="(el) => setInputRef(el, op.id)" v-model="op.params.replacement" type="text"
+                :aria-label="$t('operations.replacementLabel')"
                 :placeholder="$t('operations.placeholderReplacement')"
-                class="w-full bg-white dark:bg-slate-900/50 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all" />
+                spellcheck="false"
+                class="flex-1 min-w-0 bg-transparent px-2 py-1.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none" />
+              <button type="button" @click="openHelper(op.id)"
+                :title="$t('operations.variableHelper')"
+                :aria-label="$t('operations.variableHelper')"
+                class="mr-1 h-6 w-6 shrink-0 rounded-md flex items-center justify-center text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50 cursor-pointer">
+                <Zap class="h-3.5 w-3.5" />
+              </button>
             </div>
           </div>
 

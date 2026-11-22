@@ -36,6 +36,7 @@ const KNOWN_ERROR_CODES: DesktopErrorCode[] = [
   'NOT_FOUND',
   'ROLLED_BACK',
   'IS_DIRECTORY',
+  'CONTAINS_BATCH_ITEMS',
 ]
 
 function normalizeErrorCode(error?: string): FileOperationResult['code'] {
@@ -71,8 +72,12 @@ export const tauriDesktopBridge: DesktopBridge = {
     const selected = await invoke<string[] | null>('select_directory', { purpose })
     return selected?.[0]
   },
-  async selectFolderContents() {
-    return (await invoke<string[] | null>('select_directory', { purpose: 'contents' })) ?? []
+  async selectFolderContents(options) {
+    const purpose = options?.recursive ? 'contentsrecursive' : 'contents'
+    return (await invoke<string[] | null>('select_directory', { purpose })) ?? []
+  },
+  async selectFolderAsItem() {
+    return (await invoke<string[] | null>('select_directory', { purpose: 'item' })) ?? []
   },
   async renameFiles(files: FileOperationRequest[]) {
     return mapResults(await invoke<FileOperationResult[]>('rename_files', { files }))

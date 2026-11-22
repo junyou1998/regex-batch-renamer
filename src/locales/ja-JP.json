@@ -186,7 +186,16 @@
         "copyFailed": "コピーに失敗しました",
         "statusSuccess": "完了",
         "statusPending": "保留中",
-        "clearConfirm": "一覧の {n} 件のファイル（未適用の変更を含む）をクリアしますか？"
+        "clearConfirm": "一覧の {n} 件のファイル（未適用の変更を含む）をクリアしますか？",
+        "addFolderHint": "フォルダ内のファイルを追加",
+        "folderOptions": "その他のフォルダオプション",
+        "addFolderFiles": "フォルダ内のファイル",
+        "addFolderFilesDesc": "直下のファイルのみ（フォルダをドロップした時と同じ）",
+        "addFolderRecursive": "サブフォルダも含める",
+        "addFolderRecursiveDesc": "すべてのサブフォルダのファイルも追加（最大 10,000 件）",
+        "addFolderItself": "フォルダ自体の名前を変更",
+        "addFolderItselfDesc": "フォルダを一覧に追加し、ルールでフォルダ名を変更",
+        "folderEmpty": "そのフォルダには追加できるファイルがありません"
     },
     "errors": {
         "selectDirectoryFailed": "フォルダ選択ダイアログを開けませんでした"
@@ -563,6 +572,7 @@
         "NOT_FOUND": "ファイルが見つかりません（移動または削除された可能性）",
         "ROLLED_BACK": "同じバッチの別のファイルが失敗したため元に戻しました",
         "IS_DIRECTORY": "フォルダはコピーできません",
-        "UNKNOWN": "予期しないエラー {detail}"
+        "UNKNOWN": "予期しないエラー {detail}",
+        "CONTAINS_BATCH_ITEMS": "このフォルダ内のファイルも同じバッチに含まれていたため先に処理しました。もう一度実行するとフォルダ名を変更します"
     }
 }

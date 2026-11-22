@@ -51,11 +51,17 @@ impl FsScope {
             .unwrap_or(false)
     }
 
-    /// Keep the registry in sync after a successful rename.
+    /// Keep the registry in sync after a successful rename. When a folder is
+    /// renamed, items inside it move with it.
     pub fn move_item(&self, from: &Path, to: &Path) {
         if let Ok(mut items) = self.items.lock() {
-            items.remove(from);
-            items.insert(to.to_path_buf());
+            let moved: Vec<PathBuf> = items.iter().filter(|p| p.starts_with(from)).cloned().collect();
+            for old in moved {
+                items.remove(&old);
+                if let Ok(rest) = old.strip_prefix(from) {
+                    items.insert(if rest.as_os_str().is_empty() { to.to_path_buf() } else { to.join(rest) });
+                }
+            }
         }
     }
 }
@@ -100,5 +106,10 @@ mod tests {
         scope.move_item(Path::new("/tmp/a.txt"), Path::new("/tmp/b.txt"));
         assert!(!scope.is_item_allowed(Path::new("/tmp/a.txt")));
         assert!(scope.is_item_allowed(Path::new("/tmp/b.txt")));
+
+        scope.allow_items([Path::new("/tmp/dir"), Path::new("/tmp/dir/x.txt")]);
+        scope.move_item(Path::new("/tmp/dir"), Path::new("/tmp/dir2"));
+        assert!(scope.is_item_allowed(Path::new("/tmp/dir2/x.txt")));
+        assert!(!scope.is_item_allowed(Path::new("/tmp/dir/x.txt")));
     }
 }
