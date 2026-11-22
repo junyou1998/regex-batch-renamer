@@ -1,21 +1,69 @@
 @import "tailwindcss";
 
-:root {
-    --color-primary: #3b82f6;
-    --color-primary-dark: #2563eb;
-    --color-secondary: #06b6d4;
+/*
+ * Renamix site tokens.
+ * Paper/ink are the page; signal is the app's blue; "removed" and "added" are the
+ * app's own diff colours and are used only where something is being renamed.
+ */
+@theme {
+    --color-paper: #f5f7fa;
+    --color-ink: #0e1a2b;
+    --color-ink-soft: #1b2a40;
+    --color-slate: #5b6b82;
+    --color-line: #dde3ec;
+    --color-signal: #2563eb;
+    --color-signal-deep: #1d4ed8;
+    --color-removed: #b42318;
+    --color-removed-bg: #fee2e2;
+    --color-added: #15803d;
+    --color-added-bg: #dcfce7;
+
+    --font-sans: "IBM Plex Sans", "Noto Sans TC", "Noto Sans SC", system-ui, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
 }
 
 html {
     scroll-behavior: smooth;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+}
+
+html:lang(zh-CN) {
+    --font-sans: "IBM Plex Sans", "Noto Sans SC", "Noto Sans TC", system-ui, sans-serif;
 }
 
 body {
-    font-family:
-        "Inter",
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        Roboto,
-        sans-serif;
+    font-family: var(--font-sans);
 }
+
+/* CJK headlines: break only at punctuation, never mid-word, and size down a step. */
+html:lang(zh-TW) .hero-new,
+html:lang(zh-CN) .hero-new {
+    word-break: keep-all;
+    line-break: strict;
+    font-size: clamp(2rem, 3.3vw, 2.75rem);
+    line-height: 1.22;
+    letter-spacing: 0;
+}
+
+:focus-visible {
+    outline: 2px solid var(--color-signal);
+    outline-offset: 3px;
+    border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.001ms !important;
+        animation-delay: 0ms !important;
+        transition-duration: 0.001ms !important;
+    }
+}
+body { overflow-x: clip; }

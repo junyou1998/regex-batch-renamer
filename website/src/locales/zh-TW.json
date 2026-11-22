@@ -1,47 +1,162 @@
 {
-    "app": {
-        "title": "Renamix",
-        "subtitle": "強大的批次檔案更名工具",
-        "description": "現代化且直觀的批次檔案更名工具，支援正規表達式與即時預覽。"
+    "nav": {
+        "features": "功能",
+        "download": "下載",
+        "language": "語言",
+        "skip": "跳到主要內容"
+    },
+    "platforms": {
+        "mac": "macOS",
+        "windows": "Windows",
+        "linux": "Linux"
     },
     "hero": {
-        "headline": "前所未有的快速更名體驗",
-        "subheadline": "基於正規表達式的強大批次更名，搭配即時預覽",
-        "cta": "免費下載",
-        "learnMore": "了解更多"
+        "messy": "改檔名_最終版_v2 (1) 複本.txt",
+        "title": "一次更名上百個檔案，改之前先看清楚。",
+        "lede": "把簡單的「尋找與取代」規則串起來，看著即時預覽，一鍵完成更名。不熟 Regex 也沒關係：用一般的話描述，AI 助理會幫你寫好規則。",
+        "download": "下載 {platform} 版",
+        "otherPlatforms": "其他平台",
+        "meta": "免費、開源，支援 macOS、Windows 與 Linux。",
+        "version": "最新版本：v{version}",
+        "screenshotAlt": "Renamix 套用兩條規則，即時預覽十二張照片改名前後的差異",
+        "themeLabel": "截圖主題",
+        "light": "淺色",
+        "dark": "深色"
+    },
+    "playground": {
+        "title": "直接在這裡試試看",
+        "lede": "輸入規則或選一個範例。下方的預覽和 App 裡的一樣：真正改名之前，就先看到結果。",
+        "find": "尋找",
+        "replace": "取代為",
+        "findPlaceholder": "要尋找的文字或規則",
+        "replacePlaceholder": "留空代表刪除符合的部分",
+        "regex": "正規表示式",
+        "ignoreCase": "不分大小寫",
+        "invalid": "這個規則還不是有效的正規表示式。",
+        "presetLabel": "範例",
+        "presets": {
+            "camera": "相機照片改成日期",
+            "cleanup": "去掉 copy、final 與版本號",
+            "spaces": "空白換成底線",
+            "number": "全部依序編號"
+        },
+        "previewTitle": "預覽",
+        "changed": "{total} 個檔案中有 {n} 個會變更",
+        "note": "在 App 裡還能串接多條規則、使用外掛，並隨時復原任何一批更名。",
+        "unchanged": "不會變更"
     },
     "features": {
-        "title": "為什麼選擇 Renamix？",
-        "subtitle": "不再浪費時間在繁瑣的手動檔案整理上",
-        "batch": {
-            "title": "駕馭繁雜檔案",
-            "description": "將數小時的手動工作縮減為幾秒鐘。透過強大的正規表達式，瞬間整理成千上萬的照片與專案檔案。"
-        },
+        "title": "該有的都有，不該有的不打擾",
+        "lede": "小修小改時很輕巧，面對上千個檔案的雜亂資料夾也一樣從容。",
         "preview": {
-            "title": "所見即所得的安心感",
-            "description": "獨家的即時比對引擎，在按下執行前精確預覽每一個變更。確保路徑正確，絕不出錯。"
+            "title": "看得見、信得過的預覽",
+            "body": "規則像管線一樣由上而下套用。每個新檔名都會標出刪掉與新增的部分，意外發生在畫面上，而不是硬碟裡。",
+            "p1": "支援 Regex 與一般文字，也能不分大小寫",
+            "p2": "內建流水號、擷取群組與快速範本",
+            "p3": "更名前就會標出衝突與不合法的檔名",
+            "alt": "用三條規則整理雜亂的文件檔名"
         },
-        "opensource": {
-            "title": "開源・安全・隱私",
-            "description": "完全免費且開源 (MIT)。全離線執行，您的檔案絕不需上傳至雲端。無追蹤、無廣告。"
+        "safe": {
+            "title": "安全是預設",
+            "body": "整批更名以一次交易完成。只要有一個檔案失敗，全部恢復原狀，也絕不會覆蓋任何檔案。",
+            "p1": "互換、編號位移、只改大小寫都能正確處理",
+            "p2": "一個快捷鍵就能復原上一批",
+            "p3": "每批都有紀錄，可重新載入規則或匯出 CSV、JSON",
+            "alt": "更名歷史紀錄，列出每個檔案的前後名稱"
         },
         "ai": {
-            "title": "AI 智慧規則助理",
-            "description": "用自然語言描述更名需求，AI 自動分析檔案特徵並生成精確的 Regex 規則管道。支援本機 CLI (Claude / Codex / Grok) 與 API (Gemini / OpenAI / Anthropic / 本地 Ollama)。"
+            "title": "說出需求，規則自動生成",
+            "body": "用自己的話告訴助理想怎麼改。它會參考你的檔名寫好規則，讓你確認後再套用，也能一鍵還原。",
+            "p1": "直接使用你已安裝的 Claude Code、Codex 或 Grok CLI",
+            "p2": "或填入 Gemini、OpenAI、Anthropic、本機 Ollama 的 Key",
+            "p3": "只會送出訊息、規則與最多 30 個檔名，不會送出檔案內容",
+            "alt": "AI 助理產生相機照片的更名規則"
+        },
+        "plugins": {
+            "title": "特殊需求交給外掛",
+            "body": "繁簡轉換、依照片 EXIF 命名等功能，從外掛市集一鍵安裝。",
+            "p1": "每個外掛都在隔離沙盒中執行",
+            "p2": "安裝前會列出它要求的權限",
+            "p3": "格式公開，也能自己寫外掛",
+            "alt": "外掛市集與三個外掛"
+        }
+    },
+    "steps": {
+        "title": "使用方式",
+        "s1": {
+            "title": "加入檔案",
+            "body": "把檔案或資料夾拖進來，或從對話框選取。"
+        },
+        "s2": {
+            "title": "新增規則",
+            "body": "輸入要找的文字和要換成的內容，或從範本開始。"
+        },
+        "s3": {
+            "title": "檢查預覽",
+            "body": "新檔名立即顯示，有問題的會標示出來。"
+        },
+        "s4": {
+            "title": "執行更名",
+            "body": "直接更名或另存副本，隨時都能復原。"
         }
     },
     "download": {
-        "title": "下載",
-        "description": "支援 macOS、Windows 及 Linux",
-        "macos": "macOS (Apple Silicon)",
-        "macosIntel": "macOS (Intel)",
-        "windows": "Windows",
-        "linux": "Linux",
-        "viewAll": "在 GitHub 查看所有版本"
+        "title": "下載 Renamix",
+        "lede": "免費、開源，不需要註冊帳號。",
+        "version": "目前版本 {version}。",
+        "allReleases": "在 GitHub 查看所有版本",
+        "yourSystem": "你的系統",
+        "mac": {
+            "arm": "Apple Silicon（.dmg）",
+            "intel": "Intel（.dmg）"
+        },
+        "windows": {
+            "file": "安裝程式（.exe）"
+        },
+        "linux": {
+            "appImage": "AppImage",
+            "deb": "Debian / Ubuntu（.deb）"
+        },
+        "autoUpdate": "有新版本時，Renamix 會提醒你並自動更新。",
+        "macNoteTitle": "在 macOS 上打不開？",
+        "macNote": "App 尚未經過 Apple 公證，macOS 可能會顯示「已損毀」。請先把 App 移到「應用程式」，再到終端機執行一次這行指令：",
+        "copy": "複製",
+        "copied": "已複製"
+    },
+    "faq": {
+        "title": "常見問題",
+        "q1": {
+            "q": "Renamix 真的免費嗎？",
+            "a": "是的。以 MIT 授權開源，不需要帳號、沒有廣告，也不會追蹤你。"
+        },
+        "q2": {
+            "q": "一定要會正規表示式嗎？",
+            "a": "不用。一般文字取代和範本就能完成大部分工作，內建說明會介紹基礎，AI 助理也能幫你寫 Regex。"
+        },
+        "q3": {
+            "q": "更名出錯怎麼辦？",
+            "a": "先看預覽，衝突會在執行前標出來。如果結果還是不對，可以復原上一批，或從歷史紀錄重新載入任何一批的規則。"
+        },
+        "q4": {
+            "q": "AI 會看到我的檔案嗎？",
+            "a": "只有在你提問時，而且只會送出你的訊息、目前的規則與最多 30 個檔名，絕不送出檔案內容。使用 CLI 時，請求會透過你原本就在用的工具處理。"
+        },
+        "q5": {
+            "q": "支援哪些 AI？",
+            "a": "Claude Code、Codex、Grok CLI，以及使用自己 Key 的 Gemini、OpenAI、Anthropic 和本機 Ollama。Key 只存在你的電腦上。"
+        },
+        "q6": {
+            "q": "外掛安全嗎？",
+            "a": "外掛在隔離沙盒中執行，只能使用它宣告的權限，例如網路連線或讀取你加入的檔案。這些權限都要你在安裝前同意。"
+        }
     },
     "footer": {
-        "copyright": "© 2026 Renamix。MIT 授權。",
-        "github": "GitHub",
-        "releases": "發布頁面"
+        "tagline": "支援 Regex、外掛與 AI 的批次檔案更名工具，原名 Regex Batch Renamer。",
+        "links": "連結",
+        "source": "原始碼",
+        "plugins": "外掛",
+        "feedback": "回報問題",
+        "coffee": "請我喝咖啡",
+        "license": "以 MIT 授權釋出。"
     }
 }

@@ -1,47 +1,162 @@
 {
-    "app": {
-        "title": "Renamix",
-        "subtitle": "Powerful Batch File Renaming Tool",
-        "description": "A modern and intuitive batch file renaming tool with regex support and real-time preview."
+    "nav": {
+        "features": "Features",
+        "download": "Download",
+        "language": "Language",
+        "skip": "Skip to content"
+    },
+    "platforms": {
+        "mac": "macOS",
+        "windows": "Windows",
+        "linux": "Linux"
     },
     "hero": {
-        "headline": "Rename Files Faster Than Ever",
-        "subheadline": "Powerful regex-based batch renaming with real-time preview",
-        "cta": "Download Free",
-        "learnMore": "Learn More"
+        "messy": "rename_these_FINAL_v2 (1) copy.txt",
+        "title": "Rename hundreds of files. See every new name first.",
+        "lede": "Stack simple find-and-replace rules, check the live preview, and rename in one click. Not a regex person? Describe what you want and the AI assistant writes the rules.",
+        "download": "Download for {platform}",
+        "otherPlatforms": "Other platforms",
+        "meta": "Free and open source for macOS, Windows and Linux.",
+        "version": "Latest: v{version}",
+        "screenshotAlt": "Renamix with two rules and a live before-and-after preview of twelve photos",
+        "themeLabel": "Screenshot theme",
+        "light": "Light",
+        "dark": "Dark"
+    },
+    "playground": {
+        "title": "Try a rule right here",
+        "lede": "Type a pattern or pick an example. The preview below works just like the one in the app: you see the result before anything is renamed.",
+        "find": "Find",
+        "replace": "Replace with",
+        "findPlaceholder": "Text or pattern to find",
+        "replacePlaceholder": "Leave empty to delete the match",
+        "regex": "Regular expression",
+        "ignoreCase": "Ignore case",
+        "invalid": "That pattern isn't a valid regular expression yet.",
+        "presetLabel": "Examples",
+        "presets": {
+            "camera": "Camera photos to dates",
+            "cleanup": "Drop copy, final and versions",
+            "spaces": "Spaces to underscores",
+            "number": "Number everything"
+        },
+        "previewTitle": "Preview",
+        "changed": "{n} of {total} will change",
+        "note": "In the app you can stack several rules, use plugins, and undo any batch.",
+        "unchanged": "No change"
     },
     "features": {
-        "title": "Why Renamix?",
-        "subtitle": "Stop wasting time on manual file organization",
-        "batch": {
-            "title": "Tame the Chaos",
-            "description": "Turn hours of manual renaming into seconds. Use standard Regex or simple wildcards to organize thousands of files instantly."
-        },
+        "title": "Everything you need, nothing that gets in the way",
+        "lede": "Renamix stays out of your way for quick fixes and scales up to messy folders with thousands of files.",
         "preview": {
-            "title": "Confidence in Every Click",
-            "description": "Live diff preview shows exactly what will change. Catch mistakes before they happen with our real-time comparison engine."
+            "title": "A preview you can trust",
+            "body": "Rules run top to bottom like a pipeline. Every new name is shown with what's removed and added, so surprises happen on screen instead of on disk.",
+            "p1": "Regex or plain text, plus ignore case",
+            "p2": "Sequence numbers, capture groups and quick templates",
+            "p3": "Conflicts and invalid names are flagged before you rename",
+            "alt": "Cleaning up messy document names with three rules"
         },
-        "opensource": {
-            "title": "Open Source & Privacy First",
-            "description": "100% Free, MIT Licensed, and Offline-capable. Your files never leave your device. No tracking, no paywalls."
+        "safe": {
+            "title": "Safe by design",
+            "body": "A rename runs as one transaction. If any file fails, everything goes back the way it was. Nothing is ever overwritten.",
+            "p1": "Swaps, number shifts and case-only renames just work",
+            "p2": "Undo the last batch with one shortcut",
+            "p3": "Every batch is logged; reload its rules or export CSV or JSON",
+            "alt": "Rename history showing each file before and after"
         },
         "ai": {
-            "title": "AI Rule Assistant",
-            "description": "Describe your renaming intent in plain words. AI analyzes filename patterns and constructs exact Regex pipelines. Supports local CLIs (Claude / Codex / Grok) and APIs (Gemini / OpenAI / Anthropic / Local Ollama)."
+            "title": "Describe it, get the rules",
+            "body": "Tell the assistant what you want in your own words. It looks at your filenames, writes the rules, and shows them for you to apply or revert.",
+            "p1": "Use the Claude Code, Codex or Grok CLI you already have",
+            "p2": "Or bring a Gemini, OpenAI, Anthropic or local Ollama key",
+            "p3": "Only your message, rules and up to 30 filenames are sent, never file contents",
+            "alt": "AI assistant suggesting rules that rename camera photos"
+        },
+        "plugins": {
+            "title": "Plugins for the special cases",
+            "body": "Convert Simplified and Traditional Chinese, name photos by their EXIF data, and more. Install from the marketplace in one click.",
+            "p1": "Each plugin runs in an isolated sandbox",
+            "p2": "You see the permissions it asks for before installing",
+            "p3": "Open format, so you can write your own",
+            "alt": "Plugin marketplace with three plugins"
+        }
+    },
+    "steps": {
+        "title": "How it works",
+        "s1": {
+            "title": "Add files",
+            "body": "Drag in files or folders, or pick them from a dialog."
+        },
+        "s2": {
+            "title": "Add rules",
+            "body": "Type what to find and what to put instead, or start from a template."
+        },
+        "s3": {
+            "title": "Check the preview",
+            "body": "Every new name appears right away, with problems marked."
+        },
+        "s4": {
+            "title": "Rename",
+            "body": "Apply in place or write renamed copies. Undo anytime."
         }
     },
     "download": {
-        "title": "Download",
-        "description": "Available for macOS, Windows, and Linux",
-        "macos": "macOS (Apple Silicon)",
-        "macosIntel": "macOS (Intel)",
-        "windows": "Windows",
-        "linux": "Linux",
-        "viewAll": "View all releases on GitHub"
+        "title": "Download Renamix",
+        "lede": "Free, open source, no account needed.",
+        "version": "Version {version}.",
+        "allReleases": "All releases on GitHub",
+        "yourSystem": "Your system",
+        "mac": {
+            "arm": "Apple Silicon (.dmg)",
+            "intel": "Intel (.dmg)"
+        },
+        "windows": {
+            "file": "Installer (.exe)"
+        },
+        "linux": {
+            "appImage": "AppImage",
+            "deb": "Debian / Ubuntu (.deb)"
+        },
+        "autoUpdate": "Renamix lets you know when a new version is out and updates itself.",
+        "macNoteTitle": "Can't open it on macOS?",
+        "macNote": "The app isn't notarized by Apple yet, so macOS may say it's damaged. Move it to Applications, then run this command in Terminal once:",
+        "copy": "Copy",
+        "copied": "Copied"
+    },
+    "faq": {
+        "title": "Questions",
+        "q1": {
+            "q": "Is Renamix really free?",
+            "a": "Yes. It's open source under the MIT license, with no account, ads or tracking."
+        },
+        "q2": {
+            "q": "Do I need to know regular expressions?",
+            "a": "No. Plain text replacement and templates cover most jobs, the built-in guide explains the basics, and the AI assistant can write regex for you."
+        },
+        "q3": {
+            "q": "What if a rename goes wrong?",
+            "a": "Check the preview first; conflicts are flagged before you start. If something still isn't right, undo the last batch, or reload any past batch's rules from the history."
+        },
+        "q4": {
+            "q": "Does the AI see my files?",
+            "a": "Only when you ask it something, and only your message, the current rules and up to 30 filenames. File contents are never sent. With a CLI, the request goes through the tool you already use."
+        },
+        "q5": {
+            "q": "Which AI providers work?",
+            "a": "Claude Code, Codex and Grok CLIs, plus Gemini, OpenAI, Anthropic and local Ollama with your own key. Keys stay on your computer."
+        },
+        "q6": {
+            "q": "Are plugins safe to install?",
+            "a": "Plugins run in an isolated sandbox and can only use the permissions they declare, such as network access or reading the files you added. You approve those before installing."
+        }
     },
     "footer": {
-        "copyright": "© 2026 Renamix. MIT License.",
-        "github": "GitHub",
-        "releases": "Releases"
+        "tagline": "A batch file renamer with regex, plugins and AI. Formerly Regex Batch Renamer.",
+        "links": "Links",
+        "source": "Source code",
+        "plugins": "Plugins",
+        "feedback": "Report an issue",
+        "coffee": "Buy me a coffee",
+        "license": "Released under the MIT License."
     }
 }
